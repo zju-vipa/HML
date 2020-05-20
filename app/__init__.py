@@ -6,7 +6,7 @@ app init
 """
 
 app = Flask(__name__)
-# app = Flask(__name__, static_folder="./templates/dist/static", template_folder="./templates/dist/static")
+# app = Flask(__name__, static_folder="./static", template_folder="./templates")
 
 # connect the sql
 app.config.from_object('config_app')
