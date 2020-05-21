@@ -49,7 +49,8 @@ class DatasetService:
 
     def deleteDataset(self, dataset_id, file_path, profile_path):
         os.remove(file_path)
-        os.remove(profile_path)
+        if profile_path:
+            os.remove(profile_path)
         return self.datasetDao.deleteDataset(dataset_id)
 
     def updateDataset(self, dataset):
