@@ -52,10 +52,13 @@ def delete_dataset():
         if not file_path:
             return get_error(RET.FILEERR, 'Error: dataset file not exists')
 
-        profile_path = datasetService.getDatasetProfilePath(dataset)
-
-        if not profile_path:
-            return get_error(RET.FILEERR, 'Error: profile not exists')
+        profile_path = None
+        if dataset.profile_state == '1':
+            return get_error(RET.FILEERR, 'Error: profile is being generated')
+        elif dataset.profile_state == '2':
+            profile_path = datasetService.getDatasetProfilePath(dataset)
+            if not profile_path:
+                return get_error(RET.FILEERR, 'Error: profile not exists')
 
         datasetService.deleteDataset(dataset_id, file_path, profile_path)
 
