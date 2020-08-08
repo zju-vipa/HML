@@ -200,8 +200,8 @@ supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
 [supervisorctl]
 ;serverurl=unix:///var/run/supervisor.sock ; use a unix:// URL  for a unix socket
 serverurl=http://0.0.0.0:8020  ; use an http:// url to specify an inet socket
-username=******                   ; should be same as http_username if set
-password=******                   ; should be same as http_password if set
+username=lsy                   ; should be same as http_username if set
+password=lsy                   ; should be same as http_password if set
 
 ; The [include] section can just contain the "files" setting.  This
 ; setting can list multiple files (separated by whitespace or
@@ -364,7 +364,7 @@ docker pull mysql:8.0.19
 
 docker volume create hml-mysql
 
-docker container run -p 8023:3306 --mount source=hml-mysql,destination=/var/lib/mysql -v /etc/localtime:/etc/localtime -e MYSQL_ROOT_PASSWORD=****** --name hml-mysql -d mysql:8.0.19
+docker container run -p 8023:3306 --mount source=hml-mysql,destination=/var/lib/mysql -v /etc/localtime:/etc/localtime -e MYSQL_ROOT_PASSWORD=hml --name hml-mysql -d mysql:8.0.19
 ```
 
 
@@ -374,11 +374,11 @@ docker container run -p 8023:3306 --mount source=hml-mysql,destination=/var/lib/
 ```bash
 docker container exec -it hml-mysql bash
 
-mysql -u****** -p******
+mysql -uroot -phml
 
-CREATE USER '******'@'%' IDENTIFIED WITH mysql_native_password BY '******';
+CREATE USER 'hml'@'%' IDENTIFIED WITH mysql_native_password BY 'hml';
 
-GRANT ALL PRIVILEGES ON *.* TO '******'@'%';
+GRANT ALL PRIVILEGES ON *.* TO 'hml'@'%';
 
 flush privileges;
 ```
