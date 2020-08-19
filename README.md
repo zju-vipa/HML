@@ -125,6 +125,8 @@ http {
 - hml.conf
 
 ```
+vim /etc/nginx/conf.d/hml.conf
+
 server {
     listen 0.0.0.0:8021;
 
@@ -405,21 +407,17 @@ docker container run -p 8023:3306 --mount source=hml-mysql,destination=/var/lib/
 docker pull nginx:1.18.0
 
 docker run -p 8030:8030 -v /etc/localtime:/etc/localtime -v /disk2/lsy/HML-WEB:/usr/share/nginx/html -d --name hml-web nginx:1.18.0
+
+docker exec -it hml-web bash
 ```
 
 
 
 2、edit nginx config
 
-```bash
-docker exec -it hml-web bash
-
+```
 vim /etc/nginx/conf.d/hml-web.conf
-```
 
-with
-
-```
 server {
     listen 0.0.0.0:8030;
 
