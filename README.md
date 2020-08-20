@@ -406,14 +406,16 @@ docker container run -p 8023:3306 --mount source=hml-mysql,destination=/var/lib/
 ```bash
 docker pull nginx:1.18.0
 
-docker run -p 8030:8030 -v /etc/localtime:/etc/localtime -v /disk2/lsy/HML-WEB:/usr/share/nginx/html -d --name hml-web nginx:1.18.0
+docker run -p 8030:8030 -v /etc/localtime:/etc/localtime -v /disk2/lsy/HML-web:/usr/share/nginx/html -d --name hml-web nginx:1.18.0
 
 docker exec -it hml-web bash
 ```
 
 
 
-2、edit nginx config
+2、use nginx
+
+- hml-web.conf
 
 ```
 vim /etc/nginx/conf.d/hml-web.conf
