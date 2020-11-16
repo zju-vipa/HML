@@ -16,6 +16,7 @@ SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset=UTF8MB4'.forma
 SQLALCHEMY_COMMIT_TEARDOWN = False
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+# test privilege
 ROOT_PATH = '/root/HML'
 ROOT_FILE_PATH = '/root/HML/Data'
 ROOT_MODEL_PATH = '/root/HML/Decision'
