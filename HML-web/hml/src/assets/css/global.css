@@ -1,0 +1,49 @@
+
+html,body,#app{
+  height: 100%;
+  width: 100%;
+  font-size: 13px;
+}
+body{
+  margin: 0px;
+}
+#app{
+  min-width: 1366px;
+}
+.el-card{
+  margin: 10px 20px;
+}
+.el-table{
+  margin: 0px auto;
+}
+.el-table .cell{
+  text-align: center;
+}
+.el-button{
+  width: 100px;
+  height: 35px;
+  font-size: 13px;
+  background: #70AFCE;
+  /* background: #3b7b9a; */
+  border: #70AFCE;
+}
+
+.el-form-item__label {
+  color: black;
+  /* color: rgba(0, 0, 0, 0.8); */
+}
+.label .el-form-item__label {
+  /* padding: 0px 30px 0px 0px; */
+}
+.el-steps {
+  margin: 10px 0;
+}
+.el-step__title {
+  font-size: 13px;
+}
+.el-dialog__body {
+  text-align: center;
+}
+.el-tabs__item {
+  height: 80px;
+}
