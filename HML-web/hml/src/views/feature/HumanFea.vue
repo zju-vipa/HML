@@ -321,6 +321,7 @@ export default {
 <style scoped>
 .queryBtn{
   float: right;
+  width: 120px;
 }
   .el-form-item{
     margin-top: 20px;
