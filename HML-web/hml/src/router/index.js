@@ -12,6 +12,7 @@ import HumanFeaDataset from '../views/data/HumanFeaDataset.vue'
 
 import Feature from '../views/feature/Feature'
 import HumanFea from '../views/feature/HumanFea.vue'
+import QueryHumanFeature from '../views/feature/QueryHumanFeature.vue'
 
 import Learn from '../views/learn/Learn'
 // import Decision from '../views/decision/Decision'
@@ -77,11 +78,11 @@ const routes = [
         name: 'HumanFea',
         component: HumanFea
       },
-      //     {
-      //       path: '/feature/queryFea',
-      //       name: 'QueryHumanFeature',
-      //       component: QueryHumanFeature
-      //     },
+      {
+        path: '/feature/queryFea',
+        name: 'QueryHumanFeature',
+        component: QueryHumanFeature
+      },
       {
         path: '/learn',
         name: 'Learn',
