@@ -80,7 +80,9 @@ export default {
     width: 100%;
     height: 100%;
     background: url("./../../assets/img/time.jpg");
-    background-position: 500px 400px;
+    /* background-position: 500px 400px; */
+    background-size: cover;
+    background-position: absolute;
     overflow: hidden;
   }
   .login-form{

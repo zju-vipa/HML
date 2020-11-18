@@ -3,14 +3,17 @@
     <el-card>
         <!-- 当前任务 -->
         <h3 v-if="!isHFeaDialog">当前特征工程</h3>
-        <div @click="backPage"><i class="el-icon-arrow-left backPage"></i><span>返回</span></div>
+        <div>
+            <el-button class="opbtn" size="mini" type="info" plain @click="backPage" icon="el-icon-arrow-left">返回</el-button>
+        </div>
+        <!-- <div @click="backPage"><i class="el-icon-arrow-left backPage"></i><span>返回</span></div> -->
         <el-table :data="HumanFeaData" border stripe  style="width: 100%"
         :highlight-current-row="isHFeaDialog" @current-change="clickCurrentChange">
           <!-- 操作 -->
           <el-table-column type="expand" v-if="!isHFeaDialog">
             <template slot-scope="scope">
               <el-button  size="mini" type="primary" plain  @click="taskProgress(scope.row.task_id)">操作进度</el-button>
-              <el-button  size="mini" type="danger" plain  @click="handleDelete(scope.row.featureEng_id)">删除</el-button>
+              <el-button  size="mini" type="danger" plain icon="el-icon-delete" @click="handleDelete(scope.row.featureEng_id)">删除</el-button>
             </template>
           </el-table-column>
           <el-table-column  label="序号" type="index"> </el-table-column>
@@ -155,5 +158,22 @@ export default {
   .opbtn{
     margin-bottom: 10px;
   }
+  /* .el-button--goon.is-active,
+  .el-button--goon:active {
+    background: #20B2AA;
+    border-color: #20B2AA;
+    color: #fff;
+  }
+  .el-button--goon:focus,
+  .el-button--goon:hover {
+    background: #48D1CC;
+    border-color: #48D1CC;
+    color: #fff;
+  }
+  .el-button--goon {
+    color: #FFF;
+    background-color: #20B2AA;
+    border-color: #20B2AA;
+  } */
 
 </style>
