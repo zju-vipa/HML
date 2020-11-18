@@ -7,14 +7,19 @@ import Layout from '../components/Layout'
 
 // import Home from '../views/home/Home'
 import Data from '../views/data/Data'
-import OriginDataset from '../views/data/OriginDataset.vue'
-import HumanFeaDataset from '../views/data/HumanFeaDataset.vue'
+import OriginDataset from '../views/data/OriginDataset'
+import HumanFeaDataset from '../views/data/HumanFeaDataset'
 
 import Feature from '../views/feature/Feature'
-import HumanFea from '../views/feature/HumanFea.vue'
-import QueryHumanFeature from '../views/feature/QueryHumanFeature.vue'
+import HumanFea from '../views/feature/HumanFea'
+import QueryHumanFeature from '../views/feature/QueryHumanFeature'
 
 import Learn from '../views/learn/Learn'
+import QueryLearner from '../views/learn/QueryLearner'
+
+import Decision from '../views/decision/Decision'
+import QueryDecision from './../views/decision/QueryDecision'
+
 // import Decision from '../views/decision/Decision'
 // import Dataset from '../views/data/Dataset'
 // import DatasetHuFea from '../views/data/DatasetHuFea'
@@ -87,17 +92,17 @@ const routes = [
         path: '/learn',
         name: 'Learn',
         component: Learn
-      }
-      //     {
-      //       path: '/learn/queryLearner',
-      //       name: 'QueryLearner',
-      //       component: QueryLearner
-      //     },
-      //     {
-      //       path: '/decision',
-      //       name: 'Decision',
-      //       component: Decision
-      //     },
+      },
+      {
+        path: '/learn/queryLearner',
+        name: 'QueryLearner',
+        component: QueryLearner
+      },
+      {
+        path: '/decision',
+        name: 'Decision',
+        component: Decision
+      },
       //     {
       //       path: '/decision/decHumanFea',
       //       name: 'DecisionHumanFea',
@@ -108,11 +113,11 @@ const routes = [
       //       name: 'DecisionLearn',
       //       component: DecisionLearn
       //     },
-      //     {
-      //       path: '/decision/queryDecision',
-      //       name: 'QueryDecision',
-      //       component: QueryDecision
-      //     }
+      {
+        path: '/decision/queryDecision',
+        name: 'QueryDecision',
+        component: QueryDecision
+      }
     ]
   }
 ]
