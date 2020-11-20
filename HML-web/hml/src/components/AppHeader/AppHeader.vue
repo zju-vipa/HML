@@ -1,7 +1,11 @@
 <template>
   <div>
     <div class="header">
-      <span class="logo-title">HML</span>
+      <!-- <span class="logo-title">HML</span> -->
+      <a href="#" class="logo">
+        <img class="logo-img" src="./../../assets/img/logo.png" alt="图标">
+        <span class="logo-title">人在回路机器学习</span>
+      </a>
       <!-- <div class="header-list">
         <span>模型列表</span>
         <span>使用手册</span>
@@ -50,11 +54,20 @@ export default {
 }
 </script>
 <style scoped>
+  .logo{
+    text-decoration: none
+  }
+  .logo-img{
+    width: 25px;
+    height: 25px;
+    vertical-align:middle;
+    padding: 0 10px 0 40px
+  }
   .logo-title{
     color: white;
     cursor: pointer;
-    padding-left: 60px;
-    font-size: 25px;
+    padding-left: 10px;
+    font-size: 18px;
   }
   .dropdown{
     cursor: pointer;
@@ -62,7 +75,7 @@ export default {
     margin-right: 20px;
     color: white
   }
-  .header-list{
+  /* .header-list{
     display: inline-block;
     margin-left: 100px;
     color: #B8C7CE;
@@ -76,5 +89,5 @@ export default {
   }
   .header-list span:active{
     color: #ffffff;
-  }
+  } */
 </style>

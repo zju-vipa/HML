@@ -34,7 +34,7 @@
       <!-- 决策类型 -->
       <el-form label-position="right" label-width="150px" :model="decideHFAndLeaForm" ref="decideHumanFeaFormRef"  class="demo-ruleForm">
         <el-row>
-          <el-col :span="10">
+          <el-col :span="20">
             <el-form-item label="决策类型" prop="learner_type">
               <!-- <el-select disabled  v-model="decideHFAndLeaForm.decision_type" placeholder="决策类型" style="width: 300px">
                 <el-option v-for="(option, index) in decisionTypeOptions" :key="index" :label="option.name" :value="option.type"></el-option>
@@ -52,7 +52,7 @@
           <el-col :span="10">
             <el-form class="selectHuFea" label-position="right" label-width="150px"  :model="chooseHumanFeaForm">
               <el-form-item prop="featureEng_name" label="特征工程">
-                <el-input disabled="chooseFEDisabled" clearable  readonly v-model="chooseHumanFeaForm.featureEng_name" style="width: 300px"
+                <el-input :disabled="chooseFEDisabled" clearable  readonly v-model="chooseHumanFeaForm.featureEng_name" style="width: 300px"
                           @click.native="humanFeaDialogVisible=true" placeholder="请选择特征工程"></el-input>
               </el-form-item>
             </el-form>
@@ -60,12 +60,12 @@
           <el-col :span="10">
             <el-form label-position="right" label-width="150px"  :model="chooseLearnerForm">
               <el-form-item prop="learner_name" label="学习器">
-                <el-input disabled="chooseLearnerDisabled" clearable  readonly v-model="chooseLearnerForm.learner_name" style="width: 300px"
+                <el-input :disabled="chooseLearnerDisabled" clearable  readonly v-model="chooseLearnerForm.learner_name" style="width: 300px"
                           @click.native="learnerDialogVisible=true" placeholder="请选择学习器"></el-input>
               </el-form-item>
             </el-form>
           </el-col>
-        </el-row>
+      </el-row>
       <!-- 决策应用特征工程加学习器部分 -->
       <!-- <el-form label-position="right" label-width="150px" :model="decideHFAndLeaForm" ref="decideHumanFeaFormRef"  class="demo-ruleForm">
         <el-row>
@@ -260,14 +260,17 @@ export default {
     handleDecideOption () {
       if (this.decideHFAndLeaForm.decision_type === 'Manual_FE') {
         // 应用特征工程 禁用选择学习器
+        console.log('handleDecideOption: Manual_FE')
         this.chooseFEDisabled = false
         this.chooseLearnerDisabled = true
       } else if (this.decideHFAndLeaForm.decision_type === 'Manual_L') {
         // 应用学习器 禁用选择特征工程
+        console.log('handleDecideOption: Manual_L')
         this.chooseFEDisabled = true
         this.chooseLearnerDisabled = false
       } else {
         // 应用决策者
+        console.log('handleDecideOption: Manual_D')
         this.chooseFEDisabled = false
         this.chooseLearnerDisabled = false
       }

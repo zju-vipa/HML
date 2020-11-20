@@ -4,8 +4,8 @@
       <div class="toggle-button" @click="controlCollapse">|||</div>
       <el-menu :router="true"
               :default-active="activePath"
-               class="el-menu-vertical-demo" background-color="#222d32"
-               text-color="#B8C7CE" active-text-color="#367FA9"
+               class="el-menu-vertical-demo" background-color="#333744"
+               text-color="#fff" active-text-color="#409EFF"
                :collapse="isCollapse"
          :collapse-transition="false">
         <el-menu-item index="/home">
@@ -86,14 +86,15 @@ export default {
 <style scoped>
 
 .toggle-button{
-  background: #222d32;
+  background: #4A5064;
   font-size: 10px;
   text-align: center;
-  color: #B8C7CE;
+  /* color: #B8C7CE; */
+  color:#ffffff;
   cursor: pointer;
   line-height: 24px;
   letter-spacing: 0.2em;
-  border-bottom: 1px solid #ffffff;
+  /* border-bottom: 1px solid #ffffff; */
 }
 .el-menu{
   border-right: none;

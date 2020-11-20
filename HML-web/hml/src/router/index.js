@@ -20,6 +20,8 @@ import QueryLearner from '../views/learn/QueryLearner'
 import Decision from '../views/decision/Decision'
 import QueryDecision from './../views/decision/QueryDecision'
 
+import PowerNetDataset from './../views/data/powerNet/PowerNetDataset'
+import QueryPowerNetResult from './../views/data/powerNet/QueryPowerNetResult'
 // import Decision from '../views/decision/Decision'
 // import Dataset from '../views/data/Dataset'
 // import DatasetHuFea from '../views/data/DatasetHuFea'
@@ -117,6 +119,17 @@ const routes = [
         path: '/decision/queryDecision',
         name: 'QueryDecision',
         component: QueryDecision
+      },
+      // 电网数据集
+      {
+        path: '/data/powerNet',
+        name: 'PowerNetDataset',
+        component: PowerNetDataset
+      },
+      {
+        path: '/data/queryPowerNetResult',
+        name: 'QueryPowerNetDataset',
+        component: QueryPowerNetResult
       }
     ]
   }
