@@ -3,8 +3,9 @@
 <!--      tab便签区域-->
       <el-card>
         <div class="buttons">
-          <el-button class="queryBtn" @click="queryDataset" type="primary">原数据集</el-button>
-          <el-button class="queryBtn" @click="queryDatasetHuFea" type="primary">特征处理数据集</el-button>
+          <el-button @click="gotoPowerNetDataset" type="primary">电网数据</el-button>
+          <el-button @click="queryDataset" type="primary">查看原数据集</el-button>
+          <el-button @click="queryDatasetHuFea" type="primary">查看特征处理数据集</el-button>
         </div>
         <el-form status-icon :model="uploadForm" :rules="uploadFormRules" ref="uploadFormRef"
                   label-width="200px" label-position="right">
@@ -138,6 +139,10 @@ export default {
       datasetApi.download(this.uploadForm.dataset_id).then(response => {
         console.log(response)
       })
+    },
+    // 前往电网数据生成
+    gotoPowerNetDataset () {
+      this.$router.push('/data/powerNet')
     }
   }
 }

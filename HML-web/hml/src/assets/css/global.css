@@ -20,8 +20,8 @@ body{
   text-align: center;
 }
 .el-button{
-  width: 100px;
-  height: 35px;
+  /* width: 100px; */
+  /* height: 35px; */
   font-size: 13px;
   background: #70AFCE;
   /* background: #3b7b9a; */

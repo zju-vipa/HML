@@ -36,7 +36,8 @@ export default {
 
 <style scoped>
 .header {
-    background-color:#367FA9;
+    /* background-color:#367FA9; */
+    background-color: #2d3a4b;
     height: 50px;
     line-height: 50px;
     position: absolute;
@@ -51,7 +52,7 @@ export default {
     bottom: 0px;
     width: 180px;
     overflow-y: auto;
-    background:#222d32;
+    background:#373d41;
   }
     .navbar2{
     position: absolute;
@@ -60,7 +61,7 @@ export default {
     bottom: 0px;
     width: 60px;
     overflow-y: auto;
-    background: #222d32;
+    background: #373d41;
   }
   .main{
     position: absolute;
@@ -81,10 +82,11 @@ export default {
     background: #eaedf1;
   }
 .toggle-button{
-  background: #222d32;
+  background: #4A5064;
   font-size: 10px;
   text-align: center;
-  color: #B8C7CE;
+  /* color: #B8C7CE; */
+  color:#ffffff;
   cursor: pointer;
   line-height: 24px;
   /* 这个是控制这三个竖线之间的间距的，注意，这里不是用margin和padding */

@@ -1,17 +1,32 @@
 <template>
     <div>
                   <!-- 面包屑区域 -->
-      <el-breadcrumb separator-class="el-icon-arrow-right">
+      <!-- <el-breadcrumb separator-class="el-icon-arrow-right">
         <el-breadcrumb-item :to="{ path: '/home' }">人在回路</el-breadcrumb-item>
         <el-breadcrumb-item>决策</el-breadcrumb-item>
         <el-breadcrumb-item>查看决策</el-breadcrumb-item>
-    </el-breadcrumb>
+    </el-breadcrumb> -->
     <el-card>
-      <el-button class="queryBtn" @click="gotoDecision"  type="primary">返回主决策页面</el-button>
-
+      <!-- <el-button class="queryBtn" @click="gotoDecision"  type="primary">返回主决策页面</el-button> -->
         <!-- 当前任务 -->
       <h3>当前决策</h3>
+      <div>
+            <el-button class="opbtn" size="mini" type="info" plain @click="backPage" icon="el-icon-arrow-left">返回</el-button>
+      </div>
       <el-table :data="decisionData" border stripe  style="width: 100%">
+        <!-- 操作 -->
+        <el-table-column type="expand">
+          <template slot-scope="scope">
+            <el-button style="width:140px" size="mini" plain type="primary" :disabled="scope.row.featureEng_id==null"
+              @click="handleDownLoadFeaRes(scope.row)" icon="el-icon-download">决策特征工程结果</el-button>
+            <el-button size="mini" plain type="primary" :disabled="scope.row.learner_id==null"
+              @click="handleDownLoadPrediction(scope.row)" icon="el-icon-download">预测结果</el-button>
+            <el-button size="mini" plain type="primary" :disabled="scope.row.learner_id==null"
+              @click="handleDownLoadReport(scope.row)" icon="el-icon-download">预测报告</el-button>
+            <el-button size="mini" plain type="danger"
+              @click="handleDelete(scope.row.decision_id)" icon="el-icon-delete">删除</el-button>
+            </template>
+        </el-table-column>
         <el-table-column  label="序号" type="index"> </el-table-column>
         <el-table-column prop="decision_name" label="决策名"> </el-table-column>
         <el-table-column prop="decision_type" label="决策类型">
@@ -22,15 +37,15 @@
         </el-table-column>
         <el-table-column label="查询进度"  width="350">
           <template slot-scope="scope">
-            <el-button size="mini" type="primary" :disabled="scope.row.featureEng_id==null"
+            <el-button size="mini" type="info" :disabled="scope.row.featureEng_id==null"
             @click="queryHuFeaPrgress(scope.row.task_id)">应用特征工程</el-button>
-            <el-button size="mini" type="primary" :disabled="scope.row.learner_id==null"
+            <el-button size="mini" type="info" :disabled="scope.row.learner_id==null"
             @click="queryLearnerPrgress(scope.row.task_id)">应用学习器</el-button>
-            <el-button size="mini" type="primary" :disabled="scope.row.learner_id==null"
+            <el-button size="mini" type="info" :disabled="scope.row.learner_id==null"
              @click="queryAllPrgress(scope.row.task_id)">应用决策</el-button>
           </template>
         </el-table-column>
-        <el-table-column label="下载"  width="400">
+        <!-- <el-table-column label="下载"  width="400">
           <template slot-scope="scope">
             <el-button size="mini" type="primary" :disabled="scope.row.featureEng_id==null"
             @click="handleDownLoadFeaRes(scope.row)">决策特征工程结果</el-button>
@@ -40,7 +55,7 @@
              @click="handleDownLoadReport(scope.row)">预测报告</el-button>
             <el-button  size="mini" @click="handleDelete(scope.row.decision_id)" type="danger" icon="el-icon-delete"></el-button>
           </template>
-        </el-table-column>
+        </el-table-column> -->
       </el-table>
     </el-card>
             <!-- 查看应用特征工程进度条的对话框 -->
@@ -252,12 +267,37 @@ export default {
         this.$message.info('已取消删除')
         return error
       })
+    },
+    // 返回上一页
+    backPage () {
+      this.$router.back()
     }
   }
 }
 </script>
 <style scoped>
-.queryBtn {
+/* .queryBtn {
   margin-bottom: 20px;
-}
+} */
+  /* h3{
+    text-align: center;
+  } */
+  /* .backPage{
+    margin-bottom: 30px;
+    margin-left: 10px;
+    font-size: 15px;
+    color: #367FA9;
+    font-weight: bold;
+    margin-right: 10px;
+  } */
+  .el-card{
+    margin: 10px 20px;
+  }
+  h3{
+    padding-bottom: 10px;
+    border-bottom: 3px solid rgb(102, 102, 102)
+  }
+  .opbtn{
+    margin-bottom: 10px;
+  }
 </style>
