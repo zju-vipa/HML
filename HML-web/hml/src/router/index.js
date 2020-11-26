@@ -5,7 +5,7 @@ import Register from '../views/user/Register'
 import Login from '../views/user/Login'
 import Layout from '../components/Layout'
 
-// import Home from '../views/home/Home'
+import Home from '../views/Home'
 import Data from '../views/data/Data'
 import OriginDataset from '../views/data/OriginDataset'
 import HumanFeaDataset from '../views/data/HumanFeaDataset'
@@ -22,6 +22,7 @@ import QueryDecision from './../views/decision/QueryDecision'
 
 import PowerNetDataset from './../views/data/powerNet/PowerNetDataset'
 import QueryPowerNetResult from './../views/data/powerNet/QueryPowerNetResult'
+import PowerNetDatasetCreate from './../views/data/powerNet/PowerNetDatasetCreate'
 // import Decision from '../views/decision/Decision'
 // import Dataset from '../views/data/Dataset'
 // import DatasetHuFea from '../views/data/DatasetHuFea'
@@ -55,11 +56,11 @@ const routes = [
     component: Layout,
     // redirect: '/home',
     children: [
-      // {
-      //       path: '/home',
-      //       name: 'Home',
-      //       component: Home
-      //     },
+      {
+        path: '/home',
+        name: 'Home',
+        component: Home
+      },
       {
         path: '/data',
         name: 'Data',
@@ -125,6 +126,11 @@ const routes = [
         path: '/data/powerNet',
         name: 'PowerNetDataset',
         component: PowerNetDataset
+      },
+      {
+        path: '/data/powerNetDatasetCreate',
+        name: 'PowerNetDatasetCreate',
+        component: PowerNetDatasetCreate
       },
       {
         path: '/data/queryPowerNetResult',

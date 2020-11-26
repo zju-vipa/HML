@@ -32,7 +32,9 @@ import {
   Steps,
   Switch,
   Progress,
-  InputNumber
+  InputNumber,
+  Checkbox,
+  CheckboxGroup
 } from 'element-ui'
 
 Vue.use(Button)
@@ -66,6 +68,8 @@ Vue.use(Steps)
 Vue.use(Switch)
 Vue.use(Progress)
 Vue.use(InputNumber)
+Vue.use(Checkbox)
+Vue.use(CheckboxGroup)
 
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm
