@@ -6,23 +6,23 @@
         <el-button class="backbtn" size="mini" type="info" plain @click="backPage" icon="el-icon-arrow-left">返回</el-button>
       </el-col>
       <el-col :span="22">
-        <h2>电网数据生成任务结果</h2>
+        <h2>电网数据生成任务创建</h2>
       </el-col>
     </div>
     <div>
+      <!-- 任务信息 -->
       <el-card>
-        <!-- 任务信息 -->
-        <div><h3>任务信息</h3></div>
-        <el-form label-position="right" label-width="150px" :model="powerNetJobInfo">
+        <div><h3>Step 1: 任务设置</h3></div>
+        <el-form label-position="right" label-width="150px" :model="powerNetJobInfo" :rules="powerNetJobInfoFormRules" ref="powerNetJobInfoFormRef" class="demo-ruleForm">
           <el-row>
             <el-col :span="10">
               <el-form-item label="任务名称" prop="pn_job_name">
-                <el-input disabled  v-model="powerNetJobInfo.pn_job_name" style="width: 300px"></el-input>
+                <el-input v-model="powerNetJobInfo.pn_job_name" style="width: 300px"></el-input>
               </el-form-item>
             </el-col>
             <el-col :span="10">
               <el-form-item label="生成方式" prop="pn_job_type">
-                <el-select disabled v-model="powerNetJobInfo.pn_job_type" style="width: 300px">
+                <el-select v-model="powerNetJobInfo.pn_job_type" style="width: 300px">
                   <el-option v-for="(option, index) in generateTypeOptions" :key="index" :label="option.name" :value="option.type"></el-option>
                 </el-select>
               </el-form-item>
@@ -31,21 +31,21 @@
           <el-row>
               <el-col :span="20">
               <el-form-item label="任务描述" prop="pn_job_description">
-                <el-input disabled  v-model="powerNetJobInfo.pn_job_description" style="width: 800px"></el-input>
+                <el-input v-model="powerNetJobInfo.pn_job_description" style="width: 800px"></el-input>
               </el-form-item>
             </el-col>
           </el-row>
         </el-form>
       </el-card>
+      <!-- 初始电网信息 -->
       <el-card>
-          <!-- 初始电网信息 -->
-        <div><h3>初始电网信息</h3></div>
-        <el-form label-position="right" label-width="150px" :model="initPowerNetInfo">
+        <div><h3>Step 2: 初始电网选择</h3></div>
+        <el-form label-position="right" label-width="150px" :model="initPowerNetInfo" :rules="initPowerNetInfoFormRules" ref="initPowerNetInfoFormRef" class="demo-ruleForm">
           <el-row>
             <el-col :span="10">
               <el-form-item label="样例名称" prop="init_net_name">
-                <el-select disabled v-model="initPowerNetInfo.init_net_name" style="width: 300px">
-                  <el-option v-for="(option, index) in initNetOptions" :key="index" :label="option.name" :value="option.type"></el-option>
+                <el-select v-model="initPowerNetInfo.init_net_name" @change="handleInitNetChange" style="width: 300px">
+                  <el-option v-for="(option, index) in initNetOptions" :key="index" :label="option" :value="option"></el-option>
                 </el-select>
               </el-form-item>
             </el-col>
@@ -58,18 +58,19 @@
             </el-col>
           </el-row>
         </el-form>
-          <!-- 初始电网统计信息 -->
+        <!-- 初始电网统计信息 -->
         <el-table :data="initPowerNetInfo.init_net_component_number" border stripe style="width: 100%">
           <el-table-column prop="bus_number" label="母线数量"></el-table-column>
           <el-table-column prop="load_number" label="负荷数量"></el-table-column>
           <el-table-column prop="gen_number" label="电机数量"></el-table-column>
           <el-table-column prop="line_number" label="线路数量"></el-table-column>
         </el-table>
+        <!-- 初始电网组件信息 -->
         <div>
         <el-row :gutter="20">
           <el-col :span="12">
             <el-card style="height: 400px">
-              <div><h4>母线</h4></div>
+              <div><h3>母线</h3></div>
               <el-table :data="initPowerNetInfo.init_net_components.bus" border stripe
                 height="300" style="width:100%">
                 <el-table-column width="120" v-for="(item,index) in initPowerNetInfo.columns_list"
@@ -79,7 +80,7 @@
           </el-col>
           <el-col :span="12">
             <el-card style="height: 400px">
-              <div><h4>负荷</h4></div>
+              <div><h3>负荷</h3></div>
               <el-table :data="initPowerNetInfo.init_net_components.load" border stripe
                 height="300" style="width:100%">
                 <el-table-column width="120" v-for="(item,index) in initPowerNetInfo.columns_list"
@@ -91,7 +92,7 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-card style="height: 400px">
-              <div><h4>电机</h4></div>
+              <div><h3>电机</h3></div>
               <el-table :data="initPowerNetInfo.init_net_components.gen" border stripe
                 height="300" style="width:100%">
                 <el-table-column width="120" v-for="(item,index) in initPowerNetInfo.columns_list"
@@ -122,15 +123,45 @@
         </el-row>
       </div>
       </el-card>
+      <!-- 扰动参数设置 -->
       <el-card>
-        <h3>潮流计算结果</h3>
-        <el-table :data="powerFlowResultData" border stripe  style="width: 100%">
-          <el-table-column  label="序号" type="index"> </el-table-column>
-          <el-table-column prop="position" label="扰动位置"> </el-table-column>
-          <el-table-column prop="value_before" label="扰动前"> </el-table-column>
-          <el-table-column prop="value_after" label="扰动后"> </el-table-column>
-          <el-table-column prop="convergence" label="收敛情况"></el-table-column>
-        </el-table>
+        <div><h3>Step 3: 扰动参数设置</h3></div>
+        <el-form label-position="right" label-width="150px" :model="disturbSettings" :rules="disturbSettingsFormRules" ref="disturbSettingsFormRef" class="demo-ruleForm">
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="扰动源类型" prop="disturb_src_type_list">
+                <el-checkbox-group v-model="disturbSettings.disturb_src_type_list">
+                  <el-checkbox label="gen_p">电机P</el-checkbox>
+                  <el-checkbox label="gen_v">电机V</el-checkbox>
+                  <el-checkbox label="load_p">负荷P</el-checkbox>
+                  <el-checkbox label="load_q">负荷Q</el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="20">
+              <el-form-item label="扰动源个数" prop="disturb_n_var">
+                <el-input v-model="disturbSettings.disturb_n_var" style="width: 800px"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="20">
+              <el-form-item label="扰动范围" prop="disturb_radio">
+                <el-input v-model="disturbSettings.disturb_radio" style="width: 800px"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="20">
+              <el-form-item label="扰动次数" prop="disturb_n_sample">
+                <el-input v-model="disturbSettings.disturb_n_sample" style="width: 800px"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+        <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button>
       </el-card>
     </div>
   </div>
@@ -156,12 +187,35 @@ export default {
   },
   data () {
     return {
-    //   // 电网数据生成任务列表
-    //   powerNetData: [],
-    //   // 全部任务数，已完成任务数，未完成任务数 (异步)
-    //   powerNetJobCnt: 0,
-    //   powerNetJobDoneCnt: 0,
-    //   powerNetJobUndoneCnt: 0
+      // 提交表单形式
+      addPowerNetDatasetForm: {},
+      powerNetJobInfoFormRules: {
+        pn_job_name: [
+          { required: true, message: '请填写任务名称', trigger: 'blur' }
+        ],
+        pn_job_type: [
+          { required: true, message: '请选择生成方式', trigger: 'blur' }
+        ]
+      },
+      initPowerNetInfoFormRules: {
+        init_net_name: [
+          { required: true, message: '请选择样例名称', trigger: 'blur' }
+        ]
+      },
+      disturbSettingsFormRules: {
+        disturb_src_type_list: [
+          { required: true, message: '请选择扰动源类型', trigger: 'blur' }
+        ],
+        disturb_n_var: [
+          { required: true, message: '请填写扰动源个数', trigger: 'blur' }
+        ],
+        disturb_radio: [
+          { required: true, message: '请填写扰动源范围', trigger: 'blur' }
+        ],
+        disturb_n_sample: [
+          { required: true, message: '请填写扰动次数', trigger: 'blur' }
+        ]
+      },
       // 任务ID，名称，生成方式，描述
       powerNetJobInfo: {
         pn_job_id: '',
@@ -198,7 +252,13 @@ export default {
         columns_list: ['a', 'b', 'c', 'd'],
         init_net_topo_url: require('@/assets/img/logo.png')
       },
-      // 调整参数
+      // 扰动源类型，扰动源个数，扰动范围，扰动次数
+      disturbSettings: {
+        disturb_src_type_list: ['gen_p'],
+        disturb_n_var: 1,
+        disturb_radio: 5,
+        disturb_n_sample: 20
+      },
       // to do
       // 潮流计算结果
       powerFlowResultData: [],
@@ -208,34 +268,12 @@ export default {
     }
   },
   created () {
-    this.getPowerNetJobInfo(this.$route.query.jobId)
+    // this.getPowerNetJobInfo(this.$route.query.jobId)
   },
   methods: {
-    // 根据id获取电网数据生成任务信息
-    getPowerNetJobInfo (jobId) {
-      queryPowerNetApi.queryJob(jobId).then(response => {
-        console.log(response)
-        const resp = response.data
-        if (resp.meta.code === 200) {
-          this.$message.success('加载任务信息成功')
-          // 任务信息
-          this.powerNetJobInfo = {
-            pn_job_id: jobId,
-            pn_job_name: resp.data.powerNetJobInfo.pn_job_name,
-            pn_job_type: resp.data.powerNetJobInfo.pn_job_type,
-            pn_job_description: resp.data.powerNetJobInfo.pn_job_description
-          }
-          // 样例信息
-          this.initPowerNetInfo.init_net_name = resp.data.initPowerNetInfo.init_net_name
-          this.getInitNetInfo(this.initPowerNetInfo.init_net_name)
-          // 潮流计算结果
-          this.powerFlowResultData = resp.data.powerFlowResultData
-        }
-      })
-    },
     // 根据样例名称获得样例描述、组件数统计、组件内容、网络拓扑图
-    getInitNetInfo (name) {
-      queryPowerNetApi.queryNetDescription(name).then(response => {
+    handleInitNetChange () {
+      queryPowerNetApi.queryNetDescription(this.initPowerNetInfo.init_net_name).then(response => {
         console.log(response)
         const resp = response.data
         if (resp.meta.code === 200) {
@@ -281,6 +319,34 @@ export default {
         this.init_net_components.other = []
       }
     },
+    // 一键生成
+    addPowerNetDataset () {
+      // 验证表单数据正确
+      const valid1 = this.$refs.powerNetJobInfoFormRef.validate
+      const valid2 = this.$refs.initPowerNetInfoFormRef.validate
+      const valid3 = this.$refs.disturbSettingsFormRef.validate
+      if (valid1 && valid2 && valid3) {
+        this.addPowerNetDatasetForm = {
+          pn_job_name: this.powerNetJobInfo.pn_job_name,
+          pn_job_type: this.powerNetJobInfo.pn_job_type,
+          pn_job_description: this.powerNetJobInfo.pn_job_description,
+          init_net_name: this.initPowerNetInfo.init_net_name,
+          disturb_src_type_list: this.disturbSettings.disturb_src_type_list,
+          disturb_n_var: this.disturbSettings.disturb_n_var,
+          disturb_radio: this.disturbSettings.disturb_radio,
+          disturb_n_sample: this.disturbSettings.disturb_n_sample
+        }
+      }
+      queryPowerNetApi.addPowerNetDataset(this.addPowerNetDatasetForm).then(response => {
+        const resp = response.data
+        console.log(response)
+        if (resp.meta.code === 204) {
+          this.$message.success('添加电网数据生成任务成功')
+        } else {
+          this.$message.error('添加电网数据生成任务失败')
+        }
+      })
+    },
     // 返回上一页
     backPage () {
       this.$router.back()
@@ -308,6 +374,12 @@ export default {
     margin-top: 20px;
     /* margin-bottom: 10px; */
     margin-left:20px;
+  }
+  .createbtn{
+    /* float: right; */
+    /* margin-top: 20px; */
+    margin-bottom: 10px;
+    margin-left:400px;
   }
   .el-col{
     min-height: 1px;

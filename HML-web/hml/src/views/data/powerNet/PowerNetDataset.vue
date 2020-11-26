@@ -1,75 +1,62 @@
 <template>
   <div>
-    <el-card>
-      <!-- 标题 -->
-      <h3>电网数据集</h3>
-      <div>
-        <el-button class="opbtn" size="mini" type="info" plain @click="backPage" icon="el-icon-arrow-left">返回</el-button>
-      </div>
-      <div>
-        <!-- 统计进度 -->
-        <el-row>
-          <el-col span="1"></el-col>
-          <el-col span="22" style="border-bottom: 3px solid rgb(180, 180, 180); margin-bottom: 10px">
-            <el-row><h4>电网数据集生成进度</h4></el-row>
-            <el-row align="middle" style="margin-bottom: 30px">
-              <el-col align="center" span="12">
-                <el-progress type="circle" :percentage="powerNetJobCnt==0 ? 0 : powerNetJobDoneCnt/powerNetJobCnt*100"></el-progress>
-              </el-col>
-              <el-col span="12">
-                <div><h5>全部：  {{powerNetJobCnt}}</h5></div>
-                <div><h5>已完成：{{powerNetJobDoneCnt}}</h5></div>
-                <div><h5>未完成：{{powerNetJobUndoneCnt}}</h5></div>
-              </el-col>
-            </el-row>
+    <!-- 标题 -->
+    <div>
+      <el-col :span="2">
+        <el-button class="backbtn" size="mini" type="info" plain @click="backPage" icon="el-icon-arrow-left">返回</el-button>
+      </el-col>
+      <el-col :span="22">
+        <h2>电网数据集</h2>
+      </el-col>
+    </div>
+    <div>
+      <!-- 统计任务进度 -->
+      <el-card>
+        <div><h3>电网数据集生成进度</h3></div>
+        <el-row align="middle" style="margin-bottom: 30px" :gutter="20">
+          <el-col align="center" :span="10">
+            <el-progress type="circle" :percentage="powerNetJobCnt==0 ? 0 : powerNetJobDoneCnt/powerNetJobCnt*100"></el-progress>
           </el-col>
-          <el-col span="1"></el-col>
-        </el-row>
-        <!-- 已有电网拓扑 -->
-        <el-row>
-          <el-col span="1"></el-col>
-          <el-col span="22" style="border-bottom: 3px solid rgb(180, 180, 180); margin-bottom: 10px">
-            <el-row><h4>已有电网拓扑</h4></el-row>
-            <el-row align="middle" style="margin-bottom: 30px">
-              <!-- 暂时先随便放一下图片 -->
-              <img src="@/assets/logo.png">
-            </el-row>
+          <el-col :span="10">
+            <div><h4>全部：  {{powerNetJobCnt}}</h4></div>
+            <div><h4>已完成：{{powerNetJobDoneCnt}}</h4></div>
+            <div><h4>未完成：{{powerNetJobUndoneCnt}}</h4></div>
           </el-col>
-          <el-col span="1"></el-col>
-        </el-row>
-        <!-- 任务列表 -->
-        <el-row>
-          <el-col span="1"></el-col>
-          <el-col span="22" style="margin-bottom: 10px">
-            <el-row>
-              <el-col span="18"><h4>数据生成任务列表</h4></el-col>
-              <el-col span="6" style="margin-top: 20px">
-                <el-button class="optbtn" size="mini"
-                  type="primary" @click="createPowerNetDataset">创建新任务</el-button>
-              </el-col>
-            </el-row>
+          <el-col :span="4">
+            <el-button type="primary" @click="createPowerNetDataset">创建新任务</el-button>
           </el-col>
-          <el-col span="1"></el-col>
         </el-row>
-      </div>
-      <el-table :data="powerNetData" border stripe  style="width: 100%">
-        <el-table-column  label="序号" type="index"> </el-table-column>
-        <el-table-column prop="job_name" label="任务名称"> </el-table-column>
-        <el-table-column prop="creator" label="创建者"> </el-table-column>
-        <el-table-column prop="start_time" label="开始时间"> </el-table-column>
-        <el-table-column prop="is_done" label="状态">
-          <template slot-scope="scope">{{scope.row.is_done | applyJobStatusTrans}}</template>
-        </el-table-column>
-        <el-table-column label="操作">
-          <template slot-scope="scope">
-            <el-button style="width:140px" size="mini" plain type="primary" :disabled="scope.row.is_done==false"
-              @click="queryPowerNetResult(scope.row.job_id)" icon="el-icon-search">查看结果</el-button>
-            <!-- <el-button size="mini" plain type="danger"
-              @click="handleDelete(scope.row.decision_id)" icon="el-icon-delete">删除</el-button> -->
+      </el-card>
+      <!-- 已有电网拓扑 -->
+      <el-card>
+        <div><h3>已有电网拓扑</h3></div>
+        <el-row align="middle" style="margin-bottom: 30px">
+          <!-- 暂时先随便放一下图片 -->
+          <img src="@/assets/img/logo.png">
+        </el-row>
+      </el-card>
+      <!-- 任务列表 -->
+      <el-card>
+        <div><h3>数据生成任务列表</h3></div>
+        <el-table :data="powerNetData" border stripe  style="width: 100%">
+          <el-table-column  label="序号" type="index"> </el-table-column>
+          <el-table-column prop="job_name" label="任务名称"> </el-table-column>
+          <el-table-column prop="creator" label="创建者"> </el-table-column>
+          <el-table-column prop="start_time" label="开始时间"> </el-table-column>
+          <el-table-column prop="is_done" label="状态">
+            <template slot-scope="scope">{{scope.row.is_done | applyJobStatusTrans}}</template>
+          </el-table-column>
+          <el-table-column label="操作">
+            <template slot-scope="scope">
+              <el-button style="width:140px" size="mini" plain type="primary" :disabled="scope.row.is_done==false"
+                @click="queryPowerNetResult(scope.row.job_id)" icon="el-icon-search">查看结果</el-button>
+              <!-- <el-button size="mini" plain type="danger"
+                @click="handleDelete(scope.row.decision_id)" icon="el-icon-delete">删除</el-button> -->
             </template>
-        </el-table-column>
-      </el-table>
-    </el-card>
+          </el-table-column>
+        </el-table>
+      </el-card>
+    </div>
   </div>
 </template>
 <script>
@@ -112,6 +99,9 @@ export default {
         }
       })
     },
+    createPowerNetDataset () {
+      this.$router.push('/data/powerNetDatasetCreate')
+    },
     // 查看电网数据生成任务结果
     queryPowerNetResult (rowId) {
       console.log(rowId)
@@ -125,27 +115,30 @@ export default {
 }
 </script>
 <style scoped>
-/* .queryBtn {
-  margin-bottom: 20px;
-} */
-  /* h3{
-    text-align: center;
-  } */
   .el-card{
     margin: 10px 20px;
   }
+  h2{
+     margin-left: 20px;
+  }
   h3{
     padding-bottom: 10px;
-    border-bottom: 3px solid rgb(102, 102, 102)
+    /* border-bottom: 3px solid rgb(102, 102, 102) */
+    border-bottom: 3px solid rgb(180, 180, 180);
   }
   h4{
     padding-bottom: 10px;
     /* border-bottom: 2px solid rgb(102, 102, 102) */
   }
-  .opbtn{
-    margin-bottom: 10px;
+  .backbtn{
+    margin-top: 20px;
+    /* margin-bottom: 10px; */
+    margin-left:20px;
   }
   .el-col{
     min-height: 1px;
+  }
+  .el-form-item{
+  margin-bottom: 30px;
   }
 </style>
