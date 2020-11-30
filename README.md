@@ -185,8 +185,8 @@ vim /etc/supervisor/supervisord.conf
 
 [inet_http_server]         ; inet (TCP) server disabled by default
 port=0.0.0.0:8020          ; (ip_address:port specifier, *:port for all iface)
-username=lsy               ; (default is no username (open server))
-password=lsy               ; (default is no password (open server))
+username=***               ; (default is no username (open server))
+password=***               ; (default is no password (open server))
 
 [supervisord]
 logfile=/var/log/supervisor/supervisord.log ; (main log file;default $CWD/supervisord.log)
