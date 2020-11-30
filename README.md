@@ -394,7 +394,7 @@ docker stop hml-mysql
 
 docker commit -m "mysql environment" -a "lsy" 6dc704b01986 lsy/hml-mysql:1.0.0
 
-docker container run -p 8023:3306 --mount source=hml-mysql,destination=/var/lib/mysql -v /etc/localtime:/etc/localtime -e MYSQL_ROOT_PASSWORD=hml --name hml-mysql -d lsy/hml-mysql:1.0.0
+docker container run -p 8023:3306 --mount source=hml-mysql,destination=/var/lib/mysql -v /etc/localtime:/etc/localtime -e MYSQL_ROOT_PASSWORD=****** --name hml-mysql -d lsy/hml-mysql:1.0.0
 ```
 
 
