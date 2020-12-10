@@ -11,13 +11,13 @@
             <el-form-item label="特征工程">
               <el-row>
                 <el-col :span="5">
-                  <el-button type="primary" round @click="goHumanFea">人工特征工程</el-button>
+                  <el-button type="primary" @click="goHumanFea">人工特征工程</el-button>
                 </el-col>
                 <el-col :span="5">
-                  <el-button type="primary" round>自动化特征工程</el-button>
+                  <el-button type="primary" >自动化特征工程</el-button>
                 </el-col>
                 <el-col :span="5">
-                  <el-button type="primary" round>人在回路的特征工程</el-button>
+                  <el-button type="primary" >人在回路的特征工程</el-button>
                 </el-col>
               </el-row>
             </el-form-item>
@@ -115,7 +115,7 @@ export default {
     margin: 10px auto;
     /* width: 1000px; */
   }
-  .el-button{
+  /* .el-button{
     width: 150px;
-  }
+  } */
 </style>

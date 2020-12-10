@@ -4,3 +4,4 @@ from dao._FeatureEngDao import FeatureEngDao
 from dao._LearnerDao import LearnerDao
 from dao._DecisionDao import DecisionDao
 from dao._AlgorithmDao import AlgorithmDao
+from dao._PowerNetDatasetDao import PowerNetDatasetDao

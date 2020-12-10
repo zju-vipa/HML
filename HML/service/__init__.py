@@ -4,3 +4,4 @@ from service._FeatureEngService import FeatureEngService
 from service._LearnerService import LearnerService
 from service._DecisionService import DecisionService
 from service._AlgorithmService import AlgorithmService
+from service._PowerNetDatasetService import PowerNetDatasetService

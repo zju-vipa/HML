@@ -12,7 +12,7 @@
           <!-- 操作 -->
           <el-table-column type="expand" v-if="!isHFeaDialog">
             <template slot-scope="scope">
-              <el-button  size="mini" type="primary" plain  @click="taskProgress(scope.row.task_id)">操作进度</el-button>
+              <el-button  size="mini" plain  @click="taskProgress(scope.row.task_id)">操作进度</el-button>
               <el-button  size="mini" type="danger" plain icon="el-icon-delete" @click="handleDelete(scope.row.featureEng_id)">删除</el-button>
             </template>
           </el-table-column>

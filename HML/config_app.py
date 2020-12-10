@@ -27,6 +27,7 @@ SAVE_PROFILE_PATH = os.path.join(ROOT_FILE_PATH, 'profile')
 SAVE_FE_MODEL_PATH = os.path.join(ROOT_MODEL_PATH, 'featureEng')
 SAVE_L_MODEL_PATH = os.path.join(ROOT_MODEL_PATH, 'learner')
 SAVE_D_RESULT_PATH = os.path.join(ROOT_MODEL_PATH, 'result')
+SAVE_PN_DATASET_PATH = os.path.join(ROOT_FILE_PATH, 'power_net_dataset')
 
 
 if not os.path.exists(SAVE_DATASET_PATH):
@@ -46,3 +47,6 @@ if not os.path.exists(SAVE_L_MODEL_PATH):
 
 if not os.path.exists(SAVE_D_RESULT_PATH):
     os.mkdir(SAVE_D_RESULT_PATH)
+
+if not os.path.exists(SAVE_PN_DATASET_PATH):
+    os.mkdir(SAVE_PN_DATASET_PATH)

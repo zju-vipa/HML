@@ -17,11 +17,11 @@
         <!-- 操作 -->
         <el-table-column type="expand">
           <template slot-scope="scope">
-            <el-button style="width:140px" size="mini" plain type="primary" :disabled="scope.row.featureEng_id==null"
+            <el-button style="width:140px" size="mini" :disabled="scope.row.featureEng_id==null"
               @click="handleDownLoadFeaRes(scope.row)" icon="el-icon-download">决策特征工程结果</el-button>
-            <el-button size="mini" plain type="primary" :disabled="scope.row.learner_id==null"
+            <el-button size="mini" :disabled="scope.row.learner_id==null"
               @click="handleDownLoadPrediction(scope.row)" icon="el-icon-download">预测结果</el-button>
-            <el-button size="mini" plain type="primary" :disabled="scope.row.learner_id==null"
+            <el-button size="mini" :disabled="scope.row.learner_id==null"
               @click="handleDownLoadReport(scope.row)" icon="el-icon-download">预测报告</el-button>
             <el-button size="mini" plain type="danger"
               @click="handleDelete(scope.row.decision_id)" icon="el-icon-delete">删除</el-button>
@@ -37,11 +37,11 @@
         </el-table-column>
         <el-table-column label="查询进度"  width="350">
           <template slot-scope="scope">
-            <el-button size="mini" type="info" :disabled="scope.row.featureEng_id==null"
+            <el-button size="mini" type="danger" :disabled="scope.row.featureEng_id==null"
             @click="queryHuFeaPrgress(scope.row.task_id)">应用特征工程</el-button>
-            <el-button size="mini" type="info" :disabled="scope.row.learner_id==null"
+            <el-button size="mini" type="warning" :disabled="scope.row.learner_id==null"
             @click="queryLearnerPrgress(scope.row.task_id)">应用学习器</el-button>
-            <el-button size="mini" type="info" :disabled="scope.row.learner_id==null"
+            <el-button size="mini" type="success" :disabled="scope.row.learner_id==null"
              @click="queryAllPrgress(scope.row.task_id)">应用决策</el-button>
           </template>
         </el-table-column>

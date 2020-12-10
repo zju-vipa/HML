@@ -25,13 +25,14 @@ def hello_world():
 
 
 # register blueprint
-from app import _UserApp, _DatasetApp, _FeatureEngApp, _LearnerApp, _DecisionApp, _AlgorithmApp
+from app import _UserApp, _DatasetApp, _FeatureEngApp, _LearnerApp, _DecisionApp, _AlgorithmApp, _PowerNetDatasetApp
 app.register_blueprint(_UserApp.bp)
 app.register_blueprint(_DatasetApp.bp)
 app.register_blueprint(_FeatureEngApp.bp)
 app.register_blueprint(_LearnerApp.bp)
 app.register_blueprint(_DecisionApp.bp)
 app.register_blueprint(_AlgorithmApp.bp)
+app.register_blueprint(_PowerNetDatasetApp.bp)
 
 # db init
 db.create_all()
