@@ -4,28 +4,35 @@ export default {
   // 查询电网数据生成任务列表
   query () {
     return request({
-      url: '/data/powerNet/query',
+      url: '/data/powerNetDataset/query',
+      method: 'GET'
+    })
+  },
+  // 根据当前用户查询电网数据生成任务列表
+  queryByUserId () {
+    return request({
+      url: '/data/powerNetDataset/queryByUserId',
       method: 'GET'
     })
   },
   // 根据id查询任务
   queryJob (id) {
     return request({
-      url: `/data/powerNet/queryJob?job_id=${id}`,
+      url: `/data/powerNetDataset/queryById?id=${id}`,
       method: 'GET'
     })
   },
   // 根据样例名称查询样例描述
   queryNetDescription (name) {
     return request({
-      url: `/data/powerNet/queryNetDescription?name=${name}`,
+      url: `/data/powerNetDataset/queryNetDescription?name=${name}`,
       method: 'GET'
     })
   },
   // 创建电网数据生成任务（一键生成）
   addPowerNetDataset (form) {
     return request({
-      url: '/data/powerNet/add',
+      url: '/data/powerNetDataset/add',
       method: 'POST',
       // 'Content-Type': 'application/json',
       data: {
@@ -51,14 +58,21 @@ export default {
       //     return ret
       //   }]
     })
+  },
+  // 删除数据集
+  deletePowerNetDataset (id) {
+    return request({
+      url: `/data/powerNetDataset/delete?id=${id}`,
+      method: 'GET'
+    })
+  },
+  downloadResult (id) {
+    return request({
+      url: `/data/powerNetDataset/download/result?id=${id}`,
+      method: 'GET',
+      responseType: 'blob'
+    })
   }
-//   // 删除数据集
-//   deleteData (id) {
-//     return request({
-//       url: `/decision/delete?decision_id=${id}`,
-//       method: 'GET'
-//     })
-//   },
 //   // 下载决策特征工程的
 //   downloadHumanFea (id) {
 //     return request({

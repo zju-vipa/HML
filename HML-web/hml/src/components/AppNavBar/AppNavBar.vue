@@ -49,6 +49,14 @@ export default {
       // console.log(this.$route.path)
       if (this.$route.path === '/data/originDataset') {
         return '/data'
+      } else if (this.$route.path === '/data/humanDataset') {
+        return '/data'
+      } else if (this.$route.path === '/data/powerNet') {
+        return '/data'
+      } else if (this.$route.path === '/data/powerNetDatasetCreate') {
+        return '/data'
+      } else if (this.$route.path === '/data/queryPowerNetResult') {
+        return '/data'
       } else if (this.$route.path === '/feature/humanfea') {
         return '/feature'
       } else if (this.$route.path === '/feature/queryFea') {
@@ -61,8 +69,6 @@ export default {
         return '/decision'
       } else if (this.$route.path === '/decision/queryDecision') {
         return '/decision'
-      } else if (this.$route.path === '/data/humanDataset') {
-        return '/data'
       }
       return this.$route.path
     }

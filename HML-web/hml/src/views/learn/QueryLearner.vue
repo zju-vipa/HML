@@ -17,9 +17,9 @@
           <!-- 操作 -->
           <el-table-column type="expand" v-if="!isLearnDialog">
             <template slot-scope="scope">
-              <el-button  size="mini" type="primary" plain @click="trainProgress(scope.row.task_id)">训练进度</el-button>
-              <el-button size="mini" type="primary" plain @click="handleDownLoadPrediction(scope.row)">下载预测结果</el-button>
-              <el-button size="mini" type="primary"  plain @click="handleDownLoadReport(scope.row)">下载预测报告</el-button>
+              <el-button  size="mini" plain @click="trainProgress(scope.row.task_id)">训练进度</el-button>
+              <el-button size="mini" plain @click="handleDownLoadPrediction(scope.row)">下载预测结果</el-button>
+              <el-button size="mini" plain @click="handleDownLoadReport(scope.row)">下载预测报告</el-button>
               <el-button  size="mini" type="danger" plain icon="el-icon-delete" @click="handleDelete(scope.row.learner_id)">删除</el-button>
               <!-- <el-button  size="mini" type="primary" plain  @click="taskProgress(scope.row.task_id)">操作进度</el-button>
               <el-button  size="mini" type="danger" plain  @click="handleDelete(scope.row.featureEng_id)">删除</el-button> -->

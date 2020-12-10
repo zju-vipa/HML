@@ -51,6 +51,29 @@ class Dataset(db.Model):
         return to_json(self, self.__class__)
 
 
+class PowerNetDataset(db.Model):
+    __tablename__ = 'power_net_dataset'
+
+    power_net_dataset_id = db.Column(db.String(32), primary_key=True, info='电网数据集ID')
+    power_net_dataset_name = db.Column(db.String(32), nullable=False, info='数据集名')
+    task_id = db.Column(db.String(36), nullable=True, info='任务ID')
+    power_net_dataset_type = db.Column(db.Text, nullable=True, info='生成方式')
+    power_net_dataset_description = db.Column(db.Text, nullable=True, info='任务描述')
+    init_net_name = db.Column(db.String(32), nullable=True, info='初始电网样例')
+    disturb_src_type_list = db.Column(db.String(64), nullable=True, info='扰动源类型')
+    disturb_n_var = db.Column(db.Integer, nullable=True, info='扰动源个数')
+    disturb_radio = db.Column(db.Integer, nullable=True, info='扰动范围')
+    disturb_n_sample = db.Column(db.Integer, nullable=True, info='扰动次数')
+    start_time = db.Column(db.DateTime, nullable=True, info='开始时间')
+    generate_state = db.Column(db.String(1), nullable=False, default='0', info='生成状态')
+    user_id = db.Column(db.String(32), nullable=False, info='用户ID')
+    username = db.Column(db.String(32), nullable=False, info='用户名')
+
+    @property
+    def serialize(self):
+        return to_json(self, self.__class__)
+
+
 class FeatureEng(db.Model):
     __tablename__ = 'featureEng'
 

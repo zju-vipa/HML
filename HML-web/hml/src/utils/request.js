@@ -2,7 +2,7 @@ import axios from 'axios'
 // 2,创建一个axios实例对象
 const request = axios.create({
   baseURL: 'http://10.214.211.205:8021/api/private/v1',
-  timeout: 5000
+  timeout: 10000
 })
 // 请求拦截
 request.interceptors.request.use(config => {

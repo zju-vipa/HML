@@ -8,10 +8,10 @@
         :highlight-current-row="isDialog" @current-change="clickCurrentChange">
           <el-table-column type="expand" v-if="!isDialog">
             <template slot-scope="scope">
-              <el-button class="opbtn" size="mini" plain type="primary" @click="handleDownLoadFile(scope.row.dataset_id)">数据下载</el-button>
-              <el-button  class="opbtn" size="mini" plain type="primary"  @click="handleDownLoadProfile(scope.row)">分析下载</el-button>
-              <el-button   size="mini" type="primary" plain  @click="taskProgress(scope.row.task_id)">分析进度</el-button>
-              <el-button  size="mini" plain type="danger" @click="handleDelete(scope.row.dataset_id)">删除数据</el-button>
+              <el-button class="opbtn" size="mini" plain @click="handleDownLoadFile(scope.row.dataset_id)">数据下载</el-button>
+              <el-button class="opbtn" size="mini" plain @click="handleDownLoadProfile(scope.row)">分析下载</el-button>
+              <el-button class="opbtn" size="mini" plain  @click="taskProgress(scope.row.task_id)">分析进度</el-button>
+              <el-button class="opbtn" size="mini" plain type="danger" @click="handleDelete(scope.row.dataset_id)">删除数据</el-button>
             </template>
           </el-table-column>
           <el-table-column prop="dataset_name" label="数据集名" > </el-table-column>
