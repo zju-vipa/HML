@@ -44,8 +44,13 @@
           <el-row>
             <el-col :span="10">
               <el-form-item label="样例名称" prop="init_net_name">
-                <el-select v-model="initPowerNetInfo.init_net_name" @change="handleInitNetChange" style="width: 300px">
-                  <el-option v-for="(option, index) in initNetOptions" :key="index" :label="option" :value="option"></el-option>
+                <!--潮流数据 样例列表-->
+                <el-select v-if="powerNetJobInfo.pn_job_type==='A'" v-model="initPowerNetInfo.init_net_name" @change="handleInitNetChange" style="width: 300px">
+                  <el-option v-for="(option, index) in initNetOptionsA" :key="index" :label="option" :value="option"></el-option>
+                </el-select>
+                <!--暂稳数据 样例列表-->
+                <el-select v-else-if="powerNetJobInfo.pn_job_type==='B'" v-model="initPowerNetInfo.init_net_name" @change="handleInitNetChange" style="width: 300px">
+                  <el-option v-for="(option, index) in initNetOptionsB" :key="index" :label="option" :value="option"></el-option>
                 </el-select>
               </el-form-item>
             </el-col>
@@ -123,8 +128,8 @@
         </el-row>
       </div>
       </el-card>
-      <!-- 扰动参数设置 -->
-      <el-card>
+      <!-- 方式A（潮流数据）：扰动参数设置 -->
+      <el-card v-if="powerNetJobInfo.pn_job_type==='A'">
         <div><h3>Step 3: 扰动参数设置</h3></div>
         <el-form label-position="right" label-width="150px" :model="disturbSettings" :rules="disturbSettingsFormRules" ref="disturbSettingsFormRef" class="demo-ruleForm">
           <el-row>
@@ -163,6 +168,47 @@
         </el-form>
         <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button>
       </el-card>
+      <!-- 方式B（暂稳数据）：暂稳参数设置 -->
+      <el-card v-if="powerNetJobInfo.pn_job_type==='B'">
+        <div><h3>Step 3: 故障参数设置</h3></div>
+        <el-form label-position="right" label-width="150px" :model="faultSettings" :rules="faultSettingsFormRules" ref="faultSettingsFormRef" class="demo-ruleForm">
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="负荷范围" prop="load_list">
+                <el-input v-model="faultSettings.load_list" placeholder="例如：0.8, 1.0, 1.2"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="故障线路" prop="fault_line_list">
+                <el-checkbox-group v-model="faultSettings.fault_line_list">
+                  <el-checkbox v-for="count in 34" :key="count" :label="count">line{{count}}</el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="线路故障位置" prop="line_percentage_list">
+                <el-checkbox-group v-model="faultSettings.line_percentage_list">
+                  <el-checkbox v-for="(option, index) in linePercentageOptions"
+                  :key="index" :label="option" :value="option"></el-checkbox>
+                </el-checkbox-group>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="故障持续时间（周期数）" prop="fault_time_list">
+                <el-input v-model="faultSettings.fault_time_list" placeholder="例如：1, 2, 4, 8"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+        <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button>
+      </el-card>
+
     </div>
   </div>
 </template>
@@ -170,12 +216,14 @@
 import queryPowerNetApi from './../../../api/queryPowerNet'
 // 生成方式类型
 const generateTypeOptions = [
-  { type: 'A', name: '方式A' },
-  { type: 'B', name: '方式B' },
+  { type: 'A', name: '潮流数据生成' }, // 潮流
+  { type: 'B', name: '暂稳数据生成' }, // 暂稳
   { type: 'C', name: '方式C' }
 ]
-// 样例名称
-const initNetOptions = ['case5', 'case9', 'case14', 'case30', 'case_ieee30', 'case39', 'case57', 'case118', 'case300']
+// 方式A样例名称 （潮流）
+const initNetOptionsA = ['case5', 'case9', 'case14', 'case30', 'case_ieee30', 'case39', 'case57', 'case118', 'case300']
+// 方式B样例名称  （暂稳）
+const initNetOptionsB = ['case39']
 // 其他组件内容选择
 const otherSelectOptions = ['line', 'shunt', 'switch', 'impedance', 'trafo']
 const componentColumns = {
@@ -203,6 +251,7 @@ const componentColumns = {
     'shift_degree', 'tap_side', 'tap_neutral', 'tap_min', 'tap_max', 'tap_step_percent', 'tap_step_degree',
     'tap_pos', 'tap_phase_shifter', 'parallel', 'max_loading_percent', 'df', 'in_service']
 }
+const linePercentageOptions = ['0.1', '0.2', '0.3', '0.4', '0.5', '0.6', '0.7', '0.8', '0.9']
 export default {
   filters: {
     // is_done转换成 “已完成” “未完成”
@@ -241,6 +290,20 @@ export default {
           { required: true, message: '请填写扰动次数', trigger: 'blur' }
         ]
       },
+      faultSettingsFormRules: {
+        load_list: [
+          { required: true, message: '请填写负荷范围', trigger: 'blur' }
+        ],
+        fault_line_list: [
+          { required: true, message: '请选择故障线路', trigger: 'blur' }
+        ],
+        line_percentage_list: [
+          { required: true, message: '请选择故障位置', trigger: 'blur' }
+        ],
+        fault_time_list: [
+          { required: true, message: '请填写故障持续时间', trigger: 'blur' }
+        ]
+      },
       // 任务ID，名称，生成方式，描述
       powerNetJobInfo: {
         pn_job_id: '',
@@ -250,7 +313,7 @@ export default {
       },
       // 初始电网样例名称，描述，网络结构，拓扑图
       initPowerNetInfo: {
-        init_net_name: 'case5',
+        init_net_name: 'case39',
         init_net_description: '',
         init_net_component_number: [{
           bus_number: 0,
@@ -280,14 +343,22 @@ export default {
         disturb_radio: 5,
         disturb_n_sample: 20
       },
+      faultSettings: {
+        load_list: '0.8, 1.0, 1.2',
+        fault_line_list: [1, 2, 3, 4],
+        line_percentage_list: ['0.1', '0.2'],
+        fault_time_list: '1, 2, 4, 8'
+      },
       // to do
       // 潮流计算结果
       powerFlowResultData: [],
       generateTypeOptions,
-      initNetOptions,
+      initNetOptionsA,
+      initNetOptionsB,
       otherSelectOptions,
       componentColumns,
-      componentOtherColumns: []
+      componentOtherColumns: [],
+      linePercentageOptions
     }
   },
   created () {
@@ -361,7 +432,12 @@ export default {
       // 验证表单数据正确
       const valid1 = this.$refs.powerNetJobInfoFormRef.validate
       const valid2 = this.$refs.initPowerNetInfoFormRef.validate
-      const valid3 = this.$refs.disturbSettingsFormRef.validate
+      var valid3 = false
+      if (this.powerNetJobInfo.pn_job_type === 'A') {
+        valid3 = this.$refs.disturbSettingsFormRef.validate
+      } else if (this.powerNetJobInfo.pn_job_type === 'B') {
+        valid3 = this.$refs.faultSettingsFormRef.validate
+      }
       if (valid1 && valid2 && valid3) {
         this.addPowerNetDatasetForm = {
           pn_job_name: this.powerNetJobInfo.pn_job_name,
@@ -371,7 +447,11 @@ export default {
           disturb_src_type_list: this.disturbSettings.disturb_src_type_list,
           disturb_n_var: this.disturbSettings.disturb_n_var,
           disturb_radio: this.disturbSettings.disturb_radio,
-          disturb_n_sample: this.disturbSettings.disturb_n_sample
+          disturb_n_sample: this.disturbSettings.disturb_n_sample,
+          load_list: this.faultSettings.load_list.split(','),
+          fault_line_list: this.faultSettings.fault_line_list,
+          line_percentage_list: this.faultSettings.line_percentage_list,
+          fault_time_list: this.faultSettings.fault_time_list.split(',')
         }
       }
       queryPowerNetApi.addPowerNetDataset(this.addPowerNetDatasetForm).then(response => {

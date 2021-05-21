@@ -40,10 +40,16 @@ export default {
         pn_job_type: form.pn_job_type,
         pn_job_description: form.pn_job_description,
         init_net_name: form.init_net_name,
+        // 方式1：潮流数据任务
         disturb_src_type_list: form.disturb_src_type_list,
         disturb_n_var: form.disturb_n_var,
         disturb_radio: form.disturb_radio,
-        disturb_n_sample: form.disturb_n_sample
+        disturb_n_sample: form.disturb_n_sample,
+        // 方式2：暂稳数据任务
+        load_list: form.load_list,
+        fault_line_list: form.fault_line_list,
+        line_percentage_list: form.line_percentage_list,
+        fault_time_list: form.fault_time_list
       },
       headers: {
         // 'content-type': 'application/x-www-form-urlencoded'

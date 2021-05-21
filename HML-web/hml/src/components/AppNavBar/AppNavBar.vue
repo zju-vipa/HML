@@ -55,6 +55,8 @@ export default {
         return '/data'
       } else if (this.$route.path === '/data/powerNetDatasetCreate') {
         return '/data'
+      } else if (this.$route.path === '/data/powerNetTransientStabilityDatasetCreate') {
+        return '/data'
       } else if (this.$route.path === '/data/queryPowerNetResult') {
         return '/data'
       } else if (this.$route.path === '/feature/humanfea') {
