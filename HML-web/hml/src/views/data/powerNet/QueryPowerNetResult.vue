@@ -162,7 +162,7 @@
           </el-row>
         </el-form>
       </el-card>
-      <el-card>
+      <el-card v-if="powerNetJobInfo.pn_job_type==='A'">
         <h3>潮流计算结果（至多显示30条）</h3>
         <el-table :data="powerFlowResultData" border stripe  style="width: 100%">
           <el-table-column  label="序号" type="index"> </el-table-column>
@@ -173,6 +173,14 @@
         </el-table>
         <el-button type="primary" class="downloadbtn" icon="el-icon-download" @click="handleDownloadResult">下载潮流计算结果</el-button>
       </el-card>
+      <el-card v-if="powerNetJobInfo.pn_job_type==='B'">
+        <h3>暂稳计算结果（至多显示30条）</h3>
+        <el-table :data="powerFlowResultData" border stripe  style="width: 100%">
+          <el-table-column  label="序号" type="index"> </el-table-column>
+          <el-table-column prop="success" label="暂稳情况"></el-table-column>
+        </el-table>
+        <el-button type="primary" class="downloadbtn" icon="el-icon-download" @click="handleDownloadResult">下载潮流计算结果</el-button>
+      </el-card>
     </div>
   </div>
 </template>
@@ -180,8 +188,8 @@
 import queryPowerNetApi from './../../../api/queryPowerNet'
 // 生成方式类型
 const generateTypeOptions = [
-  { type: 'A', name: '方式A' },
-  { type: 'B', name: '方式B' },
+  { type: 'A', name: '潮流数据生成' }, // 潮流
+  { type: 'B', name: '暂稳数据生成' }, // 暂稳
   { type: 'C', name: '方式C' }
 ]
 // 样例名称

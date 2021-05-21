@@ -36,8 +36,8 @@
             </el-form-item>
             <el-form-item class="label" v-for="(params, index) in algorithm_parameters"
                       :label="params.name" :key="index">
-              <el-select v-if="params.name==='col_retain'"  :multiple="labelMultible"
-                          v-model="params.value" placeholder="请选择保留列">
+              <el-select v-if="params.name==='label'"  :multiple="labelMultible"
+                          v-model="params.value" placeholder="请选择标签列">
                 <el-option
                   v-for="(item,index) in columnsList" :key="index"
                   :label="item"
@@ -168,18 +168,26 @@ export default {
     submitAllForm () {
       console.log(this.addLearnerForm)
       console.log(this.learnParamsForm)
-      // this.addLearnerForm.dataset_id = this.datasetId
-      // this.addLearnerForm.learner_parameters = this.learnParamsForm
-      // learnApi.add(this.addLearnerForm).then(response => {
-      // console.log(this.addLearnerForm)
-      //   console.log(response)
-      //   const resp = response.data
-      //   if (resp.meta.code === 204) {
-      //     this.$message.success('添加学习器成功')
-      //   } else {
-      //     this.$message.error('添加学习器失败')
-      //   }
-      // })
+      this.addLearnerForm.dataset_id = this.datasetId
+      this.addLearnerForm.learner_parameters = this.learnParamsForm
+      // label, n_estimators
+      for (let i = 0; i < this.addLearnerForm.learner_parameters.algorithm_parameters.length; i++) {
+        if (this.addLearnerForm.learner_parameters.algorithm_parameters[i].name === 'label') {
+          this.addLearnerForm.learner_parameters.label = Array(this.addLearnerForm.learner_parameters.algorithm_parameters[i].value)
+        } else if (this.addLearnerForm.learner_parameters.algorithm_parameters[i].name === 'n_estimators') {
+          this.addLearnerForm.learner_parameters.n_estimators = parseInt(this.addLearnerForm.learner_parameters.algorithm_parameters[i].value, 10)
+        }
+      }
+      learnApi.add(this.addLearnerForm).then(response => {
+        console.log(this.addLearnerForm)
+        console.log(response)
+        const resp = response.data
+        if (resp.meta.code === 204) {
+          this.$message.success('添加学习器成功')
+        } else {
+          this.$message.error('添加学习器失败')
+        }
+      })
     },
     // 通过算法接口动态获取参数
     getAlgorithm () {

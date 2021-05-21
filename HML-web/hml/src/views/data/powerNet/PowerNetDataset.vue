@@ -34,6 +34,7 @@
           </el-col> -->
           <el-col align="center" :span="6">
             <el-button type="primary" @click="createPowerNetDataset">创建新任务</el-button>
+            <!--<el-button type="primary" @click="createPowerNetTransientStabilityDataset">创建暂稳数据任务</el-button>-->
           </el-col>
         </el-row>
       </el-card>
@@ -154,6 +155,9 @@ export default {
     createPowerNetDataset () {
       this.$router.push('/data/powerNetDatasetCreate')
     },
+    // createPowerNetTransientStabilityDataset () {
+    //   this.$router.push('/data/powerNetTransientStabilityDatasetCreate')
+    // },
     // 查看电网数据生成任务结果
     queryPowerNetResult (pnId) {
       console.log(pnId)

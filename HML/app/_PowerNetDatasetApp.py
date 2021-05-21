@@ -54,7 +54,7 @@ def query_power_net_dataset_result():
         if not powerNetDataset:
             return get_error(RET.PARAMERR, 'Error: power_net_dataset_id not exists')
 
-        result_path = powerNetDatasetService.getPowerNetResultPath(power_net_dataset_id)
+        result_path = powerNetDatasetService.getPowerNetResultPath(power_net_dataset_id, powerNetDataset.power_net_dataset_type)
         result_data = powerNetDatasetService.getPowerNetResultData(result_path)
 
         return {'meta': {'msg': 'query powerNetDataset result success', 'code': 200},
@@ -115,7 +115,7 @@ def delete_powerNetDataset():
         if not powerNetDataset:
             return get_error(RET.PARAMERR, 'Error: power_net_dataset_id not exists')
 
-        file_path = powerNetDatasetService.getPowerNetResultPath(power_net_dataset_id)
+        file_path = powerNetDatasetService.getPowerNetResultPath(power_net_dataset_id, powerNetDataset.power_net_dataset_type)
         # if not os.path.exists(file_path):
         #     return get_error(RET.FILEERR, 'Error: powerNetDataset file not exists')
 
@@ -143,6 +143,10 @@ def add_powerNetDataset():
             disturb_n_var = request.json.get('disturb_n_var')
             disturb_radio = request.json.get('disturb_radio')
             disturb_n_sample = request.json.get('disturb_n_sample')
+            load_list = request.json.get('load_list')
+            fault_line_list = request.json.get('fault_line_list')
+            line_percentage_list = request.json.get('line_percentage_list')
+            fault_time_list = request.json.get('fault_time_list')
         except Exception:
             return get_error(RET.PARAMERR, 'Error: no request')
 
@@ -166,6 +170,14 @@ def add_powerNetDataset():
             return get_error(RET.PARAMERR, 'Error: request lacks disturb_radio')
         if not disturb_n_sample:
             return get_error(RET.PARAMERR, 'Error: request lacks disturb_n_sample')
+        if not load_list:
+            return get_error(RET.PARAMERR, 'Error: request lacks load_list')
+        if not fault_line_list:
+            return get_error(RET.PARAMERR, 'Error: request lacks fault_line_list')
+        if not line_percentage_list:
+            return get_error(RET.PARAMERR, 'Error: request lacks line_percentage_list')
+        if not fault_time_list:
+            return get_error(RET.PARAMERR, 'Error: request lacks fault_time_list')
 
         #
         power_net_dataset_bean = PowerNetDataset()
@@ -175,10 +187,18 @@ def add_powerNetDataset():
         power_net_dataset_bean.power_net_dataset_description = power_net_dataset_description
         power_net_dataset_bean.init_net_name = init_net_name
         # 数组转成可存储的字符串
+        # 潮流参数
         power_net_dataset_bean.disturb_src_type_list = ','.join(disturb_src_type_list)
         power_net_dataset_bean.disturb_n_var = disturb_n_var
         power_net_dataset_bean.disturb_radio = disturb_radio
         power_net_dataset_bean.disturb_n_sample = disturb_n_sample
+        # 暂稳参数
+        power_net_dataset_bean.load_list = ','.join(load_list)
+        power_net_dataset_bean.fault_line_list = ','.join(fault_line_list)
+        power_net_dataset_bean.line_percentage_list = ','.join(line_percentage_list)
+        power_net_dataset_bean.fault_time_list = ','.join(fault_time_list)
+
+
         # power_net_dataset_bean.start_time = start_time
         # power_net_dataset_bean.generate_state = generate_state
         power_net_dataset_bean.user_id = user_id
@@ -210,7 +230,7 @@ def download_result():
         if not powerNetDataset:
             return get_error(RET.PARAMERR, 'Error: power_net_dataset_id not exists')
 
-        file_path = powerNetDatasetService.getPowerNetResultPath(power_net_dataset_id)
+        file_path = powerNetDatasetService.getPowerNetResultPath(power_net_dataset_id, powerNetDataset.power_net_dataset_type)
         if not os.path.exists(file_path):
             return get_error(RET.FILEERR, 'Error: result file not exists')
 

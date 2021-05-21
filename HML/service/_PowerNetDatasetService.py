@@ -20,7 +20,7 @@ class PowerNetDatasetService:
         power_net_dataset.generate_state = '1'
         power_net_dataset.start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
-        file_path = self.getPowerNetResultPath(power_net_dataset.power_net_dataset_id)
+        file_path = self.getPowerNetResultPath(power_net_dataset.power_net_dataset_id, power_net_dataset.power_net_dataset_type)
         task = PowerNetDatasetTasks.generate.apply_async((power_net_dataset.serialize, file_path), countdown=1)
 
         power_net_dataset.task_id = task.id
@@ -59,12 +59,15 @@ class PowerNetDatasetService:
         else:
             return None
 
-    def getPowerNetResultPath(self, power_net_dataset_id):
+    def getPowerNetResultPath(self, power_net_dataset_id, pn_type):
         # file_directory = os.path.join(current_app.config["SAVE_PN_DATASET_PATH"], power_net_dataset_id)
         # file_name = 'pn_power_flow.csv'
         # file_path = os.path.join(file_directory, file_name)
+        file_ext = ".csv"
+        if pn_type == "B":
+            file_ext = ".mat"
         file_path = os.path.join(current_app.config["SAVE_PN_DATASET_PATH"],
-                                 str(power_net_dataset_id) + '_pn_power_flow.csv')
+                                 str(power_net_dataset_id) + '_pn_power_flow' + file_ext)
         # if not os.path.exists(file_path):
         #     return None
         return file_path

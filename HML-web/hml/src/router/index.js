@@ -23,6 +23,7 @@ import QueryDecision from './../views/decision/QueryDecision'
 import PowerNetDataset from './../views/data/powerNet/PowerNetDataset'
 import QueryPowerNetResult from './../views/data/powerNet/QueryPowerNetResult'
 import PowerNetDatasetCreate from './../views/data/powerNet/PowerNetDatasetCreate'
+// import PowerNetTransientStabilityDatasetCreate from './../views/data/powerNet/PowerNetTransientStabilityDatasetCreate'
 // import Decision from '../views/decision/Decision'
 // import Dataset from '../views/data/Dataset'
 // import DatasetHuFea from '../views/data/DatasetHuFea'
@@ -132,6 +133,11 @@ const routes = [
         name: 'PowerNetDatasetCreate',
         component: PowerNetDatasetCreate
       },
+      // {
+      //   path: '/data/powerNetTransientStabilityDatasetCreate',
+      //   name: 'PowerNetTransientStabilityDatasetCreate',
+      //   component: PowerNetTransientStabilityDatasetCreate
+      // },
       {
         path: '/data/queryPowerNetResult',
         name: 'QueryPowerNetDataset',

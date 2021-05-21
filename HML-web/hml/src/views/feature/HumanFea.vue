@@ -24,18 +24,18 @@
                       </el-option>
                     </el-select>
                   </el-form-item >
-                    <el-form-item class="label" v-for="(params, index) in algorithm_parameters"
-                      :label="params.name" :key="index">
-                        <el-select v-if="params.name==='col_retain'"  :multiple="labelMultible"
-                          v-model="params.value" placeholder="请选择保留列">
-                            <el-option
-                              v-for="(item,index) in columnsList" :key="index"
-                              :label="item"
-                              :value="item">
-                            </el-option>
-                        </el-select>
-                        <el-input v-else style="width:350px" v-model="params.value"></el-input>
-                    </el-form-item>
+                  <el-form-item class="label" v-for="(params, index) in algorithm_parameters"
+                    :label="params.name" :key="index">
+                    <el-select v-if="params.name==='col_retain'"  :multiple="labelMultible"
+                      v-model="params.value" placeholder="请选择保留列">
+                      <el-option
+                        v-for="(item,index) in columnsList" :key="index"
+                        :label="item"
+                        :value="item">
+                      </el-option>
+                    </el-select>
+                    <el-input v-else style="width:350px" v-model="params.value"></el-input>
+                  </el-form-item>
                 </el-form>
               </el-card>
               <el-card class="card-form">
@@ -60,7 +60,7 @@
                               :value="item">
                             </el-option>
                         </el-select>
-                        <el-input v-else style="width:220px" v-model="params.value"></el-input>
+                        <el-input v-else style="width:220px" v-model.number="params.value"></el-input>
                     </el-form-item>
                 </el-form>
               </el-card>
@@ -143,17 +143,19 @@ export default {
     submitHumanForm () {
       console.log(this.processExtractForm.algorithm_parameters2)
       console.log(this.processConstructForm.algorithm_parameters)
-      if (this.processExtractForm.algorithm_parameters2 !== undefined) {
-        for (let i = 0; i < this.processExtractForm.algorithm_parameters2.length; i++) {
-          this.processExtractForm[this.processExtractForm.algorithm_parameters2[i].name] = this.processExtractForm.algorithm_parameters2[i].value
-        }
-        this.addFeatureForm.featureEng_processes.push(this.processExtractForm)
-      }
+      // 调整了一下位置
       if (this.processConstructForm.algorithm_parameters !== undefined) {
         for (let i = 0; i < this.processConstructForm.algorithm_parameters.length; i++) {
           this.processConstructForm[this.processConstructForm.algorithm_parameters[i].name] = this.processConstructForm.algorithm_parameters[i].value
         }
         this.addFeatureForm.featureEng_processes.push(this.processConstructForm)
+      }
+
+      if (this.processExtractForm.algorithm_parameters2 !== undefined) {
+        for (let i = 0; i < this.processExtractForm.algorithm_parameters2.length; i++) {
+          this.processExtractForm[this.processExtractForm.algorithm_parameters2[i].name] = this.processExtractForm.algorithm_parameters2[i].value
+        }
+        this.addFeatureForm.featureEng_processes.push(this.processExtractForm)
       }
 
       this.addFeatureForm.original_dataset_id = this.OriginDatasetId
