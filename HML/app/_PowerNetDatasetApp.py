@@ -1,4 +1,4 @@
-from flask import Blueprint, request, g, json
+from flask import Blueprint, request, g, json, current_app
 from app.constant import get_error, RET
 from app._UserApp import login_required
 from utils.CommonUtil import download_file
@@ -77,7 +77,7 @@ def query_net_description():
         init_net, description = powerNetDatasetService.queryInitNetByName(net_name)
 
         # 图片先搞个样例的
-        img_url = "http://10.214.211.205:8030/img/example_" + net_name + ".png"
+        img_url = "http://10.214.211.135:8030/img/example_" + net_name + ".png"
 
         return {'meta': {'msg': 'query init net success', 'code': 200},
                 'data': {'example': net_name,
@@ -147,12 +147,17 @@ def add_powerNetDataset():
             fault_line_list = request.json.get('fault_line_list')
             line_percentage_list = request.json.get('line_percentage_list')
             fault_time_list = request.json.get('fault_time_list')
+            n_sample = request.json.get('n_sample')
+            cond_stability = request.json.get('cond_stability')
+            cond_load = request.json.get('cond_load')
+            current_app.logger.info("p1 app add_powerNetDataset")
         except Exception:
             return get_error(RET.PARAMERR, 'Error: no request')
 
         try:
             user_id = g.user_id
             username = g.user.username
+            current_app.logger.info("p2 app add_powerNetDataset")
         except Exception:
             return get_error(RET.SESSIONERR, 'Error: no login')
 
@@ -178,10 +183,16 @@ def add_powerNetDataset():
             return get_error(RET.PARAMERR, 'Error: request lacks line_percentage_list')
         if not fault_time_list:
             return get_error(RET.PARAMERR, 'Error: request lacks fault_time_list')
+        if not n_sample:
+            return get_error(RET.PARAMERR, 'Error: request lacks n_sample')
+        if not cond_stability:
+            return get_error(RET.PARAMERR, 'Error: request lacks cond_stability')
+        if not cond_load:
+            return get_error(RET.PARAMERR, 'Error: request lacks cond_load')
 
         #
         power_net_dataset_bean = PowerNetDataset()
-
+        current_app.logger.info("p3 app add_powerNetDataset")
         power_net_dataset_bean.power_net_dataset_name = power_net_dataset_name
         power_net_dataset_bean.power_net_dataset_type = power_net_dataset_type
         power_net_dataset_bean.power_net_dataset_description = power_net_dataset_description
@@ -194,18 +205,23 @@ def add_powerNetDataset():
         power_net_dataset_bean.disturb_n_sample = disturb_n_sample
         # 暂稳参数
         power_net_dataset_bean.load_list = ','.join(load_list)
-        power_net_dataset_bean.fault_line_list = ','.join(fault_line_list)
+        fault_line_list_new = [str(x) for x in fault_line_list]
+        power_net_dataset_bean.fault_line_list = ','.join(fault_line_list_new)
         power_net_dataset_bean.line_percentage_list = ','.join(line_percentage_list)
         power_net_dataset_bean.fault_time_list = ','.join(fault_time_list)
+        # ctgan 参数
+        power_net_dataset_bean.n_sample = n_sample
+        power_net_dataset_bean.cond_stability = cond_stability
+        power_net_dataset_bean.cond_load = cond_load
 
 
         # power_net_dataset_bean.start_time = start_time
         # power_net_dataset_bean.generate_state = generate_state
         power_net_dataset_bean.user_id = user_id
         power_net_dataset_bean.username = username
-
+        current_app.logger.info("p4 app add_powerNetDataset")
         powerNetDataset = powerNetDatasetService.addPowerNetDataset(power_net_dataset_bean).serialize
-
+        current_app.logger.info("p5 app add_powerNetDataset")
         msg = 'add powerNetDataset success and train immediately'
         code = 204
 

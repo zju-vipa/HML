@@ -1,4 +1,4 @@
-from sklearn.decomposition.pca import PCA
+from sklearn.decomposition import PCA
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
 

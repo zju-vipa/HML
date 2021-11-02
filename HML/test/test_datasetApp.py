@@ -27,7 +27,7 @@ def test_query():
         # 'Authorization': '1yJleHAiOjE1ODM5OTUyMDUsImlhdCI6MTU4MzM5MDQwNSwiYWxnIjoiSFM1MTIifQ.eyJpZCI6IjAxYTVjOGQ1YjhkYTQzMWViMjAyNDFlNWZkY2M5MGViIn0.xrGZsMVQlIn7IBYUwVVGlTXodTnn-OMMHGP3PZbN0QqPLOh-WehrcrO5Jp29Y5d4GxKQ-i46XSWQRSu5ek7_JQ'
         'Authorization': "eyJhbGciOiJIUzUxMiIsImlhdCI6MTU4MzM4OTM1OSwiZXhwIjoxNTgzOTk0MTU5fQ.eyJpZCI6ImZkMDBkMjNmMDIzNjQwY2JhNGFjZTJjODJhNzEwYTYxIn0.9r0gis3hVkxhdf1cZ-NqaoENwGreYQHVRGaIQ2NdYCV20A4A6OE-YVyjJjwsgM6Z76qLXPWKRFrO5aFFxnvR5Q"
     }
-    result = requests.get("http://10.214.211.205:8021/api/private/v1/dataset/query", headers=headers)
+    result = requests.get("http://10.214.211.135:8021/api/private/v1/dataset/query", headers=headers)
     print("------start to print-------")
     print(result.headers)
     print("------finish to print-------")

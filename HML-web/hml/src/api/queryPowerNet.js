@@ -49,7 +49,11 @@ export default {
         load_list: form.load_list,
         fault_line_list: form.fault_line_list,
         line_percentage_list: form.line_percentage_list,
-        fault_time_list: form.fault_time_list
+        fault_time_list: form.fault_time_list,
+        // 方式3：CTGAN
+        n_sample: form.n_sample,
+        cond_stability: form.cond_stability,
+        cond_load: form.cond_load
       },
       headers: {
         // 'content-type': 'application/x-www-form-urlencoded'

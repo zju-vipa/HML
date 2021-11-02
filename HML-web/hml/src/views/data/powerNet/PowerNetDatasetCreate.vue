@@ -1,5 +1,10 @@
 <template>
+
   <div>
+    <!-- <div class="block">
+    <span class="demonstration">默认</span>
+    <el-slider v-model="value1"></el-slider>
+    </div> -->
     <!-- 标题 -->
     <div>
       <el-col :span="2">
@@ -49,7 +54,7 @@
                   <el-option v-for="(option, index) in initNetOptionsA" :key="index" :label="option" :value="option"></el-option>
                 </el-select>
                 <!--暂稳数据 样例列表-->
-                <el-select v-else-if="powerNetJobInfo.pn_job_type==='B'" v-model="initPowerNetInfo.init_net_name" @change="handleInitNetChange" style="width: 300px">
+                <el-select v-else-if="powerNetJobInfo.pn_job_type==='B' || powerNetJobInfo.pn_job_type==='C'" v-model="initPowerNetInfo.init_net_name" @change="handleInitNetChange" style="width: 300px">
                   <el-option v-for="(option, index) in initNetOptionsB" :key="index" :label="option" :value="option"></el-option>
                 </el-select>
               </el-form-item>
@@ -208,6 +213,59 @@
         </el-form>
         <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button>
       </el-card>
+      <!-- 方式C（CTGAN）：生成参数设置 -->
+      <el-card v-if="powerNetJobInfo.pn_job_type==='C'">
+        <div><h3>Step 3: 生成参数设置</h3></div>
+        <el-form label-position="right" label-width="150px" :model="ganSettings" :rules="ganSettingsFormRules" ref="ganSettingsFormRef" class="demo-ruleForm">
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="生成样本数量" prop="n_sample">
+                <el-input v-model.number="ganSettings.n_sample" style="width: 800px"></el-input>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="稳定性条件控制" prop="cond_stability">
+                <!-- <el-col :span="12">
+                  <el-switch v-model="ganSettings.stability_switch" @change="stabilityConditionSwitch">
+                  </el-switch>
+                </el-col>
+                <el-col :span="12"> -->
+                <!-- <el-slider  v-model="ganSettings.cond_stability"
+                  :format-tooltip="formatToolTip1"
+                  :show-tooltip="true"
+                  :min="0" :max="3" :step="1"
+                  @change="condControl1">
+                </el-slider> -->
+                <!-- </el-col> -->
+                <el-radio-group v-model="ganSettings.cond_stability" >
+                  <el-radio v-for="(option, index) in ganStabilityOptions"
+                  :key="index" :label="option.type">{{option.name}}
+                  </el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="负荷条件控制" prop="cond_load">
+                <!-- <el-switch v-model="ganSettings.load_switch" @change="loadConditionSwitch">
+                </el-switch>
+                <el-slider v-if="ganSettings.load_switch===true" v-model="ganSettings.cond_load"
+                 :min="0.7" :max="1.3" :step="0.1" show-stops>
+                </el-slider> -->
+                <el-radio-group v-model="ganSettings.cond_load" >
+                  <el-radio v-for="(option, index) in ganLoadOptions"
+                  :key="index" :label="option.type">{{option.name}}
+                  </el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+          </el-row>
+        </el-form>
+        <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button>
+      </el-card>
 
     </div>
   </div>
@@ -218,11 +276,33 @@ import queryPowerNetApi from './../../../api/queryPowerNet'
 const generateTypeOptions = [
   { type: 'A', name: '潮流数据生成' }, // 潮流
   { type: 'B', name: '暂稳数据生成' }, // 暂稳
-  { type: 'C', name: '方式C' }
+  { type: 'C', name: 'GAN模型生成' }
+]
+// CTGAN生成条件：无；稳定；不稳定
+const ganStabilityOptions = [
+  { type: 0, name: '不设置' },
+  { type: 1, name: '暂态稳定' },
+  { type: 2, name: '暂态失稳' }
+]
+const ganLoadOptions = [
+  { type: '0', name: '不设置' },
+  { type: '0.7', name: '70%' },
+  { type: '0.75', name: '75%' },
+  { type: '0.8', name: '80%' },
+  { type: '0.85', name: '85%' },
+  { type: '0.9', name: '90%' },
+  { type: '0.95', name: '95%' },
+  { type: '1.0', name: '100%' },
+  { type: '1.05', name: '105%' },
+  { type: '1.1', name: '110%' },
+  { type: '1.15', name: '115%' },
+  { type: '1.2', name: '120%' },
+  { type: '1.25', name: '125%' },
+  { type: '1.3', name: '130%' }
 ]
 // 方式A样例名称 （潮流）
 const initNetOptionsA = ['case5', 'case9', 'case14', 'case30', 'case_ieee30', 'case39', 'case57', 'case118', 'case300']
-// 方式B样例名称  （暂稳）
+// 方式B/c样例名称  （暂稳）
 const initNetOptionsB = ['case39']
 // 其他组件内容选择
 const otherSelectOptions = ['line', 'shunt', 'switch', 'impedance', 'trafo']
@@ -261,6 +341,7 @@ export default {
   },
   data () {
     return {
+      value1: 0,
       // 提交表单形式
       addPowerNetDatasetForm: {},
       powerNetJobInfoFormRules: {
@@ -302,6 +383,17 @@ export default {
         ],
         fault_time_list: [
           { required: true, message: '请填写故障持续时间', trigger: 'blur' }
+        ]
+      },
+      ganSettingsFormRules: {
+        n_sample: [
+          { required: true, message: '请填写样本数', trigger: 'blur' }
+        ],
+        cond_stability: [
+          { required: true, message: '请选择稳定条件', trigger: 'blur' }
+        ],
+        cond_load: [
+          { required: true, message: '请选择负荷条件', trigger: 'blur' }
         ]
       },
       // 任务ID，名称，生成方式，描述
@@ -349,6 +441,13 @@ export default {
         line_percentage_list: ['0.1', '0.2'],
         fault_time_list: '1, 2, 4, 8'
       },
+      ganSettings: {
+        n_sample: 10,
+        stability_switch: false,
+        cond_stability: 0,
+        load_switch: false,
+        cond_load: '0'
+      },
       // to do
       // 潮流计算结果
       powerFlowResultData: [],
@@ -358,7 +457,9 @@ export default {
       otherSelectOptions,
       componentColumns,
       componentOtherColumns: [],
-      linePercentageOptions
+      linePercentageOptions,
+      ganStabilityOptions,
+      ganLoadOptions
     }
   },
   created () {
@@ -437,7 +538,10 @@ export default {
         valid3 = this.$refs.disturbSettingsFormRef.validate
       } else if (this.powerNetJobInfo.pn_job_type === 'B') {
         valid3 = this.$refs.faultSettingsFormRef.validate
+      } else if (this.powerNetJobInfo.pn_job_type === 'C') {
+        valid3 = this.$refs.ganSettingsFormRef.validate
       }
+      // 转换成query需要的格式
       if (valid1 && valid2 && valid3) {
         this.addPowerNetDatasetForm = {
           pn_job_name: this.powerNetJobInfo.pn_job_name,
@@ -451,7 +555,11 @@ export default {
           load_list: this.faultSettings.load_list.split(','),
           fault_line_list: this.faultSettings.fault_line_list,
           line_percentage_list: this.faultSettings.line_percentage_list,
-          fault_time_list: this.faultSettings.fault_time_list.split(',')
+          fault_time_list: this.faultSettings.fault_time_list.split(','),
+          n_sample: this.ganSettings.n_sample,
+          // cond_stability: this.ganSettings.cond_stability.toString,
+          cond_stability: this.ganSettings.cond_stability,
+          cond_load: this.ganSettings.cond_load
         }
       }
       queryPowerNetApi.addPowerNetDataset(this.addPowerNetDatasetForm).then(response => {
@@ -459,10 +567,12 @@ export default {
         console.log(response)
         if (resp.meta.code === 204) {
           this.$message.success('添加电网数据生成任务成功')
+          this.$router.back()
         } else {
           this.$message.error('添加电网数据生成任务失败')
         }
       })
+      // this.$router.back()
     },
     formatValues (row, column, cellValue) {
       if (cellValue === null) {
@@ -475,6 +585,24 @@ export default {
         return 'false'
       }
       return cellValue
+    },
+    // 方式C：是否设置生成条件
+    stabilityConditionSwitch () {
+      if (this.ganSettings.stability_switch === false) {
+        this.ganSettings.cond_stability = 0
+      }
+    },
+    loadConditionSwitch () {
+      if (this.ganSettings.load_switch === false) {
+        this.ganSettings.cond_load = 0
+      }
+    },
+    formatToolTip1 (val) {
+      return val
+    },
+    condControl1 () {
+      console.log(this.ganSettings.cond_stability)
+      console.log(this.ganSettings.cond_load)
     },
     // 返回上一页
     backPage () {

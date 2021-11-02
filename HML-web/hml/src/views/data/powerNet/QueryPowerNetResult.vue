@@ -123,7 +123,7 @@
       </div>
       </el-card>
       <!-- 扰动参数设置 -->
-      <el-card>
+      <el-card v-if="powerNetJobInfo.pn_job_type==='A'">
         <div><h3>扰动参数信息</h3></div>
         <el-form label-position="right" label-width="150px" :model="disturbSettings" :rules="disturbSettingsFormRules" ref="disturbSettingsFormRef" class="demo-ruleForm">
           <el-row>
@@ -179,7 +179,14 @@
           <el-table-column  label="序号" type="index"> </el-table-column>
           <el-table-column prop="success" label="暂稳情况"></el-table-column>
         </el-table>
-        <el-button type="primary" class="downloadbtn" icon="el-icon-download" @click="handleDownloadResult">下载潮流计算结果</el-button>
+        <el-button type="primary" class="downloadbtn" icon="el-icon-download" @click="handleDownloadResult">下载暂稳结果</el-button>
+      </el-card>
+      <el-card v-if="powerNetJobInfo.pn_job_type==='C'">
+        <h3>CTGAN生成数据</h3>
+        <!-- <el-table :data="powerFlowResultData" border stripe  style="width: 100%">
+          <el-table-column  label="序号" type="index"> </el-table-column>
+        </el-table> -->
+        <el-button type="primary" class="downloadbtn" icon="el-icon-download" @click="handleDownloadResult">下载电网数据集</el-button>
       </el-card>
     </div>
   </div>
