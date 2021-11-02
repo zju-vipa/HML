@@ -4,6 +4,7 @@ function res = generate_datas_function(data_path, list_load,list_line,list_linef
 % clear;clc
 % addpath(genpath('matpower7.1'));
 % addpath(genpath('psat'));
+res = 1;
 initpsat;%初始化PSAT
 RESULT.all = [];
 % list_load = [0.8, 0.85, 0.9, 0,95, 1.0, 1.05, 1.1, 1.15, 1.2];
@@ -239,6 +240,6 @@ end
     %data_path = ['data1','\','m10case39','_line', num2str(fault_line),'.mat'];
 end
     save(data_path,'data');
-    res = 1;
+    res = 2;
 end
 

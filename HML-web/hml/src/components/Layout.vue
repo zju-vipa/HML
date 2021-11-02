@@ -1,24 +1,25 @@
 <template>
     <div>
       <!-- 头部区域 -->
-      <app-header class="header"></app-header>
-<!--      左侧导航栏区域-->
+      <app-header  :class="'header'"></app-header>
+      <!--      左侧导航栏区域-->
       <app-navBar  :class="this.isCollapse ? 'navbar2' : 'navbar'"  @isCollapse="chooseCollapse"></app-navBar>
-<!--      右侧主区域-->
+      <!--      右侧主区域-->
       <app-main :class="this.isCollapse ? 'main2' : 'main'"></app-main>
     </div>
 </template>
 
 <script>
+import AppHeader from './AppHeader/AppHeader'
 import AppMain from './AppMain/AppMain'
 import AppNavBar from './AppNavBar/AppNavBar'
-import AppHeader from './AppHeader/AppHeader'
+
 export default {
   name: 'Layout',
   components: {
+    AppHeader,
     AppMain,
-    AppNavBar,
-    AppHeader
+    AppNavBar
   },
   data () {
     return {
@@ -35,7 +36,7 @@ export default {
 </script>
 
 <style scoped>
-.header {
+  .header {
     /* background-color:#367FA9; */
     background-color: #2d3a4b;
     height: 50px;
@@ -54,7 +55,7 @@ export default {
     overflow-y: auto;
     background:#373d41;
   }
-    .navbar2{
+  .navbar2{
     position: absolute;
     left: 0px;
     top:  50px;

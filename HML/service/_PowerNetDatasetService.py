@@ -22,10 +22,8 @@ class PowerNetDatasetService:
 
         file_path = self.getPowerNetResultPath(power_net_dataset.power_net_dataset_id, power_net_dataset.power_net_dataset_type)
         task = PowerNetDatasetTasks.generate.apply_async((power_net_dataset.serialize, file_path), countdown=1)
-
         power_net_dataset.task_id = task.id
         self.powerNetDatasetDao.addPowerNetDataset(power_net_dataset)
-
         return power_net_dataset
 
     def deletePowerNetDataset(self, power_net_dataset_id, result_path):
