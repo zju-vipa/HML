@@ -66,10 +66,14 @@ class PowerNetDataset(db.Model):
     disturb_radio = db.Column(db.Integer, nullable=True, info='扰动范围')
     disturb_n_sample = db.Column(db.Integer, nullable=True, info='扰动次数')
      # 暂稳参数
-    load_list = db.Column(db.String(64), nullable=True, info='负荷范围列表')
-    fault_line_list = db.Column(db.String(64), nullable=True, info='故障线路列表')
-    line_percentage_list = db.Column(db.String(64), nullable=True, info='线路故障位置列表')
-    fault_time_list = db.Column(db.String(64), nullable=True, info='故障持续时间列表')
+    load_list = db.Column(db.Text, nullable=True, info='负荷范围列表')
+    fault_line_list = db.Column(db.Text, nullable=True, info='故障线路列表')
+    line_percentage_list = db.Column(db.Text, nullable=True, info='线路故障位置列表')
+    fault_time_list = db.Column(db.Text, nullable=True, info='故障持续时间列表')
+    # ctgan参数
+    n_sample = db.Column(db.Integer, nullable=True, info='样本数')
+    cond_stability = db.Column(db.Integer, nullable=True, info='稳定条件')
+    cond_load = db.Column(db.String(32), nullable=True, info='负荷条件')
 
     start_time = db.Column(db.DateTime, nullable=True, info='开始时间')
     generate_state = db.Column(db.String(1), nullable=False, default='0', info='生成状态')
