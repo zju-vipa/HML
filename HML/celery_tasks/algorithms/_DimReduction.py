@@ -1,7 +1,7 @@
 from sklearn.decomposition import PCA
 import pandas as pd
 from sklearn.preprocessing import OneHotEncoder
-
+from celery_tasks.algorithms._DimReduction_utils import gnn
 
 
 def algorithm_OneHot_train(data):
@@ -26,3 +26,14 @@ def algorithm_PCA_train(data, n_components):
 def algorithm_PCA_apply(data, model_pca):
     data_pca = pd.DataFrame(model_pca.transform(data))
     return data_pca
+
+
+def algorithm_GNN_train(data):
+    model_GNN = gnn.GNN()
+    model_GNN.fit(data)
+    data_GNN = pd.DataFrame(model_GNN.transform(data))
+    return data_GNN, model_GNN
+
+def algoritm_GNN_apply(data, model_GNN):
+    data_GNN = pd.DataFrame(model_GNN.transform(data))
+    return data_GNN

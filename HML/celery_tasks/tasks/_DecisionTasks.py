@@ -56,7 +56,7 @@ def use_featureEng(data, decision_id, decision_parameters, featureEng_id, featur
             data_retain = data[col_retain]
             data.drop(columns=col_retain, inplace=True)
 
-        data = run_algorithm_featureEng(data, decision_parameters, featureEng_id,
+        data = run_algorithm_featureEng(Fdata, decision_parameters, featureEng_id,
                                         featureEng_processes[int(str(process_idx))])
 
         data = pd.concat([data, data_retain], axis=1)
@@ -135,7 +135,10 @@ def run_algorithm_featureEng(data, decision_parameters, featureEng_id, featureEn
         model_pca = load_featureEng_model('PCA.pkl', featureEng_id)
         data_pca = DimReduction.algorithm_PCA_apply(data, model_pca)
         return data_pca
-
+    if featureEng_process['operate_name'] == 'GNN':
+        model_GNN = load_featureEng_model('GNN.pkl', featureEng_id)
+        data_GNN = DimReduction.algorithm_GNN_apply(data, model_GNN)
+        return data_GNN
 
 def run_algorithm_learner_with_label(data, data_label, decision_parameters, learner_id, learner_parameters):
     if learner_parameters['train_name'] == 'RFC':

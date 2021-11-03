@@ -85,7 +85,7 @@ def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
 
     # except Exception:
     #     self.update_state(state='FAILURE', meta={'progress': 1.0, 'message': 'failure'})
-    #     featureEng_bean.operate_state = '3'
+    #     featureEng_bean.operate_state = '3'F
     #     featureEngDao.updateFeatureEng(featureEng_bean)
     #     return 'FAILURE'
 
@@ -102,6 +102,11 @@ def run_algorithm_train(data, featureEng_id, featureEng_process):
         data_pca, model_pca = DimReduction.algorithm_PCA_train(data, n_components)
         save_featureEng_model(model_pca, 'PCA.pkl', featureEng_id)
         return data_pca
+    if featureEng_process['operate_name'] == 'GNN':
+        #n_components = featureEng_process['n_components']
+        data_GNN, model_GNN = DimReduction.algorithm_GNN_train(data) # may need some ohter parameter
+        save_featureEng_model(model_GNN, 'GNN.pkl', featureEng_id)
+        return data_GNN
 
     return data
 
