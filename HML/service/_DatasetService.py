@@ -20,10 +20,11 @@ class DatasetService:
         tmp_file_path = os.path.join(current_app.config["SAVE_TMP_DATASET_PATH"], file_name)
         file.save(tmp_file_path)
 
-        try:
-            pd.read_csv(tmp_file_path, delimiter=',', header=0, nrows=16, encoding='utf-8')
-        except Exception:
-            return None
+        # hgs ignore type limitation
+        # try:
+        #     pd.read_csv(tmp_file_path, delimiter=',', header=0, nrows=16, encoding='utf-8')
+        # except Exception:
+        #     return None
 
         data = {'dataset_id': dataset_id, 'tmp_file_path': tmp_file_path}
         return data

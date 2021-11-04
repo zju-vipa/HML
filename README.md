@@ -78,6 +78,8 @@ http {
         # keepalive_timeout 65;
         keepalive_timeout 300;
         types_hash_max_size 2048;
+        # hgs change
+        client_max_body_size 300m;
         # server_tokens off;
 
         # server_names_hash_bucket_size 64;
