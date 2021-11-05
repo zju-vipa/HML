@@ -56,14 +56,15 @@ def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
     featureEng_id = featureEng_bean.featureEng_id
 
     # try:
+    data = None
     self.update_state(state='PROCESS', meta={'progress': 0.05, 'message': 'read csv'})
-    data = pd.read_csv(original_dataset_file_path, delimiter=',', header=0, encoding='utf-8')
-
+    if(original_dataset_file_path[-3:]=="csv"):     data = pd.read_csv(original_dataset_file_path, delimiter=',', header=0, encoding='utf-8')
+    elif(original_dataset_file_path[-3:]=="mat"):   data = original_dataset_file_path
     processes_num = len(featureEng_processes)
     for process_idx in range(processes_num):
         progress = round(0.1 + process_idx / processes_num * 0.85, 2)
         message = featureEng_processes[int(str(process_idx))]['operate_name'] + 'operating'
-        self.update_state(state='PROCESS', meta={'progress': progress, 'message': message})
+        self.update_state(state='PROCESS', meta={'progress': progress, 'message': message})  # need update
 
         col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
 
@@ -103,8 +104,9 @@ def run_algorithm_train(data, featureEng_id, featureEng_process):
         save_featureEng_model(model_pca, 'PCA.pkl', featureEng_id)
         return data_pca
     if featureEng_process['operate_name'] == 'GNN':
-        #n_components = featureEng_process['n_components']
-        data_GNN, model_GNN = DimReduction.algorithm_GNN_train(data) # may need some ohter parameter
+        n_components = featureEng_process['n_components']
+        epoch = featureEng_process['epoch']
+        data_GNN, model_GNN = DimReduction.algorithm_GNN_train(data, n_components, epoch) # may need some ohter parameter
         save_featureEng_model(model_GNN, 'GNN.pkl', featureEng_id)
         return data_GNN
 
