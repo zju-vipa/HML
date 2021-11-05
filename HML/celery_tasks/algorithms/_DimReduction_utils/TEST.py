@@ -10,6 +10,7 @@ def XXX():
     print(Test2.K(p))
 def main():
     XXX()
-    print("XXX)
+    print("XXX")
+    print("yyy")      
 if __name__ == '__main__':
     main()
