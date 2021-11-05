@@ -8,6 +8,7 @@ def XXX():
             self.a = v
     p=a(10)
     print(Test2.K(p))
+    print("zyh")
 def main():
     XXX()
     print("XXX)
