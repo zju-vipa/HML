@@ -1,9 +1,11 @@
 
-
+from flask import current_app
+import os
 import numpy as np
 from scipy.io import loadmat
 def gen_data_from_mat(datapath):
-    data = loadmat('../../data/case39/case39.mat')
+    #datapath1 = "case39.mat"
+    data = loadmat(datapath)
     label = data['data']['label'][0][0]
     # bus_matrix = data['data']['bus_matrix'][0][0]
     # line = data['data']['line'][0][0]
@@ -51,7 +53,13 @@ def gen_data_from_mat(datapath):
 
     ind_train_matrix = ind_train_matrix.astype(int)
     ind_test_matrix = ind_test_matrix.astype(int)
-    np.save('../../data/case39/ind_train_matrix.npy', ind_train_matrix)
-    np.save('../../data/case39/ind_test_matrix.npy', ind_test_matrix)
+    #str1 = "ind_train_matrix.npy"
+    #str2 = "ind_test_matrix.npy"
+    str1 = os.path.join(current_app.config["SAVE_DATASET_PATH"],"ind_train_matrix.npy")
+    str2 = os.path.join(current_app.config["SAVE_DATASET_PATH"],"ind_test_matrix.npy")
+    np.save(str1, ind_train_matrix)
+    np.save(str2, ind_test_matrix)
+    #np.save('../../data/case39/ind_train_matrix.npy', ind_train_matrix)
+    #np.save('../../data/case39/ind_test_matrix.npy', ind_test_matrix)
 
 

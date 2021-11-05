@@ -1,6 +1,7 @@
 from celery_tasks.celery import celery_app
 from celery_tasks.algorithms import DimReduction
 from utils.EncryptUtil import get_uid
+from flask import current_app
 import pandas as pd
 import os
 import copy
@@ -58,8 +59,11 @@ def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
     # try:
     data = None
     self.update_state(state='PROCESS', meta={'progress': 0.05, 'message': 'read csv'})
-    if(original_dataset_file_path[-3:]=="csv"):     data = pd.read_csv(original_dataset_file_path, delimiter=',', header=0, encoding='utf-8')
-    elif(original_dataset_file_path[-3:]=="mat"):   data = original_dataset_file_path
+    current_app.logger.info(original_dataset_file_path)
+    if(original_dataset_file_path[-3:]=="csv"):
+        data = pd.read_csv(original_dataset_file_path, delimiter=',', header=0, encoding='utf-8')
+    elif(original_dataset_file_path[-3:]=="mat"):
+        data = original_dataset_file_path
     processes_num = len(featureEng_processes)
     for process_idx in range(processes_num):
         progress = round(0.1 + process_idx / processes_num * 0.85, 2)
@@ -104,6 +108,8 @@ def run_algorithm_train(data, featureEng_id, featureEng_process):
         save_featureEng_model(model_pca, 'PCA.pkl', featureEng_id)
         return data_pca
     if featureEng_process['operate_name'] == 'GNN':
+        current_app.logger.info("GNN data path")
+        current_app.logger.info(data  )
         n_components = featureEng_process['n_components']
         epoch = featureEng_process['epoch']
         data_GNN, model_GNN = DimReduction.algorithm_GNN_train(data, n_components, epoch) # may need some ohter parameter

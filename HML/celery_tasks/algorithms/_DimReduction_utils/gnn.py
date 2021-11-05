@@ -110,7 +110,7 @@ class GNN():
         # return acc_train, acc_test
         return acc_test, pred
 
-    def Dim_Re(self, datapath, model):
+    def Dim_Re(self,model,datapath):
         model.eval()
         model.Is_dim = True
         # output = pass_data_iteratively(model, train_graphs)
@@ -118,7 +118,7 @@ class GNN():
         # labels = torch.LongTensor([graph.label for graph in train_graphs]).to(device)
         # correct = pred.eq(labels.view_as(pred)).sum().cpu().item()
         # acc_train = correct / float(len(train_graphs))
-        train_graphs, test_graphs, train_label, test_label = load_psdata(datapath, 0)
+        train_graphs, test_graphs, train_label, test_label = load_psdata(0, datapath)
         input=train_graphs+test_graphs
         output = self.pass_data_iteratively(model, input)
         model.Is_dim = False
@@ -127,53 +127,33 @@ class GNN():
     def main(self):
         # Training settings
         # Note: Hyper-parameters need to be tuned in order to obtain results reported in the paper.
-        parser = argparse.ArgumentParser(
-            description='PyTorch graph convolutional neural net for whole-graph classification')
-        parser.add_argument('--dataset', type=str, default="CASE39",
-                            help='name of dataset (default: CASE39)')
-        parser.add_argument('--device', type=int, default=0,
-                            help='which gpu to use if any (default: 0)')
-        parser.add_argument('--batch_size', type=int, default=32,
-                            help='input batch size for training (default: 32)')
-        parser.add_argument('--iters_per_epoch', type=int, default=50,
-                            help='number of iterations per each epoch (default: 50)')
-        parser.add_argument('--epochs', type=int, default=self.epoch,
-                            help='number of epochs to train (default: 5)')
-        parser.add_argument('--lr', type=float, default=0.001,
-                            help='learning rate (default: 0.001)')
-        parser.add_argument('--seed', type=int, default=0,
-                            help='random seed for splitting the dataset into 10 (default: 0)')
-        parser.add_argument('--fold_idx', type=int, default=0,
-                            help='the index of fold in 10-fold validation. Should be less then 10.')
-        parser.add_argument('--num_layers', type=int, default=5,
-                            help='number of layers INCLUDING the input one (default: 5)')
-        parser.add_argument('--num_mlp_layers', type=int, default=2,
-                            help='number of layers for MLP EXCLUDING the input one (default: 2). 1 means linear model.')
-        parser.add_argument('--hidden_dim', type=int, default=32,
-                            help='number of hidden units (default: 32)')
-        parser.add_argument('--final_dropout', type=float, default=0.5,
-                            help='final layer dropout (default: 0.5)')
-        parser.add_argument('--graph_pooling_type', type=str, default="sum", choices=["sum", "average"],
-                            help='Pooling for over nodes in a graph: sum or average')
-        parser.add_argument('--neighbor_pooling_type', type=str, default="sum", choices=["sum", "average", "max"],
-                            help='Pooling for over neighboring nodes: sum, average or max')
-        parser.add_argument('--learn_eps', action="store_true",
-                            help='Whether to learn the epsilon weighting for the center nodes. Does not affect training accuracy though.')
-        parser.add_argument('--degree_as_tag', action="store_true",
-                            help='let the input node features be the degree of nodes (heuristics for unlabeled graph)')
-        parser.add_argument('--fac_dim', type=int, default=1,
-                            help='dimensionality of the factorized matrices')
-        parser.add_argument('--rep_dim', type=int, default=self.n_component,
-                            help='dimensionality of the representations')
-        parser.add_argument('--filename', type=str, default="10flod.txt",
-                            help='output file')
-        parser.add_argument('--fo_type', type=int, default=0,
-                            help='first order type, 0: mean operation, 1: summation operation')
-        parser.add_argument('--so_type', type=int, default=0,
-                            help='first order type, 0: cov operation, 1: bilinear operation')
-        parser.add_argument('--train_ratio', type=float, default=0.9,
-                            help='')
-        args = parser.parse_args()
+        #parser = argparse.ArgumentParser(
+        #    description='PyTorch graph convolutional neural net for whole-graph classification')
+        class Parser():
+            def __init__(self, n_component, epoch):
+                self.dataset = 'CASE39'
+                self.device = 0
+                self.batch_size = 32
+                self.iters_per_epoch = 50
+                self.epochs = epoch
+                self.lr = 0.001
+                self.seed = 0
+                self.fold_idx = 0
+                self.num_layers = 5
+                self.num_mlp_layers = 2
+                self.hidden_dim = 32
+                self.final_dropout = 0.5
+                self.graph_pooling_type = "sum"
+                self.neighbor_pooling_type = "sum"
+                self.fac_dim = 1
+                self.rep_dim = n_component
+                self.filename = "10flod.txt"
+                self.fo_type = 0
+                self.so_type = 0
+                self.train_ratio = 0.9
+                self.learn_eps = False
+
+        args = Parser(self.n_component, self.epoch)
 
         # set up seeds and gpu device
         torch.manual_seed(0)
@@ -185,7 +165,7 @@ class GNN():
         if torch.cuda.is_available():
             torch.cuda.manual_seed_all(0)
 
-        train_graphs, test_graphs, train_label, test_label = load_psdata(args.dataset, args.fold_idx)
+        train_graphs, test_graphs, train_label, test_label = load_psdata(args.fold_idx, self.datapath)
         model = GraphCNN(args.num_layers, args.num_mlp_layers, train_graphs[0].node_features.shape[1], args.hidden_dim,
                          num_classes,
                          args.fac_dim, args.rep_dim, args.final_dropout, args.learn_eps, args.graph_pooling_type,

@@ -32,7 +32,7 @@ def algorithm_GNN_train(data_path, n_components, epoch):
     c10folds.gen_data_from_mat(data_path)
     model_GNN = gnn.GNN(data_path,n_components, epoch)  # GNN is a shell of gnn
     model_gnn = model_GNN.main()
-    data_GNN = pd.DataFrame( (model_GNN.Dim_Re(data_path,model_gnn)).numpy() )
+    data_GNN = pd.DataFrame( (model_GNN.Dim_Re(model_gnn,data_path)).numpy() )
     print("data_GNN=",data_GNN)
     return data_GNN, model_gnn
 

@@ -56,7 +56,7 @@ def use_featureEng(data, decision_id, decision_parameters, featureEng_id, featur
             data_retain = data[col_retain]
             data.drop(columns=col_retain, inplace=True)
 
-        data = run_algorithm_featureEng(Fdata, decision_parameters, featureEng_id,
+        data = run_algorithm_featureEng(data, decision_parameters, featureEng_id,
                                         featureEng_processes[int(str(process_idx))])
 
         data = pd.concat([data, data_retain], axis=1)
