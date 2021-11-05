@@ -11,6 +11,7 @@ def XXX():
     print("zyh")
 def main():
     XXX()
-    print("XXX)
+    print("XXX")
+    print("yyy")      
 if __name__ == '__main__':
     main()
