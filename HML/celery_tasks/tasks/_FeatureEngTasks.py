@@ -1,6 +1,7 @@
 from celery_tasks.celery import celery_app
 from celery_tasks.algorithms import DimReduction
 from utils.EncryptUtil import get_uid
+from flask import current_app
 import pandas as pd
 import os
 import copy
@@ -56,14 +57,18 @@ def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
     featureEng_id = featureEng_bean.featureEng_id
 
     # try:
+    data = None
     self.update_state(state='PROCESS', meta={'progress': 0.05, 'message': 'read csv'})
-    data = pd.read_csv(original_dataset_file_path, delimiter=',', header=0, encoding='utf-8')
-
+    current_app.logger.info(original_dataset_file_path)
+    if(original_dataset_file_path[-3:]=="csv"):
+        data = pd.read_csv(original_dataset_file_path, delimiter=',', header=0, encoding='utf-8')
+    elif(original_dataset_file_path[-3:]=="mat"):
+        data = original_dataset_file_path
     processes_num = len(featureEng_processes)
     for process_idx in range(processes_num):
         progress = round(0.1 + process_idx / processes_num * 0.85, 2)
         message = featureEng_processes[int(str(process_idx))]['operate_name'] + 'operating'
-        self.update_state(state='PROCESS', meta={'progress': progress, 'message': message})
+        self.update_state(state='PROCESS', meta={'progress': progress, 'message': message})  # need update
 
         col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
 
@@ -85,7 +90,7 @@ def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
 
     # except Exception:
     #     self.update_state(state='FAILURE', meta={'progress': 1.0, 'message': 'failure'})
-    #     featureEng_bean.operate_state = '3'
+    #     featureEng_bean.operate_state = '3'F
     #     featureEngDao.updateFeatureEng(featureEng_bean)
     #     return 'FAILURE'
 
@@ -102,6 +107,14 @@ def run_algorithm_train(data, featureEng_id, featureEng_process):
         data_pca, model_pca = DimReduction.algorithm_PCA_train(data, n_components)
         save_featureEng_model(model_pca, 'PCA.pkl', featureEng_id)
         return data_pca
+    if featureEng_process['operate_name'] == 'GNN':
+        current_app.logger.info("GNN data path")
+        current_app.logger.info(data  )
+        n_components = featureEng_process['n_components']
+        epoch = featureEng_process['epoch']
+        data_GNN, model_GNN = DimReduction.algorithm_GNN_train(data, n_components, epoch) # may need some ohter parameter
+        save_featureEng_model(model_GNN, 'GNN.pkl', featureEng_id)
+        return data_GNN
 
     return data
 
@@ -123,6 +136,7 @@ def add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name):
     dataset.featureEng_id = featureEng_bean.featureEng_id
     dataset.original_dataset_id = original_dataset_bean.dataset_id
 
+    dataset.file_type = '.csv'
     file_type = dataset.file_type
     file_name = dataset.dataset_id + '.' + file_type
     file_path = os.path.join(celery_app.conf["SAVE_DATASET_PATH"], file_name)

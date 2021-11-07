@@ -80,22 +80,22 @@ export default {
     getColumns () {
       // console.log(this.datasetId)
       if (this.datasetId !== '') {
+        localStorage.setItem('datasetId', this.datasetId)
         featureApi.getDatasetColumns(this.datasetId).then(response => {
-          console.log(response)
-          const resp = response.data
-          if (resp.meta.code === 200) {
-            this.$message.success('获取数据集成功')
-          }
-          this.columnsList = resp.data
-          localStorage.setItem('datasetId', this.datasetId)
-          console.log(this.columnsList)
-        })
-        featureApi.getData(this.datasetId).then(response => {
           console.log(response)
           const resp = response.data
           // if (resp.meta.code === 200) {
           //   this.$message.success('获取数据集成功')
           // }
+          this.columnsList = resp.data
+          console.log(this.columnsList)
+        })
+        featureApi.getData(this.datasetId).then(response => {
+          console.log(response)
+          const resp = response.data
+          if (resp.meta.code === 200) {
+            this.$message.success('获取数据成功')
+          }
           this.datasetDetailList = resp.data
           console.log(this.datasetDetailList)
         })

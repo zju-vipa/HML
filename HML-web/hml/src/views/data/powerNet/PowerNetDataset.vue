@@ -27,6 +27,13 @@
             <el-progress :format="format3" type="circle" stroke-width="12" width="200" color="#21a675"
             :percentage="powerNetJobCnt==0 ? 0 : parseFloat(powerNetJobDoneCnt/powerNetJobCnt*100).toFixed(1)"></el-progress>
           </el-col>
+          <!-- <div class="block">
+            <span class="demonstration">默认</span>
+            <el-slider v-model="value1"></el-slider>
+          </div>
+          <el-col align="center" :span="6">
+            <el-slider class="el-slider"  v-model="value1"></el-slider>
+          </el-col> -->
           <!-- <el-col :span="5">
             <div><h4>全部：  {{powerNetJobCnt}}</h4></div>
             <div><h4>已完成：{{powerNetJobDoneCnt}}</h4></div>
@@ -105,6 +112,7 @@ export default {
   data () {
     return {
       // 电网数据生成任务列表
+      value1: 5,
       powerNetData: [],
       // 全部任务数，已完成任务数，未完成任务数 (异步)
       powerNetJobCnt: 0,
@@ -235,4 +243,42 @@ export default {
   .progressName{
     font-size: 10px;
   }
+
+  /* .el-slider {
+    .el-slider__input {
+      margin-top: 0;
+    }
+    .el-slider__runway {
+      height: 32px;
+      margin-top: 0;
+      margin-bottom: 0 !important;
+      background-color: #FFFFFF;
+      border: 1px solid #DCDFE6;
+      .el-slider__bar {
+        height: 31px;
+      }
+      .el-slider__button-wrapper {
+        top: 0;
+        height: 32px;
+        .el-slider__button {
+          width: 4px;
+          height: 31px;
+          border-radius: 0;
+          background: #FFFFFF;
+          border: solid 2px #0068A5;
+        }
+      }
+      .el-slider__stop {
+        width: 1px;
+        height: 31px;
+        border-radius: 0;
+        background-color: #DCDFE6;
+      }
+      .el-slider__marks-text {
+        color: #717171;
+        margin-top: 0;
+        transform: translateX(-115%);
+      }
+    }
+  } */
 </style>
