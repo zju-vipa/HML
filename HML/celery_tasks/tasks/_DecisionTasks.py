@@ -33,7 +33,11 @@ def apply_featureEng(self, decision_json, decision_parameters, featureEng_id, fe
     decision_id = decision_bean.decision_id
 
     self.update_state(state='PROCESS', meta={'progress': 0.05, 'message': 'read csv'})
-    data = pd.read_csv(dataset_file_path, delimiter=',', header=0, encoding='utf-8')
+    data = None
+    if (dataset_file_path[-3:] == "csv"):
+        data = pd.read_csv(dataset_file_path, delimiter=',', header=0, encoding='utf-8')
+    elif (dataset_file_path[-3:] == "mat"):
+        data = dataset_file_path
 
     self.update_state(state='PROCESS', meta={'progress': 0.10, 'message': 'feature engineering'})
     use_featureEng(data, decision_id, decision_parameters, featureEng_id, featureEng_processes)

@@ -20,10 +20,11 @@ from celery_tasks.algorithms._DimReduction_utils.gcpool.graphcnn import GraphCNN
 
 criterion = nn.CrossEntropyLoss()
 class GNN():
-    def __init__(self, datapath="CASE39", n_component=10, epoch = 100):
+    def __init__(self, datapath="CASE39", n_component=10, epoch = 100 ,model=None):
         self.datapath = datapath
         self.n_component = n_component
         self.epoch = epoch
+        self.model = model
     def performance(self, predicted, expected):
         predicted = np.array(predicted.cpu(), dtype='uint8').squeeze(1)
         res = (predicted ^ expected)  # 亦或使得判断正确的为0,判断错误的为1
@@ -43,8 +44,8 @@ class GNN():
         # recall = tp / (tp + fn)
         return F1, acc, tnr, tpr
 
-    def train(self, args, model, device, train_graphs, optimizer, epoch):
-        model.train()
+    def train(self, args, device, train_graphs, optimizer, epoch):
+        self.model.train()
 
         total_iters = args.iters_per_epoch
         pbar = tqdm(range(total_iters), unit='batch')
@@ -54,7 +55,7 @@ class GNN():
             selected_idx = np.random.permutation(len(train_graphs))[:args.batch_size]
 
             batch_graph = [train_graphs[idx] for idx in selected_idx]
-            output = model(batch_graph)
+            output = self.model(batch_graph)
 
             labels = torch.LongTensor([graph.label for graph in batch_graph]).to(device)
 
@@ -79,20 +80,20 @@ class GNN():
         return average_loss
 
     ###pass data to model with minibatch during testing to avoid memory overflow (does not perform backpropagation)
-    def pass_data_iteratively(self, model, graphs, minibatch_size=64):
-        model.eval()
+    def pass_data_iteratively(self, graphs, minibatch_size=64):
+        self.model.eval()
         output = []
         idx = np.arange(len(graphs))
         for i in range(0, len(graphs), minibatch_size):
             sampled_idx = idx[i:i + minibatch_size]
             if len(sampled_idx) == 0:
                 continue
-            output.append(model([graphs[j] for j in sampled_idx]).detach())
+            output.append(self.model([graphs[j] for j in sampled_idx]).detach())
         #print("output=",output)
         return torch.cat(output, 0)
 
-    def Test(self, args, model, device, train_graphs, test_graphs, epoch):
-        model.eval()
+    def Test(self, args, device, train_graphs, test_graphs, epoch):
+        self.model.eval()
 
         # output = pass_data_iteratively(model, train_graphs)
         # pred = output.max(1, keepdim=True)[1]
@@ -100,7 +101,7 @@ class GNN():
         # correct = pred.eq(labels.view_as(pred)).sum().cpu().item()
         # acc_train = correct / float(len(train_graphs))
 
-        output = self.pass_data_iteratively(model, test_graphs)
+        output = self.pass_data_iteratively(test_graphs)
         pred = output.max(1, keepdim=True)[1]
         labels = torch.LongTensor([graph.label for graph in test_graphs]).to(device)
         correct = pred.eq(labels.view_as(pred)).sum().cpu().item()
@@ -110,9 +111,9 @@ class GNN():
         # return acc_train, acc_test
         return acc_test, pred
 
-    def Dim_Re(self,model,datapath):
-        model.eval()
-        model.Is_dim = True
+    def Dim_Re(self,datapath):
+        self.model.eval()
+        self.model.Is_dim = True
         # output = pass_data_iteratively(model, train_graphs)
         # pred = output.max(1, keepdim=True)[1]
         # labels = torch.LongTensor([graph.label for graph in train_graphs]).to(device)
@@ -120,8 +121,8 @@ class GNN():
         # acc_train = correct / float(len(train_graphs))
         train_graphs, test_graphs, train_label, test_label = load_psdata(0, datapath)
         input=train_graphs+test_graphs
-        output = self.pass_data_iteratively(model, input)
-        model.Is_dim = False
+        output = self.pass_data_iteratively(input)
+        self.model.Is_dim = False
         #print("output=",output)
         return output   # need pd.dataframe
     def main(self):
@@ -131,7 +132,6 @@ class GNN():
         #    description='PyTorch graph convolutional neural net for whole-graph classification')
         class Parser():
             def __init__(self, n_component, epoch):
-                self.dataset = 'CASE39'
                 self.device = 0
                 self.batch_size = 32
                 self.iters_per_epoch = 50
@@ -166,27 +166,26 @@ class GNN():
             torch.cuda.manual_seed_all(0)
 
         train_graphs, test_graphs, train_label, test_label = load_psdata(args.fold_idx, self.datapath)
-        model = GraphCNN(args.num_layers, args.num_mlp_layers, train_graphs[0].node_features.shape[1], args.hidden_dim,
+        self.model = GraphCNN(args.num_layers, args.num_mlp_layers, train_graphs[0].node_features.shape[1], args.hidden_dim,
                          num_classes,
                          args.fac_dim, args.rep_dim, args.final_dropout, args.learn_eps, args.graph_pooling_type,
                          args.neighbor_pooling_type,
                          args.fo_type, args.so_type, device).to(device)
 
-        optimizer = optim.Adam(model.parameters(), lr=args.lr)
+        optimizer = optim.Adam(self.model.parameters(), lr=args.lr)
 
-        #path_ = str('state/') + str(args.dataset) + '_' + str(args.fo_type) + '_' + str(args.fold_idx) + '_' + str(
-        #    args.batch_size) + '_' + str(args.hidden_dim) + '_' + str(args.lr) + '_.pth'
-        path_ = str(args.dataset) + '_' + str(args.fo_type) + '_' + str(args.fold_idx) + '_' + str(
+
+        path_ = 'GNN'+str(args.fo_type) + '_' + str(args.fold_idx) + '_' + str(
              args.batch_size) + '_' + str(args.hidden_dim) + '_' + str(args.lr) + '_.pth'
         max_acc = 0.0
         max_F1 = 0.0
         max_tnr = 0.0
         max_tpr = 0.0
-        max_state_dict = model.state_dict()
+        max_state_dict = self.model.state_dict()
         for epoch in range(1, args.epochs + 1):
 
-            avg_loss = self.train(args, model, device, train_graphs, optimizer, epoch)
-            acc_test, pred_test = self.Test(args, model, device, train_graphs, test_graphs, epoch)
+            avg_loss = self.train(args, device, train_graphs, optimizer, epoch)
+            acc_test, pred_test = self.Test(args, device, train_graphs, test_graphs, epoch)
             optimizer.step()
             # print(model.state_dict())
             F1, acc, tnr, tpr = self.performance(pred_test, test_label)
@@ -195,14 +194,13 @@ class GNN():
                 max_F1 = F1
                 max_tnr = tnr
                 max_tpr = tpr
-                max_state_dict = model.state_dict()
+                max_state_dict = self.model.state_dict()
 
             print("performance F1, acc, tnr, tpr : %f %f %f %f" % (max_acc, max_F1, max_tnr, max_tpr))
             print("")
-            print(model.eps)
         torch.save(max_state_dict, path_)
-        model.load_state_dict(torch.load(path_))
-        return model
+        self.model.load_state_dict(torch.load(path_))
+        return self.model
 if __name__ == '__main__':
     tmp= GNN()
     tmp.main()

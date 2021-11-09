@@ -30,14 +30,16 @@ def algorithm_PCA_apply(data, model_pca):
 
 def algorithm_GNN_train(data_path, n_components, epoch):
     c10folds.gen_data_from_mat(data_path)
-    model_GNN = gnn.GNN(data_path,n_components, epoch)  # GNN is a shell of gnn
+    model_GNN = gnn.GNN(data_path = data_path,n_components = n_components, epoch = epoch, model = None)  # GNN is a shell of gnn
     model_gnn = model_GNN.main()
-    data_GNN = pd.DataFrame( (model_GNN.Dim_Re(model_gnn,data_path)).numpy() )
-    print("data_GNN=",data_GNN)
+    data_GNN = pd.DataFrame( (model_GNN.Dim_Re(data_path)).numpy() )
+    #print("data_GNN=",data_GNN)
     return data_GNN, model_gnn
 
-def algoritm_GNN_apply(data_path, model_GNN):
-    data_GNN = pd.DataFrame(model_GNN.transform(data_path))
+def algoritm_GNN_apply(data_path, model_gnn):
+    c10folds.gen_data_from_mat(data_path)
+    model_GNN = gnn.GNN(model = model_gnn)
+    data_GNN = pd.DataFrame((model_GNN.Dim_Re(data_path)).numpy())
     return data_GNN
 
 if __name__ == '__main__':
