@@ -1,7 +1,7 @@
 import request from '../utils/request'
 
 export default {
-  // 添加数据集
+  // 添加
   add (form) {
     return request({
       url: '/learner/add',
@@ -17,7 +17,7 @@ export default {
       }
     })
   },
-  // 删除数据集
+  // 删除
   deleteData (id) {
     return request({
       url: `/learner/delete?learner_id=${id}`,
@@ -38,7 +38,7 @@ export default {
       method: 'GET'
     })
   },
-  // 下载数据集
+  // 下载预测
   downloadPrediction (id) {
     return request({
       url: `/learner/download/prediction?learner_id=${id}`,
@@ -46,7 +46,7 @@ export default {
       responseType: 'blob'
     })
   },
-  // 下载数据集
+  // 下载报告
   downloadReport (id) {
     return request({
       url: `/learner/download/report?learner_id=${id}`,

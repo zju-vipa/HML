@@ -69,9 +69,9 @@ def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
         progress = round(0.1 + process_idx / processes_num * 0.85, 2)
         message = featureEng_processes[int(str(process_idx))]['operate_name'] + 'operating'
         self.update_state(state='PROCESS', meta={'progress': progress, 'message': message})  # need update
-
-        col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
-
+        col_retain = None
+        if "col_retain" in featureEng_processes[int(str(process_idx))]:
+            col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
         data_retain = pd.DataFrame()
         if col_retain:
             data_retain = data[col_retain]

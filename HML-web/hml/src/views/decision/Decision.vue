@@ -7,7 +7,11 @@
       </el-breadcrumb> -->
     <!-- 卡片区域 -->
     <el-card>
-      <el-button class="queryBtn" @click="gotoQueryDec" type="primary">查询决策</el-button>
+      <el-row>
+        <el-col :span="24" >
+          <el-button class="buttons" @click="gotoQueryDec" type="primary">查询决策</el-button>
+        </el-col>
+      </el-row>
       <!-- <el-button class="queryBtn" disabled type="primary">应用决策</el-button>
       <el-button class="queryBtn" @click="gotoDecHumanFea" type="primary">决策特征工程</el-button>
       <el-button class="queryBtn" @click="gotoLearnDec" type="primary">决策学习器</el-button> -->
@@ -299,7 +303,21 @@ export default {
 .el-form-item{
   margin-bottom: 30px;
 }
+.buttons{
+    float: right;
+}
+/* .queryBtn{
+    width: 120px;
+}
 .queryBtn {
   margin-bottom: 20px;
-}
+  float: left;
+} */
+/* .buttons{
+  /* margin-bottom: 15px; */
+  /* float: right;
+} */
+  /* .el-form {
+    margin-top: 80px;
+  } */
 </style>

@@ -4,11 +4,25 @@
       <el-card >
         <!-- form区域 -->
           <el-form   label-width="100px" label-position="right" :model="chooseDatasetForm" ref="chooseDatasetFormRef">
-            <el-form-item prop="dataset_name" label="数据集">
+            <el-row>
+              <el-col :span="12">
+                <el-form-item prop="dataset_name" label="原始数据集">
+                  <el-input clearable  readonly v-model="chooseDatasetForm.dataset_name" style="width: 300px"
+                  @click.native="datasetDialogVisible=true" placeholder="请选择数据集"></el-input>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <div class="buttons">
+                  <el-button type="primary" @click="goHumanFea">创建特征工程</el-button>
+                  <el-button type="primary" @click="queryFeatureEng">查看特征工程</el-button>
+                </div>
+              </el-col>
+            </el-row>
+            <!-- <el-form-item prop="dataset_name" label="数据集">
               <el-input clearable  readonly v-model="chooseDatasetForm.dataset_name" style="width: 300px"
                         @click.native="datasetDialogVisible=true" placeholder="请选择数据集"></el-input>
-            </el-form-item>
-            <el-form-item label="特征工程">
+            </el-form-item> -->
+            <!-- <el-form-item label="特征工程">
               <el-row>
                 <el-col :span="5">
                   <el-button type="primary" @click="goHumanFea">人工特征工程</el-button>
@@ -20,7 +34,7 @@
                   <el-button type="primary" >人在回路的特征工程</el-button>
                 </el-col>
               </el-row>
-            </el-form-item>
+            </el-form-item> -->
           </el-form>
           <h3>数据集展示</h3>
           <el-table :data="datasetDetailList" border stripe  style="width: 100%">
@@ -58,6 +72,7 @@ export default {
         dataset_id: ''
       },
       datasetId: '',
+      datasetName: '',
       // 弹出数据集对话框
       datasetDialogVisible: false,
       // 用来接收数据集的列名
@@ -72,6 +87,7 @@ export default {
       this.chooseDatasetForm.dataset_name = currentRow.dataset_name
       this.chooseDatasetForm.dataset_id = currentRow.dataset_id
       this.datasetId = currentRow.dataset_id
+      this.datasetName = currentRow.dataset_name
       console.log(this.datasetId)
       this.datasetDialogVisible = false
       console.log(currentRow)
@@ -81,6 +97,7 @@ export default {
       // console.log(this.datasetId)
       if (this.datasetId !== '') {
         localStorage.setItem('datasetId', this.datasetId)
+        localStorage.setItem('datasetName', this.datasetName)
         featureApi.getDatasetColumns(this.datasetId).then(response => {
           console.log(response)
           const resp = response.data
@@ -105,6 +122,10 @@ export default {
     goHumanFea () {
       this.$emit('columns-get', this.columnsList)
       this.$router.push('/feature/humanfea')
+    },
+    // 点击查看特征工程按钮
+    queryFeatureEng () {
+      this.$router.push('/feature/queryFea')
     }
   }
 }
@@ -114,6 +135,9 @@ export default {
   .el-form {
     margin: 10px auto;
     /* width: 1000px; */
+  }
+  .buttons {
+    float: right;
   }
   /* .el-button{
     width: 150px;

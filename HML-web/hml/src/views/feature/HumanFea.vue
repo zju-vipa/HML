@@ -5,11 +5,17 @@
       <el-button class="queryBtn" @click="queryFeatureEng" type="primary">查看特征工程</el-button>
            <!-- 表单区域 -->
       <el-form label-position="right" label-width="250px" :model="addFeatureForm" :rules="addFeatureFormRules" ref="addFeatureFormRef" class="demo-ruleForm">
+            <el-form-item class="label" label="原始数据集">
+              <el-input clearable disabled="" style="width:410px" v-model="addFeatureForm.original_dataset_name" placeholder="返回选择原始数据集"></el-input>
+            </el-form-item>
             <el-form-item class="label" label="特征工程名" prop="featureEng_name">
               <el-input clearable style="width:410px" v-model="addFeatureForm.featureEng_name" placeholder="请填写特征工程名"></el-input>
             </el-form-item>
             <el-form-item class="label" label="特征工程类型" prop="featureEng_type">
-              <el-input disabled="" style="width:410px" v-model="addFeatureForm.featureEng_type"></el-input>
+              <!-- <el-input style="width:410px" v-model="addFeatureForm.featureEng_type"></el-input> -->
+              <el-select v-model="addFeatureForm.featureEng_type" style="width: 410px">
+                  <el-option v-for="(option, index) in featureEngTypeOptions" :key="index" :label="option.name" :value="option.type"></el-option>
+                </el-select>
             </el-form-item>
             <el-form-item class="label" label="特征工程步骤" prop="featureEng_processes">
               <el-card class="card-form">
@@ -83,6 +89,13 @@ import featureApi from './../../api/feature'
 // import learnApi from './../../api/learn'
 import humanApi from './../../api/HumanFea'
 import learnApi from './../../api/learn'
+// 生成方式类型
+const featureEngTypeOptions = [
+  { type: 'Manual', name: '人工特征工程' },
+  { type: 'Machine', name: '自动化特征工程' },
+  { type: 'HumanInLoop', name: '人在回路特征工程' }
+]
+
 export default {
   name: 'HumanFea',
 
@@ -98,8 +111,10 @@ export default {
         featureEng_processes: [
         ],
         original_dataset_id: '',
+        original_dataset_name: '',
         new_dataset_name: ''
       },
+      featureEngTypeOptions,
       operate_nameValue1: '',
       operate_columnsValue1: [],
       operate_columnsValue2: [],
@@ -109,12 +124,13 @@ export default {
       algorithm_name2: [],
       algorithm_name3: [],
       addFeatureFormRules: {
-        feature_name: [
-          { required: true, message: '请选择特征', trigger: 'blur' }
+        featureEng_name: [
+          { required: true, message: '请填写特征工程名', trigger: 'blur' }
         ]
       },
       // 在特征首页选择的数据集及其列名
       OriginDatasetId: '',
+      OriginDatasetName: '',
       columnsList: [],
       algorithm_category: 'FeatureEng_construct',
       // 根据算法类型收到的算法总数据
@@ -188,6 +204,8 @@ export default {
     // 获取原始数据集id
     getOriginDatasetId () {
       this.OriginDatasetId = localStorage.getItem('datasetId')
+      this.OriginDatasetName = localStorage.getItem('datasetName')
+      this.addFeatureForm.original_dataset_name = this.OriginDatasetName
       // console.log(this.OriginDatasetId)
       this.getColumns()
       // console.log(db)

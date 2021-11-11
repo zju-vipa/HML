@@ -33,9 +33,12 @@ export default {
   data () {
     return {
       registerForm: {
-        username: 'admin',
-        password: '123456',
-        email: 'wang@123'
+        // username: 'admin',
+        // password: '123456',
+        // email: 'wang@123'
+        username: '',
+        password: '',
+        email: ''
       },
       // 登录表单验证规则
       registerFormRules: {

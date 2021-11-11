@@ -29,8 +29,10 @@ export default {
   data () {
     return {
       loginForm: {
-        email: 'wang@123',
-        password: '123456'
+        // email: 'test@123',
+        // password: 'test'
+        email: '',
+        password: ''
       },
       // 登录表单验证规则
       loginFormRules: {
