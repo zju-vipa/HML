@@ -147,7 +147,6 @@ class GNN():
                 self.neighbor_pooling_type = "sum"
                 self.fac_dim = 1
                 self.rep_dim = n_component
-                self.filename = "10flod.txt"
                 self.fo_type = 0
                 self.so_type = 0
                 self.train_ratio = 0.9
