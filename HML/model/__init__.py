@@ -116,6 +116,7 @@ class Learner(db.Model):
     dataset_id = db.Column(db.String(32), nullable=False, info='数据集ID')
     user_id = db.Column(db.String(32), nullable=False, info='用户ID')
     username = db.Column(db.String(32), nullable=False, info='用户名')
+    action = db.Column(db.Integer, nullable=True, info='动作')
 
     @property
     def serialize(self):

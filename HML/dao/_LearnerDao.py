@@ -39,4 +39,5 @@ class LearnerDao(BaseDao):
         learner.dataset_id = learner_bean.dataset_id
         learner.user_id = learner_bean.user_id
         learner.username = learner_bean.username
+        learner.action = learner_bean.action
         self.db.session.commit()

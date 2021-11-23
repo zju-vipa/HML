@@ -3,7 +3,7 @@
     <el-card>
         <!-- 当前任务 -->
         <h3 v-if="!isHFeaDialog">当前特征工程</h3>
-        <div>
+        <div v-if="!isHFeaDialog">
             <el-button class="opbtn" size="mini" type="info" plain @click="backPage" icon="el-icon-arrow-left">返回</el-button>
         </div>
         <!-- <div @click="backPage"><i class="el-icon-arrow-left backPage"></i><span>返回</span></div> -->

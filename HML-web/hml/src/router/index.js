@@ -16,6 +16,7 @@ import QueryHumanFeature from '../views/feature/QueryHumanFeature'
 
 import Learn from '../views/learn/Learn'
 import QueryLearner from '../views/learn/QueryLearner'
+import QueryLearnerDetail from '../views/learn/QueryLearnerDetail'
 
 import Decision from '../views/decision/Decision'
 import QueryDecision from './../views/decision/QueryDecision'
@@ -101,6 +102,11 @@ const routes = [
         path: '/learn/queryLearner',
         name: 'QueryLearner',
         component: QueryLearner
+      },
+      {
+        path: '/learn/queryLearnerDetail',
+        name: 'QueryLearnerDetail',
+        component: QueryLearnerDetail
       },
       {
         path: '/decision',

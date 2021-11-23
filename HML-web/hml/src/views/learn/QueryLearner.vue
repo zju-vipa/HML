@@ -9,7 +9,7 @@
     <el-card>
         <!-- 当前任务 -->
         <h3 v-if="!isLearnDialog">当前学习器</h3>
-        <div>
+        <div v-if="!isLearnDialog">
             <el-button class="opbtn" size="mini" type="info" plain @click="backPage" icon="el-icon-arrow-left">返回</el-button>
         </div>
         <el-table :data="LearnerData" border stripe  style="width: 100%"
@@ -17,6 +17,7 @@
           <!-- 操作 -->
           <el-table-column type="expand" v-if="!isLearnDialog">
             <template slot-scope="scope">
+              <el-button size="mini" plain @click="handleLearner(scope.row.learner_id)">待处理</el-button>
               <el-button  size="mini" plain @click="trainProgress(scope.row.task_id)">训练进度</el-button>
               <el-button size="mini" plain @click="handleDownLoadPrediction(scope.row)">下载预测结果</el-button>
               <el-button size="mini" plain @click="handleDownLoadReport(scope.row)">下载预测报告</el-button>
@@ -97,7 +98,7 @@ export default {
     this.getLearnerInfo()
   },
   methods: {
-    // 获取数据集信息
+    // 获取学习器信息
     getLearnerInfo () {
       learnApi.query().then(response => {
         // console.log(response)
@@ -107,6 +108,14 @@ export default {
           this.LearnerData = resp.data
         }
       })
+    },
+    handleLearner (rowId) {
+      console.log(rowId)
+      if (rowId) {
+        this.$router.push({ path: '/learn/queryLearnerDetail', query: { learnerId: rowId } })
+      } else {
+        this.$message.error('该学习器未进行训练')
+      }
     },
     // 查看分析任务进度
     trainProgress (rowId) {

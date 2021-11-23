@@ -1,5 +1,27 @@
 <template>
     <div>
+      <!-- 统计任务进度 -->
+      <el-card>
+        <div><h3>学习器进度</h3></div>
+        <el-row align="center" style="margin-bottom: 30px" :gutter="20">
+          <el-col align="center" :span="6">
+            <el-progress :format="format1" type="circle" stroke-width="12" width="200" color="#8e71c7"
+            :percentage="1+learnerDoneCnt">
+            </el-progress>
+          </el-col>
+          <el-col align="center" :span="6">
+            <el-progress :format="format2" type="circle" stroke-width="12" width="200" color="#f36838"
+            :percentage="1+learnerUndoneCnt"></el-progress>
+          </el-col>
+          <el-col align="center" :span="6">
+            <el-progress :format="format3" type="circle" stroke-width="12" width="200" color="#21a675"
+            :percentage="learnerCnt==0 ? 0 : parseFloat(learnerDoneCnt/learnerCnt*100).toFixed(1)"></el-progress>
+          </el-col>
+          <el-col align="center" :span="6">
+            <el-button type="primary" @click="inputHumanAction">查看待处理人在回路学习器</el-button>
+          </el-col>
+        </el-row>
+      </el-card>
     <!-- 卡片区域 -->
     <el-card>
       <div class="buttons">
@@ -109,11 +131,16 @@ export default {
       // 算法参数
       algorithm_parameters: {},
       algorithm_category: 'Learner_supervised',
-      labelMultible: true
+      labelMultible: true,
+      // 学习器进度统计
+      learnerCnt: 0,
+      learnerDoneCnt: 0,
+      learnerUndoneCnt: 0
     }
   },
   created () {
     this.getAlgorithm()
+    this.getLearnerInfo()
   },
   methods: {
     // 接受数据集组件传来的数据
@@ -165,6 +192,10 @@ export default {
     queryLearner () {
       this.$router.push('/learn/queryLearner')
     },
+    // 处理人在回路学习器
+    inputHumanAction () {
+      this.$router.push('/learn/queryLearner')
+    },
     submitAllForm () {
       console.log(this.addLearnerForm)
       console.log(this.learnParamsForm)
@@ -196,8 +227,33 @@ export default {
         this.algorithm_name = response.data.data.map(item => item.algorithm_name)
         console.log(this.algorithm_Options)
       })
+    },
+    // 学习器学习进度
+    getLearnerInfo () {
+      learnApi.query().then(response => {
+        // console.log(response)
+        const resp = response.data
+        if (resp.meta.code === 200) {
+          this.$message.success('加载学习器成功')
+          this.LearnerData = resp.data
+          // 统计数量
+          this.learnerCnt = resp.data.length
+          this.learnerDoneCnt = resp.data.filter(item => {
+            return item.train_state === '2'
+          }).length
+          this.learnerUndoneCnt = this.learnerCnt - this.learnerDoneCnt
+        }
+      })
+    },
+    format1 () {
+      return `已完成：${this.learnerDoneCnt}`
+    },
+    format2 () {
+      return `未完成：${this.learnerUndoneCnt}`
+    },
+    format3 (percentage) {
+      return `进度：${percentage}%`
     }
-
   }
 }
 </script>

@@ -19,6 +19,7 @@ def learner_to_bean(learner_json):
     learner_bean.dataset_id = learner_json['dataset_id']
     learner_bean.user_id = learner_json['user_id']
     learner_bean.username = learner_json['username']
+    # not action
 
     return learner_bean
 

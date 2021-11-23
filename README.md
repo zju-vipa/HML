@@ -464,3 +464,161 @@ docker commit -m "hml web environment" -a "lsy" 60db6386e2ba lsy/hml-web:1.0.0
 docker run -p 8030:8030 -v /etc/localtime:/etc/localtime -v /disk2/lsy/HML-WEB:/usr/share/nginx/html -d --name hml-web lsy/hml-web:1.0.0
 ```
 
+## 特征工程
+
+### FeatureEng_construct
+
+```json
+{
+    "algorithm_name": "Onehot",
+    "algorithm_type": "Manual",
+    "algorithm_category": "FeatureEng_construct",
+    "algorithm_parameters": [
+      {	
+        "name": "col_retain",
+        "select": "multi-select",
+        "type": "column"
+      }
+		],
+    "introduction": "Onehot"
+}
+```
+
+```
+{
+    "algorithm_name": "OperatorBased-Manual",
+    "algorithm_type": "Manual",
+    "algorithm_category": "FeatureEng_construct",
+    "algorithm_parameters": [
+      {	
+        "name": "col_retain",
+        "select": "multi-select",
+        "type": "column"
+      }
+		],
+    "introduction": "Operator-based, manual, YuNa"
+}
+```
+
+```
+{
+    "algorithm_name": "OperatorBased-Machine",
+    "algorithm_type": "Machine",
+    "algorithm_category": "FeatureEng_construct",
+    "algorithm_parameters": [
+      {	
+        "name": "col_retain",
+        "select": "multi-select",
+        "type": "column"
+      },
+      {	
+        "name": "machine_operators",
+        "select": "multi-select",
+        "type": "operators"
+      }
+		],
+    "introduction": "Operator-based, machine, YuNa"
+}
+```
+
+```
+{
+    "algorithm_name": "OperatorBased-HML",
+    "algorithm_type": "HumanInLoop",
+    "algorithm_category": "FeatureEng_construct",
+    "algorithm_parameters": [
+      {	
+        "name": "col_retain",
+        "select": "multi-select",
+        "type": "column"
+      },
+      {	
+        "name": "human_operators",
+        "select": "flexible",
+        "type": "operators"
+      }
+		],
+    "introduction": "Operator-based, human in the loop, YuNa"
+}
+```
+
+
+
+### FeatureEng_extract
+
+```json
+{
+    "algorithm_name": "PCA",
+    "algorithm_type": "Manual",
+    "algorithm_category": "FeatureEng_extract",
+    "algorithm_parameters": [
+      {	
+        "name": "col_retain",
+        "select": "multi-select",
+        "type": "column"
+      },
+      {	
+        "name": "n_components",
+        "select": "single-select",
+        "type": "int"
+      }
+		],
+    "introduction": "PCA"
+}
+```
+
+
+
+```
+{
+    "algorithm_name": "GNN",
+    "algorithm_type": "Manual",
+    "algorithm_category": "FeatureEng_extract",
+    "algorithm_parameters": [
+      {	
+        "name": "col_retain",
+        "select": "multi-select",
+        "type": "column"
+      },
+      {	
+        "name": "n_components",
+        "select": "single-select",
+        "type": "int"
+      },
+      {	
+        "name": "epoch",
+        "select": "single-select",
+        "type": "int"
+      }
+		],
+    "introduction": "GNN ckx"
+}
+```
+
+
+
+## 学习器
+
+### Learner_supervised
+
+```json
+{
+    "algorithm_name": "RFC",
+    "algorithm_type": "Manual",
+    "algorithm_category": "Learner_supervised",
+    "algorithm_parameters": [
+      {	
+        "name": "label",
+        "select": "single-select",
+        "type": "column"
+      },
+      {	
+        "name": "n_estimators",
+        "select": "single-select",
+        "type": "int"
+      }
+		],
+    "introduction": "RFC"
+}
+```
+
