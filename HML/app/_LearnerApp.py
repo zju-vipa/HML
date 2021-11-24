@@ -5,6 +5,8 @@ from utils.CommonUtil import download_file
 from model import Learner
 from service import LearnerService
 from service import DatasetService
+import os
+import pandas as pd
 learnerService = LearnerService()
 datasetService = DatasetService()
 
@@ -247,4 +249,72 @@ def get_task_train_state():
         data = learnerService.getTaskTrainState(task_id)
 
         return {'meta': {'msg': 'get state success', 'code': 200}, 'data': data}, 200
+    return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
+
+# action
+@bp.route('/action/query', methods=('GET', 'POST'))
+@login_required
+def query_action_detail():
+    if request.method == 'GET':
+        try:
+            learner_id = request.args.get('learner_id')
+        except Exception:
+            return get_error(RET.PARAMERR, 'Error: no request')
+
+        if not learner_id:
+            return get_error(RET.PARAMERR, 'Error: request lacks learner_id')
+
+        learner = learnerService.queryLearnerById(learner_id)
+        if not learner:
+            return get_error(RET.PARAMERR, 'Error: learner_id not exists')
+        # p, q, v, theta
+        file_path = learnerService.getActionFilePath(learner)
+        detail = None
+        if os.path.exists(file_path):
+            # 先簡單處理一下
+            file = pd.read_csv(file_path)
+            detail = file.to_json()
+
+        return {'meta': {'msg': 'query learner action detail success', 'code': 200}, 'data': detail}, 200
+    return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
+
+
+@bp.route('/action/input', methods=('GET', 'POST'))
+@login_required
+def learner_action_input():
+    # human in the loop: deal with the human action input
+    """
+    request params:
+    name: the action(an integer number) of the learner **required**
+    """
+    if request.method == 'POST':
+        try:
+            learner_id = request.args.get('learner_id')
+            learner_action = request.args.get('learner_action')
+        except Exception:
+            return get_error(RET.PARAMERR, 'Error: no request')
+
+        # try:
+        #     user_id = g.user_id
+        #     username = g.user.username
+        # except Exception:
+        #     return get_error(RET.SESSIONERR, 'Error: no login')
+
+        if not learner_id:
+            return get_error(RET.PARAMERR, 'Error: request lacks learner_id')
+        if not learner_action:
+            return get_error(RET.PARAMERR, 'Error: request lacks learner_action')
+
+        learner = learnerService.queryLearnerById(learner_id)
+
+        if not learner:
+            return get_error(RET.PARAMERR, 'Error: learner_id not exists')
+        # write the action into database
+        learner.action = learner_action
+        learnerService.updateLearner(learner)
+
+        msg = 'input learner action success'
+        code = 204
+
+        return {'meta': {'msg': msg, 'code': code}, 'data': learner}, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
