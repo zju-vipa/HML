@@ -1,5 +1,5 @@
 from celery_tasks.celery import celery_app
-from celery_tasks.algorithms import DimReduction, Classification
+from celery_tasks.algorithms import DimReduction, Classification, _Reinforcementlearning
 import pandas as pd
 import os
 import joblib
@@ -97,7 +97,8 @@ def use_learner(data, decision_id, decision_parameters, learner_id, learner_para
     else:
         y_prediction = run_algorithm_learner_without_label(data, decision_parameters, learner_id, learner_parameters)
         save_decision_y_prediction(y_prediction, decision_id)
-
+    # todo sth about Reinforcement learner;
+    # result = run_algorithm_learner_with_Reinfocement(data, decision_parameters, learner_id, learner_parameters)
 
 @celery_app.task(bind=True, name='decision.applyDecision')
 def apply_decision(self, decision_json, decision_parameters, featureEng_id, featureEng_processes,
@@ -148,14 +149,17 @@ def run_algorithm_learner_with_label(data, data_label, decision_parameters, lear
         return y_prediction, report
 
 
+
 def run_algorithm_learner_without_label(data, decision_parameters, learner_id, learner_parameters):
     if learner_parameters['train_name'] == 'RFC':
         model_enc = load_learner_model('Label.pkl', learner_id)
         model_rfc = load_learner_model('RFC.pkl', learner_id)
         y_prediction = Classification.algorithm_RFC_test(data, model_enc, model_rfc)
         return y_prediction
-
-
+def run_algorithm_learner_with_Reinfocement(data, decision_parameters, learner_id, learner_parameters):
+    if learner_parameters['train_name'] == 'HML_RL':
+        result = _Reinforcementlearning.algorithm_HML_RL_test(flag='test')
+    return result
 def load_featureEng_model(model_file_name, featureEng_id):
     model_directory = os.path.join(celery_app.conf["SAVE_FE_MODEL_PATH"], featureEng_id)
     model_path = os.path.join(model_directory, model_file_name)

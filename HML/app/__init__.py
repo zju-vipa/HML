@@ -16,6 +16,7 @@ app.app_context().push()
 # root page
 @app.route('/')
 def index():
+
     return render_template('index.html')
 
 # hello
