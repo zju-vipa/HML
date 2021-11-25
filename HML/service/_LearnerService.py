@@ -55,6 +55,15 @@ class LearnerService:
 
         return file_directory
 
+    def getActionFilePath(self, learner):
+        # to get the file path of the csv file that stores p,q,v theta
+        file_directory = os.path.join(current_app.config["SAVE_L_MODEL_PATH"], learner.learner_id)
+        file_name = 'action_pqvt.csv'
+        file_path = os.path.join(file_directory, file_name)
+        # if not os.path.exists(file_path):
+        #     return None
+        return file_path
+
     def getPredictionFilePath(self, learner):
         file_directory = os.path.join(current_app.config["SAVE_L_MODEL_PATH"], learner.learner_id)
         file_name = 'y_prediction.csv'
