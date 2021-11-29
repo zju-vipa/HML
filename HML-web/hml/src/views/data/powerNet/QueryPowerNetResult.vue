@@ -197,7 +197,7 @@ import queryPowerNetApi from './../../../api/queryPowerNet'
 const generateTypeOptions = [
   { type: 'A', name: '潮流数据生成' }, // 潮流
   { type: 'B', name: '暂稳数据生成' }, // 暂稳
-  { type: 'C', name: '方式C' }
+  { type: 'C', name: 'CTGAN模型生成' }
 ]
 // 样例名称
 const initNetOptions = ['case5', 'case9', 'case14', 'case30', 'case_ieee30', 'case39', 'case57', 'case118', 'case300']

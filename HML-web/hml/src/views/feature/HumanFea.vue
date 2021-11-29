@@ -28,13 +28,13 @@
                     @change="handleselectTrainname">
                       <el-option
                         v-for="(item,index) in algorithm_Options" :key="index"
-                        :label="item.algorithm_name"
+                        :label="item.introduction"
                         :value="item.algorithm_name">
                       </el-option>
                     </el-select>
                   </el-form-item >
                   <el-form-item class="label" v-for="(params, index) in algorithm_parameters"
-                    :label="params.name" :key="index">
+                    :label="params.introduction" :key="index">
                     <el-select v-if="params.name==='col_retain'" style="width:360px" :multiple="labelMultible"
                       v-model="params.value" placeholder="请选择保留列">
                       <el-option
@@ -193,13 +193,13 @@
                         v-model="processExtractForm.operate_name" placeholder="请选择特征">
                           <el-option
                           v-for="(item,index) in algorithm_Options2" :key="index"
-                          :label="item.algorithm_name"
+                          :label="item.introduction"
                           :value="item.algorithm_name">
                           </el-option>
                       </el-select>
                     </el-form-item>
                     <el-form-item class="label" v-for="(params, index) in algorithm_parameters2"
-                      :label="params.name" :key="index">
+                      :label="params.introduction" :key="index">
                         <el-select v-if="params.name==='col_retain'" style="width:360px"  :multiple="labelMultible2"
                           v-model="params.value" placeholder="请选择保留列">
                             <el-option
