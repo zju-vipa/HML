@@ -50,15 +50,15 @@
               <el-select  v-model="learnParamsForm.train_name" placeholder="请选择方法" style="width: 300px"
               @change="handleselectTrainname">
                 <el-option
-                  v-for="(item,index) in algorithm_name" :key="index"
-                  :label="item"
-                  :value="item">
+                  v-for="(item,index) in algorithm_Options" :key="index"
+                  :label="item.introduction"
+                  :value="item.algorithm_name">
                 </el-option>
               </el-select>
             </el-form-item>
             <el-form-item class="label" v-for="(params, index) in algorithm_parameters"
-                      :label="params.name" :key="index">
-              <el-select v-if="params.name==='label'"  :multiple="labelMultible"
+                      :label="params.introduction" :key="index">
+              <el-select v-if="params.name==='label'"  :multiple="labelMultible" style="width:300px"
                           v-model="params.value" placeholder="请选择标签列">
                 <el-option
                   v-for="(item,index) in columnsList" :key="index"
@@ -66,7 +66,7 @@
                   :value="item">
                 </el-option>
               </el-select>
-              <el-input v-else style="width:350px" v-model="params.value"></el-input>
+              <el-input v-else style="width:300px" v-model="params.value"></el-input>
             </el-form-item>
             <!-- <el-form-item  label="n_components" prop="n_estimators">
                <el-input-number  v-model="learnParamsForm.n_estimators"
@@ -92,8 +92,8 @@ import learnApi from './../../api/learn'
 // 学习器类型
 const learnerTypeOptions = [
   { type: 'Manual', name: '人工' },
-  { type: 'Auto', name: '自动化' },
-  { type: 'HML', name: '人在回路' }
+  { type: 'Machine', name: '自动化' },
+  { type: 'HumanInLoop', name: '人在回路' }
 ]
 export default {
   name: 'Learn',

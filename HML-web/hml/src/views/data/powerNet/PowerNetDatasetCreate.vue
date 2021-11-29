@@ -276,7 +276,7 @@ import queryPowerNetApi from './../../../api/queryPowerNet'
 const generateTypeOptions = [
   { type: 'A', name: '潮流数据生成' }, // 潮流
   { type: 'B', name: '暂稳数据生成' }, // 暂稳
-  { type: 'C', name: 'GAN模型生成' }
+  { type: 'C', name: 'CTGAN模型生成' }
 ]
 // CTGAN生成条件：无；稳定；不稳定
 const ganStabilityOptions = [

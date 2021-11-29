@@ -12,7 +12,7 @@
         <div v-if="!isLearnDialog">
             <el-button class="opbtn" size="mini" type="info" plain @click="backPage" icon="el-icon-arrow-left">返回</el-button>
         </div>
-        <el-table :data="LearnerData" border stripe  style="width: 100%"
+        <el-table :data="LearnerData" border stripe  style="width: 100%" :cell-style="cellStyle"
         :highlight-current-row="isLearnDialog" @current-change="clickCurrentChange">
           <!-- 操作 -->
           <el-table-column type="expand" v-if="!isLearnDialog">
@@ -62,8 +62,8 @@ const trainStatus = [
 // 学习器类型
 const learnerTypeOptions = [
   { type: 'Manual', name: '人工' },
-  { type: 'Auto', name: '自动化' },
-  { type: 'HML', name: '人在回路' }
+  { type: 'Machine', name: '自动化' },
+  { type: 'HumanInLoop', name: '人在回路' }
 ]
 export default {
   filters: {
@@ -196,6 +196,17 @@ export default {
         this.$message.info('已取消删除')
         return error
       })
+    },
+    // 将待处理显示为红色
+    cellStyle (row, column, rowIndex, columnIndex) {
+      // 根据报警级别显示颜色
+      // console.log(row);
+      // console.log(row.column);
+      if (row.column.label === '训练状态' && row.row.action === -1) {
+        return 'background:#aaa'
+      } else if (row.column.label === '训练状态' && row.row.train_state === '1') {
+        return 'background:#fbb'
+      }
     },
     // 返回上一页
     backPage () {

@@ -67,5 +67,26 @@ export default {
       url: `/algorithm/query?algorithm_category=${algorithmCategory}`,
       method: 'GET'
     })
+  },
+  // 查询待处理学习器信息
+  queryActionDetail (id) {
+    return request({
+      url: `/learner/action/query?learner_id=${id}`,
+      method: 'GET'
+    })
+  },
+  // 提交待处理学习器的动作
+  submitAction (form) {
+    return request({
+      url: '/learner/action/input',
+      method: 'POST',
+      data: {
+        learner_id: form.learner_id,
+        learner_action: form.learner_action
+      },
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
   }
 }

@@ -273,9 +273,11 @@ def query_action_detail():
         if os.path.exists(file_path):
             # 先簡單處理一下
             file = pd.read_csv(file_path)
-            detail = file.to_json()
+            detail = file.to_json(orient="records")
 
-        return {'meta': {'msg': 'query learner action detail success', 'code': 200}, 'data': detail}, 200
+        return {'meta': {'msg': 'query learner action detail success', 'code': 200},
+                'data': {'learner': learner.serialize, 'detail': detail}
+                }, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
 
 
