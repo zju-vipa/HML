@@ -1,5 +1,6 @@
 from celery_tasks.celery import celery_app
 from celery_tasks.algorithms import Classification
+from celery_tasks.algorithms import _Reinforcementlearning
 import pandas as pd
 import os
 import joblib
@@ -43,7 +44,7 @@ def train(self, learner_json, learner_parameters, dataset_file_path):
         data.drop(columns=label, inplace=True)
         run_algorithm_train_with_label(data, data_label, learner_id, learner_parameters)
     else:
-        # TODO
+        run_algorithm_reinforcement_learning(learner_id, learner_parameters)
         return 'FAILURE'
 
     self.update_state(state='PROCESS', meta={'progress': 0.95, 'message': 'update train_state'})
@@ -58,6 +59,9 @@ def train(self, learner_json, learner_parameters, dataset_file_path):
 
     return 'SUCCESS'
 
+def run_algorithm_reinforcement_learning(learner_id,learner_parameters):
+    if learner_parameters['train_name']=='HML_RL':
+        _Reinforcementlearning.algorithm_HML_RL_train()
 
 def run_algorithm_train_with_label(data, data_label, learner_id, learner_parameters):
     if learner_parameters['train_name'] == 'RFC':
@@ -91,3 +95,7 @@ def save_learner_report(report, learner_id):
     with open(file_path, 'w') as f:
         f.write(report)
     return file_path
+
+
+if __name__ == '__main__':
+    _Reinforcementlearning.algorithm_HML_RL_train()
