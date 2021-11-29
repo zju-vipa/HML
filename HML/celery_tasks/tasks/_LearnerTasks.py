@@ -45,7 +45,7 @@ def train(self, learner_json, learner_parameters, dataset_file_path):
         run_algorithm_train_with_label(data, data_label, learner_id, learner_parameters)
     else:
         run_algorithm_reinforcement_learning(learner_id, learner_parameters)
-        return 'FAILURE'
+        # todo  later maybe other algorithm need to add
 
     self.update_state(state='PROCESS', meta={'progress': 0.95, 'message': 'update train_state'})
     learner_bean.train_state = '2'
@@ -61,7 +61,7 @@ def train(self, learner_json, learner_parameters, dataset_file_path):
 
 def run_algorithm_reinforcement_learning(learner_id,learner_parameters):
     if learner_parameters['train_name']=='HML_RL':
-        _Reinforcementlearning.algorithm_HML_RL_train()
+        _Reinforcementlearning.algorithm_HML_RL_train(learner_id)
 
 def run_algorithm_train_with_label(data, data_label, learner_id, learner_parameters):
     if learner_parameters['train_name'] == 'RFC':

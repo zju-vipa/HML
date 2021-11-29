@@ -1,6 +1,10 @@
 import gym
 import os
 import sys
+from service import LearnerService
+from service import DatasetService
+learnerService = LearnerService()
+datasetService = DatasetService()
 ABSPATH = os.path.abspath(os.path.realpath(os.path.dirname(__file__)))
 sys.path.append(ABSPATH)
 # print(sys.path)
@@ -68,7 +72,15 @@ def get_human_policy():
         print(state[2::4])
         print("Theta:")
         print(state[3::4])
-        action = input("Human Action:")
+        #action = input("Human Action:")
+        learner = learnerService.queryLearnerById(learner_id)
+        # todo need change to a while lop waiting for the DB write the action
+        # DB write  action = -1
+        while (1==1):
+            import  time
+            time.sleep(10)
+            action = #db query
+            if(action!=-1): break
         return action
 
     return human_policy
