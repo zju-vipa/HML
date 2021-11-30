@@ -158,7 +158,7 @@ def run_algorithm_learner_without_label(data, decision_parameters, learner_id, l
         return y_prediction
 def run_algorithm_learner_with_Reinfocement(data, decision_parameters, learner_id, learner_parameters):
     if learner_parameters['train_name'] == 'HML_RL':
-        result = _Reinforcementlearning.algorithm_HML_RL_test(flag='test')
+        result = _Reinforcementlearning.algorithm_HML_RL_test()
     return result
 def load_featureEng_model(model_file_name, featureEng_id):
     model_directory = os.path.join(celery_app.conf["SAVE_FE_MODEL_PATH"], featureEng_id)

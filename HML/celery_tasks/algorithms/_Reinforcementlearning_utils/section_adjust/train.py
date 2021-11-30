@@ -1,6 +1,10 @@
 import gym
 import os
 import sys
+from service import LearnerService
+from service import DatasetService
+learnerService = LearnerService()
+datasetService = DatasetService()
 ABSPATH = os.path.abspath(os.path.realpath(os.path.dirname(__file__)))
 sys.path.append(ABSPATH)
 # print(sys.path)
@@ -53,7 +57,7 @@ def get_model(env, args):
     return model
 
 
-def get_human_policy():
+def get_human_policy(learner_id):
     # model_path = "askrl/exp_v1/2021-11-12_PSASP300_vanilla_ppo_reward_gen_404/18-41-07/rl_model_final.zip"
     # model = PPO.load(model_path)
 
@@ -68,8 +72,19 @@ def get_human_policy():
         print(state[2::4])
         print("Theta:")
         print(state[3::4])
-        action = input("Human Action:")
-        return action
+        #action = input("Human Action:")
+        learner = learnerService.queryLearnerById(learner_id)
+        learner.action = -1
+        learnerService.updateLearner(learner)
+        # DB write  action = -1
+        while (1==1):
+            import  time
+            time.sleep(10)
+            learner = learnerService.queryLearnerById(learner_id)
+            action = learner.action
+            if(action!=-1):
+                return action
+
 
     return human_policy
 
@@ -107,7 +122,7 @@ def test(args):   # test时不会向人类提问
     #plt.bar(np.arange(len(env.action_count)), env.action_count, width=0.8, bottom=2, color='r', alpha=0.8, edgecolor='k', linewidth=1)
     #plt.show()
     return mean_reward   # todo
-def main(flag = 'train'):
+def main(flag = 'train',learner_id=None):
     class Parser():
         def __init__(self):
             self.env_id = 'case118'
