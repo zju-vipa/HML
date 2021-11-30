@@ -6,6 +6,7 @@ import os
 import joblib
 from dao import LearnerDao
 from model import db, Learner
+from flask import current_app
 learnerDao = LearnerDao(db)
 
 
@@ -20,6 +21,7 @@ def learner_to_bean(learner_json):
     learner_bean.dataset_id = learner_json['dataset_id']
     learner_bean.user_id = learner_json['user_id']
     learner_bean.username = learner_json['username']
+    learner_bean.action = learner_json['action']
     # not action
 
     return learner_bean
@@ -44,6 +46,7 @@ def train(self, learner_json, learner_parameters, dataset_file_path):
         data.drop(columns=label, inplace=True)
         run_algorithm_train_with_label(data, data_label, learner_id, learner_parameters)
     else:
+        current_app.logger.info("learnerTask train no label")
         run_algorithm_reinforcement_learning(learner_id, learner_parameters)
         # todo  later maybe other algorithm need to add
 
@@ -60,7 +63,9 @@ def train(self, learner_json, learner_parameters, dataset_file_path):
     return 'SUCCESS'
 
 def run_algorithm_reinforcement_learning(learner_id,learner_parameters):
-    if learner_parameters['train_name']=='HML_RL':
+    current_app.logger.info("run_algorithm_reinforcement_learning begin")
+    if learner_parameters['train_name'] == 'HML_RL':
+        current_app.logger.info("run_algorithm_reinforcement_learning HML_RL")
         _Reinforcementlearning.algorithm_HML_RL_train(learner_id)
 
 def run_algorithm_train_with_label(data, data_label, learner_id, learner_parameters):

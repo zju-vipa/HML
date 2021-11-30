@@ -291,8 +291,8 @@ def learner_action_input():
     """
     if request.method == 'POST':
         try:
-            learner_id = request.args.get('learner_id')
-            learner_action = request.args.get('learner_action')
+            learner_id = request.json.get('learner_id')
+            learner_action = request.json.get('learner_action')
         except Exception:
             return get_error(RET.PARAMERR, 'Error: no request')
 
@@ -318,5 +318,5 @@ def learner_action_input():
         msg = 'input learner action success'
         code = 204
 
-        return {'meta': {'msg': msg, 'code': code}, 'data': learner}, 200
+        return {'meta': {'msg': msg, 'code': code}}, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405

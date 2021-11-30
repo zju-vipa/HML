@@ -16,6 +16,7 @@ class LearnerService:
     def addLearner(self, learner, learner_parameters, dataset_file_path):
         learner.learner_id = get_uid()
         learner.train_state = '1'
+        learner.action = 0
 
         task = LearnerTasks.train.apply_async((learner.serialize,
                                                learner_parameters,

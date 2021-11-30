@@ -136,7 +136,7 @@ export default {
     submitAction () {
       this.submitActionForm = {
         learner_id: this.learnerInfo.learner_id,
-        learner_action: this.learnerInfo.learner_action
+        learner_action: parseInt(this.learnerInfo.learner_action)
       }
       learnApi.submitAction(this.submitActionForm).then(response => {
         const resp = response.data

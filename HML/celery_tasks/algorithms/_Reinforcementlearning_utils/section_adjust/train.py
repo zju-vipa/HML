@@ -20,7 +20,7 @@ from askrl.stable_baselines3.common.utils import linear_schedule
 from askrl.stable_baselines3.common.callbacks import CheckpointCallback
 from askrl.stable_baselines3.common.evaluation import evaluate_policy
 from env.transmission_section import TransmissionSectionEnv
-
+from flask import current_app
 
 class AskAction(gym.Wrapper):
     def __init__(self, env):
@@ -63,6 +63,7 @@ def get_model(env, args):
 def get_human_policy(learner_id):
     # model_path = "askrl/exp_v1/2021-11-12_PSASP300_vanilla_ppo_reward_gen_404/18-41-07/rl_model_final.zip"
     # model = PPO.load(model_path)
+    current_app.logger.info("get human policy begin")
 
     def human_policy(state):
         # action, _ = model.predict(state.cpu(), deterministic=True)
@@ -75,44 +76,57 @@ def get_human_policy(learner_id):
         print(state[2::4])
         print("Theta:")
         print(state[3::4])
-        #action = input("Human Action:")
+        # action = input("Human Action:")
         # learner = learnerService.queryLearnerById(learner_id)
         learner = learnerDao.queryLearnerById(learner_id)
         learner.action = -1
         # learnerService.updateLearner(learner)
         learnerDao.updateLearner(learner)
+        current_app.logger.info("get human policy update action=-1")
+        current_app.logger.info(learner.learner_name)
         # DB write  action = -1
         while (1==1):
-            import  time
+            current_app.logger.info("get human policy while-loop")
+            import time
             time.sleep(10)
             # learner = learnerService.queryLearnerById(learner_id)
             learner = learnerDao.queryLearnerById(learner_id)
+            # 每次查询后更新一下，不然下次查询的结果就是这次的快照，而不会重新从数据库里读取
+            learnerDao.updateLearner(learner)
             action = learner.action
+            current_app.logger.info(action)
             if(action!=-1):
+                current_app.logger.info("get human policy action!=-1")
+                current_app.logger.info(learner.learner_name)
+                current_app.logger.info(action)
                 return action
 
 
     return human_policy
 
 
-def train(args):
+def train(args, learner_id):
+    current_app.logger.info("RL train.train begin")
     env = get_env(args)
     model = get_model(env, args)
+    current_app.logger.info(model)
 
     if args.use_baseline_ask != '':
         model.use_ask_loss = False
 
     if args.mode == 'human':
-        model.human_policy = get_human_policy()   #不用就改成none
+        model.human_policy = get_human_policy(learner_id)   #不用就改成none
 
     checkpoint_callback = CheckpointCallback(save_freq=5000, save_path=args.log_dir, name_prefix='rl_model')
     model.learn(total_timesteps=args.total_timesteps, callback=checkpoint_callback, reset_num_timesteps=True)
-    #model.learn(total_timesteps=args.total_timesteps, callback=checkpoint_callback, reset_num_timesteps=True)
-   # print(args.log_dir)
-   # model.save(os.path.join(args.log_dir, 'rl_model_final'))
+    current_app.logger.info("RL train.train model.learn")
+    # model.learn(total_timesteps=args.total_timesteps, callback=checkpoint_callback, reset_num_timesteps=True)
+    # print(args.log_dir)
+    # model.save(os.path.join(args.log_dir, 'rl_model_final'))
     model.save(os.path.join('rl_model_final'))
 
 def test(args):   # test时不会向人类提问
+    current_app.logger.info("RL train.test begin")
     env = get_env(args)
     model_path = "rl_model_final.zip"
     if args.mode == 'vanilla':
@@ -128,15 +142,16 @@ def test(args):   # test时不会向人类提问
     #plt.bar(np.arange(len(env.action_count)), env.action_count, width=0.8, bottom=2, color='r', alpha=0.8, edgecolor='k', linewidth=1)
     #plt.show()
     return mean_reward   # todo
-def main(flag = 'train',learner_id=None):
+def main(flag = 'train', learner_id=None):
+    current_app.logger.info("RL train.main begin")
     class Parser():
         def __init__(self):
             self.env_id = 'case118'
             self.mode = 'human'
             # self.mode = 'vanilla'
             self.algo = 'ppo'
-            #self.total_timesteps = int(5e4)
-            self.total_timesteps = int(1e2)
+            self.total_timesteps = int(5e4)
+            # self.total_timesteps = int(1e2)
             self.seeds = '[404]'
             self.exp = 'run'
             self.use_baseline_ask = ''
@@ -169,7 +184,7 @@ def main(flag = 'train',learner_id=None):
         args.log_dir = os.path.join(log_date_dir, log_datetime.strftime('%H-%M-%S'))
         args.seed = seeds[i]
 
-        if(flag=='train'):  train(args)
+        if(flag=='train'):  train(args, learner_id)
         if(flag=='test'):   test(args)
 
 if __name__ == '__main__':
