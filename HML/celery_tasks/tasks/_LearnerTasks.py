@@ -6,6 +6,7 @@ import os
 import joblib
 from dao import LearnerDao
 from model import db, Learner
+from flask import current_app
 learnerDao = LearnerDao(db)
 
 
@@ -45,7 +46,7 @@ def train(self, learner_json, learner_parameters, dataset_file_path):
         run_algorithm_train_with_label(data, data_label, learner_id, learner_parameters)
     else:
         run_algorithm_reinforcement_learning(learner_id, learner_parameters)
-        return 'FAILURE'
+        # return 'FAILURE'
 
     self.update_state(state='PROCESS', meta={'progress': 0.95, 'message': 'update train_state'})
     learner_bean.train_state = '2'
