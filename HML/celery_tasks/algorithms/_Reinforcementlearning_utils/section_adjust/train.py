@@ -1,10 +1,13 @@
 import gym
 import os
 import sys
-from service import LearnerService
-from service import DatasetService
-learnerService = LearnerService()
-datasetService = DatasetService()
+# from service import LearnerService
+# from service import DatasetService
+# learnerService = LearnerService()
+# datasetService = DatasetService()
+from dao import LearnerDao
+from model import db, Learner
+learnerDao = LearnerDao(db)
 ABSPATH = os.path.abspath(os.path.realpath(os.path.dirname(__file__)))
 sys.path.append(ABSPATH)
 # print(sys.path)
@@ -73,14 +76,17 @@ def get_human_policy(learner_id):
         print("Theta:")
         print(state[3::4])
         #action = input("Human Action:")
-        learner = learnerService.queryLearnerById(learner_id)
+        # learner = learnerService.queryLearnerById(learner_id)
+        learner = learnerDao.queryLearnerById(learner_id)
         learner.action = -1
-        learnerService.updateLearner(learner)
+        # learnerService.updateLearner(learner)
+        learnerDao.updateLearner(learner)
         # DB write  action = -1
         while (1==1):
             import  time
             time.sleep(10)
-            learner = learnerService.queryLearnerById(learner_id)
+            # learner = learnerService.queryLearnerById(learner_id)
+            learner = learnerDao.queryLearnerById(learner_id)
             action = learner.action
             if(action!=-1):
                 return action
@@ -126,8 +132,8 @@ def main(flag = 'train',learner_id=None):
     class Parser():
         def __init__(self):
             self.env_id = 'case118'
-            #self.mode = 'human'
-            self.mode = 'vanilla'
+            self.mode = 'human'
+            # self.mode = 'vanilla'
             self.algo = 'ppo'
             #self.total_timesteps = int(5e4)
             self.total_timesteps = int(1e2)
