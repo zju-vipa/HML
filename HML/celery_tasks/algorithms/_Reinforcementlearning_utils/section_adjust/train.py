@@ -145,7 +145,7 @@ def test(args):   # test时不会向人类提问
     #plt.figure()
     #plt.bar(np.arange(len(env.action_count)), env.action_count, width=0.8, bottom=2, color='r', alpha=0.8, edgecolor='k', linewidth=1)
     #plt.show()
-    return mean_reward   # todo
+    return mean_reward   # 以后可以考虑返回点别的东西。
 def main(flag = 'train', learner_id=None):
     current_app.logger.info("RL train.main begin")
     class Parser():
