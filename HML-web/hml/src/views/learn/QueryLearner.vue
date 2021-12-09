@@ -98,11 +98,18 @@ export default {
       // 查看操作进度对话框
       queryProgressVisible: false,
       progress: 0,
-      progressStatus: ''
+      progressStatus: '',
+      timer: null
     }
   },
   created () {
     this.getLearnerInfo()
+    this.timer = setInterval(() => {
+      this.getLearnerInfo()
+    }, 10000)
+  },
+  destroyed () {
+    clearInterval(this.timer)
   },
   methods: {
     // 获取学习器信息
@@ -111,7 +118,7 @@ export default {
         // console.log(response)
         const resp = response.data
         if (resp.meta.code === 200) {
-          this.$message.success('加载学习器成功')
+          // this.$message.success('加载学习器成功')
           this.LearnerData = resp.data
         }
       })

@@ -10,16 +10,20 @@
             </el-progress>
           </el-col>
           <el-col align="center" :span="6">
-            <el-progress :format="format2" type="circle" stroke-width="12" width="200" color="#f36838"
+            <el-progress :format="format2" type="circle" stroke-width="12" width="200" color="#f7d44b"
             :percentage="1+learnerUndoneCnt"></el-progress>
           </el-col>
           <el-col align="center" :span="6">
-            <el-progress :format="format3" type="circle" stroke-width="12" width="200" color="#21a675"
-            :percentage="learnerCnt==0 ? 0 : parseFloat(learnerDoneCnt/learnerCnt*100).toFixed(1)"></el-progress>
+            <el-progress :format="format3" type="circle" stroke-width="12" width="200" color="#f36838"
+            :percentage="1+learnerActionCnt"></el-progress>
           </el-col>
           <el-col align="center" :span="6">
-            <el-button type="primary" @click="inputHumanAction">查看待处理人在回路学习器</el-button>
+            <el-progress :format="format4" type="circle" stroke-width="12" width="200" color="#21a675"
+            :percentage="learnerCnt==0 ? 0 : parseFloat(learnerDoneCnt/learnerCnt*100).toFixed(1)"></el-progress>
           </el-col>
+          <!-- <el-col align="center" :span="6">
+            <el-button type="primary" @click="inputHumanAction">查看待处理人在回路学习器</el-button>
+          </el-col> -->
         </el-row>
       </el-card>
     <!-- 卡片区域 -->
@@ -135,12 +139,20 @@ export default {
       // 学习器进度统计
       learnerCnt: 0,
       learnerDoneCnt: 0,
-      learnerUndoneCnt: 0
+      learnerUndoneCnt: 0,
+      learnerActionCnt: 0,
+      timer: null
     }
   },
   created () {
     this.getAlgorithm()
     this.getLearnerInfo()
+    this.timer = setInterval(() => {
+      this.getLearnerInfo()
+    }, 2000)
+  },
+  destroyed () {
+    clearInterval(this.timer)
   },
   methods: {
     // 接受数据集组件传来的数据
@@ -234,12 +246,15 @@ export default {
         // console.log(response)
         const resp = response.data
         if (resp.meta.code === 200) {
-          this.$message.success('加载学习器成功')
+          // this.$message.success('加载学习器成功')
           this.LearnerData = resp.data
           // 统计数量
           this.learnerCnt = resp.data.length
           this.learnerDoneCnt = resp.data.filter(item => {
             return item.train_state === '2'
+          }).length
+          this.learnerActionCnt = resp.data.filter(item => {
+            return item.train_state === '1' && item.action === -1
           }).length
           this.learnerUndoneCnt = this.learnerCnt - this.learnerDoneCnt
         }
@@ -251,7 +266,10 @@ export default {
     format2 () {
       return `未完成：${this.learnerUndoneCnt}`
     },
-    format3 (percentage) {
+    format3 () {
+      return `待处理：${this.learnerActionCnt}`
+    },
+    format4 (percentage) {
       return `进度：${percentage}%`
     }
   }
