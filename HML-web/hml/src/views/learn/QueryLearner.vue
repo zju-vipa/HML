@@ -17,7 +17,7 @@
           <!-- 操作 -->
           <el-table-column type="expand" v-if="!isLearnDialog">
             <template slot-scope="scope">
-              <el-button size="mini" plain @click="handleLearner(scope.row.learner_id)">待处理</el-button>
+              <el-button v-if="scope.row.action===-1" size="mini" plain @click="handleLearner(scope.row.learner_id)">待处理</el-button>
               <el-button  size="mini" plain @click="trainProgress(scope.row.task_id)">训练进度</el-button>
               <el-button size="mini" plain @click="handleDownLoadPrediction(scope.row)">下载预测结果</el-button>
               <el-button size="mini" plain @click="handleDownLoadReport(scope.row)">下载预测报告</el-button>
@@ -32,7 +32,7 @@
             <template slot-scope="scope">{{scope.row.learner_type | learnerTypeTrans}}</template>
           </el-table-column>
           <el-table-column prop="train_state" label="训练状态">
-            <template slot-scope="scope">{{scope.row.train_state | trainTypeTrans}}</template>
+            <template slot-scope="scope">{{scope.row.train_state | trainTypeTrans(scope.row.action)}}</template>
           </el-table-column>
           <!-- <el-table-column label="操作" width="400" v-if="!isLearnDialog">
             <template slot-scope="scope">
@@ -72,9 +72,16 @@ export default {
       const obj = learnerTypeOptions.find(item => item.type === type)
       return obj ? obj.name : null
     },
-    trainTypeTrans (type) {
+    trainTypeTrans (type, action) {
       const obj = trainStatus.find(item => item.type === type)
-      return obj ? obj.name : null
+      if (obj) {
+        if (obj.type === '1' && action === -1) {
+          return '待处理'
+        } else {
+          return obj.name
+        }
+      }
+      return null
     }
   },
   props: {
@@ -202,10 +209,18 @@ export default {
       // 根据报警级别显示颜色
       // console.log(row);
       // console.log(row.column);
-      if (row.column.label === '训练状态' && row.row.action === -1) {
-        return 'background:#aaa'
+      if (row.column.label === '训练状态' && row.row.train_state === '1' && row.row.action === -1) {
+        // 待处理
+        return 'background:#FFDAB9'
       } else if (row.column.label === '训练状态' && row.row.train_state === '1') {
-        return 'background:#fbb'
+        // 训练中
+        return 'background:#FFFACD'
+      } else if (row.column.label === '训练状态' && row.row.train_state === '2') {
+        // 训练完成
+        return 'background:#bcf0c2'
+      } else if (row.column.label === '训练状态' && row.row.train_state === '3') {
+        // 训练失败
+        return 'background:#c8cbc9'
       }
     },
     // 返回上一页
