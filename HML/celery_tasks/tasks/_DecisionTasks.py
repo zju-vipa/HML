@@ -91,14 +91,12 @@ def use_learner(data, decision_id, decision_parameters, learner_id, learner_para
     if label:
         data_label = data[label]
         data.drop(columns=label, inplace=True)
-        y_prediction, report = run_algorithm_learner_with_label(data, data_label, decision_parameters, learner_id, learner_parameters)
-        save_decision_y_prediction(y_prediction, decision_id)
+        result, report = run_algorithm_learner_with_label(data, data_label, decision_parameters, learner_id, learner_parameters)
+        save_decision_y_prediction(result, decision_id)
         save_decision_report(report, decision_id)
     else:
-        y_prediction = run_algorithm_learner_without_label(data, decision_parameters, learner_id, learner_parameters)
-        save_decision_y_prediction(y_prediction, decision_id)
-    # todo sth about Reinforcement learner;
-    # result = run_algorithm_learner_with_Reinfocement(data, decision_parameters, learner_id, learner_parameters)
+        result = run_algorithm_learner_without_label(data, decision_parameters, learner_id, learner_parameters)
+        save_decision_y_prediction(result, decision_id)  # 保存在一个prediction.csv里面，但是里面存的不一定是prediction,总之是模型的返回结果
 
 @celery_app.task(bind=True, name='decision.applyDecision')
 def apply_decision(self, decision_json, decision_parameters, featureEng_id, featureEng_processes,
@@ -156,7 +154,6 @@ def run_algorithm_learner_without_label(data, decision_parameters, learner_id, l
         model_rfc = load_learner_model('RFC.pkl', learner_id)
         y_prediction = Classification.algorithm_RFC_test(data, model_enc, model_rfc)
         return y_prediction
-def run_algorithm_learner_with_Reinfocement(data, decision_parameters, learner_id, learner_parameters):
     if learner_parameters['train_name'] == 'HML_RL':
         result = _Reinforcementlearning.algorithm_HML_RL_test()
     return result

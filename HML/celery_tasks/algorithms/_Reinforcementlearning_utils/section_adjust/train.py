@@ -1,16 +1,12 @@
 import gym
 import os
 import sys
-# from service import LearnerService
-# from service import DatasetService
-# learnerService = LearnerService()
-# datasetService = DatasetService()
+
 from dao import LearnerDao
 from model import db, Learner
 learnerDao = LearnerDao(db)
 ABSPATH = os.path.abspath(os.path.realpath(os.path.dirname(__file__)))
 sys.path.append(ABSPATH)
-# print(sys.path)
 from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
@@ -68,15 +64,23 @@ def get_human_policy(learner_id):
     def human_policy(state):
         # action, _ = model.predict(state.cpu(), deterministic=True)
         state = state.cpu().numpy()
-        print("P:")
-        print(state[0::4])
-        print("Q:")
-        print(state[1::4])
-        print("V:")
-        print(state[2::4])
-        print("Theta:")
-        print(state[3::4])
-        # action = input("Human Action:")
+
+        #print("P:")
+        P=(state[0::4])
+        Q=(state[1::4])
+        V=(state[2::4])
+        Theta=(state[3::4])
+        import csv
+        import pandas as pd
+
+        # result 为插入的list数据
+        path = "action_pqvt.csv"
+        #if(not os.path.exists(path)): os.makedirs(path)
+        test = pd.DataFrame({'P': P, 'Q': Q, "V": V, "Theta": Theta})
+        test.to_csv(path)
+
+        #action = input("Human Action:")
+        #return action
         # learner = learnerService.queryLearnerById(learner_id)
         learner = learnerDao.queryLearnerById(learner_id)
         learner.action = -1
@@ -141,7 +145,7 @@ def test(args):   # test时不会向人类提问
     #plt.figure()
     #plt.bar(np.arange(len(env.action_count)), env.action_count, width=0.8, bottom=2, color='r', alpha=0.8, edgecolor='k', linewidth=1)
     #plt.show()
-    return mean_reward   # todo
+    return mean_reward   # 以后可以考虑返回点别的东西。
 def main(flag = 'train', learner_id=None):
     current_app.logger.info("RL train.main begin")
     class Parser():
@@ -188,4 +192,4 @@ def main(flag = 'train', learner_id=None):
         if(flag=='test'):   test(args)
 
 if __name__ == '__main__':
-    main('test')
+    main('train')
