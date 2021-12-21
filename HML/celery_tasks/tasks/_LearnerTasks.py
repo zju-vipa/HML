@@ -1,6 +1,7 @@
 from celery_tasks.celery import celery_app
 from celery_tasks.algorithms import Classification
 from celery_tasks.algorithms import _Reinforcementlearning
+from celery_tasks.algorithms import learn_with_label
 import pandas as pd
 import os
 import joblib
@@ -68,7 +69,7 @@ def run_algorithm_reinforcement_learning(learner_id,learner_parameters):
         current_app.logger.info("run_algorithm_reinforcement_learning HML_RL")
         _Reinforcementlearning.algorithm_HML_RL_train(learner_id)
 
-def run_algorithm_train_with_label(data, data_label, learner_id, learner_parameters):
+def run_algorithm_train_with_label(data, data_label, learner_id, learner_parameters): # if train_name is GNN, no need for data_label and data is datapath
     if learner_parameters['train_name'] == 'RFC':
         n_estimators = learner_parameters['n_estimators']
         model_enc, model_rfc, y_prediction, report = Classification.algorithm_RFC_train(data, data_label, n_estimators)
@@ -76,6 +77,13 @@ def run_algorithm_train_with_label(data, data_label, learner_id, learner_paramet
         save_learner_model(model_rfc, 'RFC.pkl', learner_id)
         save_learner_y_prediction(y_prediction, learner_id)
         save_learner_report(report, learner_id)
+    if learner_parameters['train_name'] == 'GNN_in_learner':
+        current_app.logger.info("GNN_in_learner data path")
+        current_app.logger.info(data  )
+        n_components = learner_parameters['n_components']
+        epoch = learner_parameters['epoch']
+        model_GNN = learn_with_label.algorithm_GNN_train(data, n_components, epoch)
+        save_learner_model(model_GNN, 'GNN_in_learner.pkl', learner_id)
 
 
 def save_learner_model(model_object, model_file_name, learner_id):

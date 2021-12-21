@@ -149,6 +149,9 @@ def run_algorithm_learner_with_label(data, data_label, decision_parameters, lear
         model_rfc = load_learner_model('RFC.pkl', learner_id)
         y_prediction, report = Classification.algorithm_RFC_validation(data, data_label, model_enc, model_rfc)
         return y_prediction, report
+    if learner_parameters['train_name'] == 'GNN_in_learner':
+        model_GNN = load_learner_model('GNN_in_learner.pkl', learner_id)
+        #y_prediction = model  # todo how to prepair data for test and validation....
 
 
 
