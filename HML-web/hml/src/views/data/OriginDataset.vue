@@ -16,7 +16,7 @@
           </el-table-column>
           <el-table-column prop="dataset_name" label="数据集名" > </el-table-column>
           <el-table-column prop="file_type" label="数据集类型" width="100"> </el-table-column>
-          <el-table-column prop="introduction" label="数据集介绍" width="120"> </el-table-column>
+          <el-table-column prop="introduction" label="数据集介绍" width="200"> </el-table-column>
           <el-table-column prop="if_public" label="是否公开" width="120">
             <template slot-scope="scope">
               <el-switch disabled="" v-model="scope.row.if_public" active-color="#13ce66">

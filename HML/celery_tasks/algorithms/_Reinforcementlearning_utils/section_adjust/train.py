@@ -66,18 +66,22 @@ def get_human_policy(learner_id):
         state = state.cpu().numpy()
 
         #print("P:")
-        P=(state[0::4])
-        Q=(state[1::4])
-        V=(state[2::4])
-        Theta=(state[3::4])
-        import csv
+        P = (state[0::4])
+        Q = (state[1::4])
+        V = (state[2::4])
+        Theta = (state[3::4])
         import pandas as pd
 
         # result 为插入的list数据
-        path = "action_pqvt.csv"
+        file_directory = os.path.join(current_app.config["SAVE_L_MODEL_PATH"], learner_id)
+        if not os.path.exists(file_directory):
+            os.mkdir(file_directory)
+        file_name = 'action_pqvt.csv'
+        file_path = os.path.join(file_directory, file_name)
+        # path = "action_pqvt.csv"
         #if(not os.path.exists(path)): os.makedirs(path)
         test = pd.DataFrame({'P': P, 'Q': Q, "V": V, "Theta": Theta})
-        test.to_csv(path)
+        test.to_csv(file_path)
 
         #action = input("Human Action:")
         #return action

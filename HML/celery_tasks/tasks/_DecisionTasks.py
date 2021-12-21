@@ -5,6 +5,7 @@ import os
 import joblib
 from dao import DecisionDao
 from model import db, Decision
+from flask import current_app
 decisionDao = DecisionDao(db)
 
 
@@ -50,15 +51,22 @@ def apply_featureEng(self, decision_json, decision_parameters, featureEng_id, fe
 
 
 def use_featureEng(data, decision_id, decision_parameters, featureEng_id, featureEng_processes):
+    # current_app.logger.info(data.columns)
     processes_num = len(featureEng_processes)
     for process_idx in range(processes_num):
-
-        col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
-
+        # current_app.logger.info("column debug2")
+        # current_app.logger.info(data.columns)
         data_retain = pd.DataFrame()
-        if col_retain:
-            data_retain = data[col_retain]
-            data.drop(columns=col_retain, inplace=True)
+        if "col_retain" in featureEng_processes[int(str(process_idx))]:
+            col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
+            # data_retain = pd.DataFrame()
+            if col_retain:
+                # current_app.logger.info("column debug")
+                # current_app.logger.info(data.columns)
+                # current_app.logger.info(col_retain)
+                # current_app.logger.info(data[:3][:])
+                data_retain = data[col_retain]
+                data.drop(columns=col_retain, inplace=True)
 
         data = run_algorithm_featureEng(data, decision_parameters, featureEng_id,
                                         featureEng_processes[int(str(process_idx))])
@@ -112,6 +120,10 @@ def apply_decision(self, decision_json, decision_parameters, featureEng_id, feat
 
     self.update_state(state='PROCESS', meta={'progress': 0.05, 'message': 'read csv'})
     data = pd.read_csv(dataset_file_path, delimiter=',', header=0, encoding='utf-8')
+    # current_app.logger.info("column debug1")
+    # current_app.logger.info(dataset_file_path)
+    # current_app.logger.info(data.columns)
+    # current_app.logger.info(data)
 
     self.update_state(state='PROCESS', meta={'progress': 0.10, 'message': 'feature engineering'})
     new_dataset_file_path = use_featureEng(data, decision_id, decision_parameters, featureEng_id, featureEng_processes)
@@ -142,6 +154,8 @@ def run_algorithm_featureEng(data, decision_parameters, featureEng_id, featureEn
         model_GNN = load_featureEng_model('GNN.pkl', featureEng_id)
         data_GNN = DimReduction.algorithm_GNN_apply(data, model_GNN)
         return data_GNN
+    # 这里不return会出错 导致循环里面的data变成空值
+    return data
 
 def run_algorithm_learner_with_label(data, data_label, decision_parameters, learner_id, learner_parameters):
     if learner_parameters['train_name'] == 'RFC':
