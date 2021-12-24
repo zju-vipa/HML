@@ -53,10 +53,10 @@ def gen_data_from_mat(datapath):
 
     ind_train_matrix = ind_train_matrix.astype(int)
     ind_test_matrix = ind_test_matrix.astype(int)
-    #str1 = "ind_train_matrix.npy"
-    #str2 = "ind_test_matrix.npy"
-    str1 = os.path.join(current_app.config["SAVE_DATASET_PATH"],"ind_train_matrix.npy")
-    str2 = os.path.join(current_app.config["SAVE_DATASET_PATH"],"ind_test_matrix.npy")
+    str1 = "ind_train_matrix.npy"
+    str2 = "ind_test_matrix.npy"
+    #str1 = os.path.join(current_app.config["SAVE_DATASET_PATH"],"ind_train_matrix.npy")
+    #str2 = os.path.join(current_app.config["SAVE_DATASET_PATH"],"ind_test_matrix.npy")
     np.save(str1, ind_train_matrix)
     np.save(str2, ind_test_matrix)
     #np.save('../../data/case39/ind_train_matrix.npy', ind_train_matrix)

@@ -12,15 +12,15 @@ import numpy as np
 
 from tqdm import tqdm
 from scipy.io import loadmat
-from celery_tasks.algorithms._DimReduction_utils.gcpool.util import separate_data
-from celery_tasks.algorithms._DimReduction_utils.gcpool.util import load_psdata
+#from celery_tasks.algorithms._DimReduction_utils.gcpool.util import separate_data
+from celery_tasks.algorithms.learner_with_label_utils.gcpool.util import load_psdata
 # from models.graphcnn import GraphCNN
 # from sopool_attn.graphcnn import GraphCNN
-from celery_tasks.algorithms._DimReduction_utils.gcpool.graphcnn import GraphCNN
-
+from celery_tasks.algorithms.learner_with_label_utils.gcpool.graphcnn import GraphCNN
+from celery_tasks.algorithms.learner_with_label_utils import c10folds
 criterion = nn.CrossEntropyLoss()
 class GNN():
-    def __init__(self, datapath="CASE39", n_component=10, epoch = 100 ,model=None):
+    def __init__(self, datapath="CASE39", n_component=10, epoch = 5,model=None):
         self.datapath = datapath
         self.n_component = n_component
         self.epoch = epoch
@@ -223,5 +223,6 @@ class GNN():
         self.model.load_state_dict(torch.load(path_))
         return self.model
 if __name__ == '__main__':
+    c10folds.gen_data_from_mat("case39.mat")
     tmp= GNN()
     tmp.main()

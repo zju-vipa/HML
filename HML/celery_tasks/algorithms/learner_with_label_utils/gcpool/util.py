@@ -83,6 +83,7 @@ def loda_matdata(fold_idx, datapath):
     print('loading data')
     import sys
     print(sys.argv[0])
+    print(datapath)
     data = loadmat(datapath)
     bus_matrix = data['data']['bus_matrix'][0][0]
     bus_matrix = bus_matrix[:, 0:2, :]  # 只取 p,q 的值
@@ -101,10 +102,10 @@ def loda_matdata(fold_idx, datapath):
         node_features = bus_matrix[0:bus_matrix.shape[0]-1,:,i]
         g_list.append(S2VGraph(g, label[i].item(), list(np.zeros(bus_matrix.shape[0]-1)), node_features=node_features))
     g_list = add_labels_edge(g_list)
-    #str1 = "ind_train_matrix.npy"
-    #str2 = "ind_test_matrix.npy"
-    str1 = os.path.join(current_app.config["SAVE_DATASET_PATH"],"ind_train_matrix.npy")
-    str2 = os.path.join(current_app.config["SAVE_DATASET_PATH"],"ind_test_matrix.npy")
+    str1 = "ind_train_matrix.npy"
+    str2 = "ind_test_matrix.npy"
+#    str1 = os.path.join(current_app.config["SAVE_DATASET_PATH"],"ind_train_matrix.npy")
+ #   str2 = os.path.join(current_app.config["SAVE_DATASET_PATH"],"ind_test_matrix.npy")
     ind_train_matrix = np.load(str1, allow_pickle=True)
     ind_test_matrix = np.load(str2, allow_pickle=True)
 
