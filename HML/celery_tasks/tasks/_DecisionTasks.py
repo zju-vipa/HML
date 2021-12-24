@@ -1,5 +1,7 @@
 from celery_tasks.celery import celery_app
 from celery_tasks.algorithms import DimReduction, Classification, _Reinforcementlearning
+from celery_tasks.algorithms.learner_with_label_utils import c10folds
+from celery_tasks.algorithms.learner_with_label_utils import gnn
 import pandas as pd
 import os
 import joblib
@@ -164,8 +166,12 @@ def run_algorithm_learner_with_label(data, data_label, decision_parameters, lear
         y_prediction, report = Classification.algorithm_RFC_validation(data, data_label, model_enc, model_rfc)
         return y_prediction, report
     if learner_parameters['train_name'] == 'GNN_in_learner':
-        model_GNN = load_learner_model('GNN_in_learner.pkl', learner_id)
-        #y_prediction = model  # todo how to prepair data for test and validation....
+        data_path = data
+        model_gnn = load_learner_model('GNN_in_learner.pkl', learner_id)
+        c10folds.gen_data_from_mat(data_path)
+        model_GNN = gnn.GNN(model=model_gnn)
+        y_prediction, report = (model_GNN.Test_for_learning(data_path))
+        return y_prediction, report
 
 
 
@@ -175,6 +181,15 @@ def run_algorithm_learner_without_label(data, decision_parameters, learner_id, l
         model_rfc = load_learner_model('RFC.pkl', learner_id)
         y_prediction = Classification.algorithm_RFC_test(data, model_enc, model_rfc)
         return y_prediction
+
+    if learner_parameters['train_name'] == 'GNN_in_learner':
+        data_path = data
+        model_gnn = load_learner_model('GNN_in_learner.pkl', learner_id)
+        c10folds.gen_data_from_mat(data_path)
+        model_GNN = gnn.GNN(model=model_gnn)
+        y_prediction = (model_GNN.Use_for_learning(data_path))   # todo no label for validation,
+        return y_prediction
+
     if learner_parameters['train_name'] == 'HML_RL':
         result = _Reinforcementlearning.algorithm_HML_RL_test()
     return result

@@ -1,7 +1,7 @@
 from celery_tasks.celery import celery_app
 from celery_tasks.algorithms import Classification
 from celery_tasks.algorithms import _Reinforcementlearning
-from celery_tasks.algorithms import learn_with_label
+from celery_tasks.algorithms import train_with_label
 import pandas as pd
 import os
 import joblib
@@ -82,7 +82,7 @@ def run_algorithm_train_with_label(data, data_label, learner_id, learner_paramet
         current_app.logger.info(data  )
         n_components = learner_parameters['n_components']
         epoch = learner_parameters['epoch']
-        model_GNN = learn_with_label.algorithm_GNN_train(data, n_components, epoch)
+        model_GNN = train_with_label.algorithm_GNN_train(data, n_components, epoch)
         save_learner_model(model_GNN, 'GNN_in_learner.pkl', learner_id)
 
 

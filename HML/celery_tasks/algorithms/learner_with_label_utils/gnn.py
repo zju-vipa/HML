@@ -92,7 +92,7 @@ class GNN():
         #print("output=",output)
         return torch.cat(output, 0)
 
-    def Test(self, args, device, train_graphs, test_graphs, epoch):
+    def Test(self, args, device, train_graphs, test_graphs, epoch):  # this one is original
         self.model.eval()
 
         # output = pass_data_iteratively(model, train_graphs)
@@ -110,7 +110,29 @@ class GNN():
         #
         # return acc_train, acc_test
         return acc_test, pred
+    def Test_for_learning(self, datapath):
+        self.model.eval()
+        self.model.Is_dim = False
+        train_graphs, test_graphs, train_label, test_label = load_psdata(0, datapath)
+        input=train_graphs+test_graphs
 
+        #======#
+        args_device = 0
+        device = torch.device("cuda:" + str(args_device)) if torch.cuda.is_available() else torch.device("cpu")
+        labels = torch.LongTensor([graph.label for graph in input]).to(device)
+        #=====#
+
+        output = self.pass_data_iteratively(input)
+        pred = output.max(1, keepdim=True)[1]
+        correct = pred.eq(labels.view_as(pred)).sum().cpu().item()
+        acc_test = correct / float(len(test_graphs))
+        return  pred, acc_test
+    def use_for_learning(self, datapath):
+        self.model.eval()
+        self.model.Is_dim = False
+        #todo load function need to be rewrite
+        pred = None
+        return pred
     def Dim_Re(self,datapath):
         self.model.eval()
         self.model.Is_dim = True
