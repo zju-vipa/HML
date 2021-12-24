@@ -20,7 +20,7 @@ from celery_tasks.algorithms.learner_with_label_utils.gcpool.graphcnn import Gra
 from celery_tasks.algorithms.learner_with_label_utils import c10folds
 criterion = nn.CrossEntropyLoss()
 class GNN():
-    def __init__(self, datapath="CASE39", n_component=10, epoch = 5,model=None):
+    def __init__(self, datapath="CASE39", n_component=10, epoch = 100,model=None):
         self.datapath = datapath
         self.n_component = n_component
         self.epoch = epoch
