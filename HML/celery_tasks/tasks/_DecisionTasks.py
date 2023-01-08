@@ -112,6 +112,8 @@ def apply_decision(self, decision_json, decision_parameters, featureEng_id, feat
 
     self.update_state(state='PROCESS', meta={'progress': 0.01, 'message': 'start'})
     decision_bean = decision_to_bean(decision_json)
+    current_app.logger.info("decision bean debug 1")
+    current_app.logger.info(decision_bean)
     decision_id = decision_bean.decision_id
 
     self.update_state(state='PROCESS', meta={'progress': 0.05, 'message': 'read csv'})
@@ -131,7 +133,11 @@ def apply_decision(self, decision_json, decision_parameters, featureEng_id, feat
     use_learner(data, decision_id, decision_parameters, learner_id, learner_parameters)
 
     self.update_state(state='PROCESS', meta={'progress': 0.95, 'message': 'update train_state'})
+    current_app.logger.info("decision bean debug")
+    current_app.logger.info(decision_bean)
     decision_bean.apply_state = '2'
+    current_app.logger.info("decision bean debug")
+    current_app.logger.info(decision_bean)
     decisionDao.updateDecision(decision_bean)
 
     return 'SUCCESS'

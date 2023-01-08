@@ -1,6 +1,6 @@
 <template>
    <div class="login-container">
-     <h2 class="login-title">人在回路机器学习系统</h2>
+     <h2 class="login-title">大电网复杂系统人机协同双向学习引擎</h2>
      <el-form class="login-form" :model="loginForm" :rules="loginFormRules" ref="loginFormRef">
        <el-form-item  prop="email">
          <el-input v-model="loginForm.email" style="width:350px" placeholder="请输入邮箱"></el-input>

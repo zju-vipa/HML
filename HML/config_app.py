@@ -11,7 +11,7 @@ db_name = 'hml'
 db_username = 'hml'
 db_password = 'hml'
 
-SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset=UTF8MB4'.format(
+SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://{}:{}@{}:{}/{}?charset=UTF8MB4&autocommit=true'.format(
     db_username, db_password, db_host, db_port, db_name)
 
 SQLALCHEMY_COMMIT_TEARDOWN = False

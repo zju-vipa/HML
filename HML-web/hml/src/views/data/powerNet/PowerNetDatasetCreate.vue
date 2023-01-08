@@ -444,7 +444,7 @@ export default {
       ganSettings: {
         n_sample: 10,
         stability_switch: false,
-        cond_stability: 0,
+        cond_stability: 1,
         load_switch: false,
         cond_load: '0'
       },

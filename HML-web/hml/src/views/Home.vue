@@ -1,6 +1,7 @@
 <template>
     <div>
-      <h2>人在回路的电网系统</h2>
+      <!-- <h2>人在回路的电网系统</h2> -->
+      <h2>大电网复杂系统人机协同双向学习引擎</h2>
       <el-card>
         <h3>当前特征工程</h3>
         <query-human-feature :isHFeaDialog="true"></query-human-feature>

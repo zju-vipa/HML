@@ -272,8 +272,10 @@ def query_action_detail():
         detail = None
         if os.path.exists(file_path):
             # 先簡單處理一下
-            file = pd.read_csv(file_path)
-            detail = file.to_json(orient="records")
+            file = pd.read_csv(file_path, delimiter=',', header=0, encoding='utf-8')
+            # detail = file.to_json(orient="records")
+            file = file.to_dict(orient='index')
+            detail = [file[i] for i in range(len(file))]
 
         return {'meta': {'msg': 'query learner action detail success', 'code': 200},
                 'data': {'learner': learner.serialize, 'detail': detail}

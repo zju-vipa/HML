@@ -24,7 +24,10 @@
           <el-row>
             <el-col :span="10">
               <el-form-item label="学习器类型" prop="learner_type">
-                <el-input disabled  v-model="learnerInfo.learner_name" style="width: 200px"></el-input>
+                <el-select disabled v-model="learnerInfo.learner_type" placeholder="学习器类型" style="width: 200px">
+                  <el-option v-for="(option, index) in learnerTypeOptions" :key="index" :label="option.name" :value="option.type"></el-option>
+                </el-select>
+                <!-- <el-input disabled  v-model="learnerInfo.learner_type" style="width: 200px"></el-input> -->
               </el-form-item>
             </el-col>
           </el-row>
@@ -46,22 +49,27 @@
           </el-row>
         </el-form>
         <el-row>
-          <el-col :span="14">
-            <el-card style="height: 400px">
-              <div><h3>电网当前状态</h3></div>
+          <el-col :span="12">
+            <!-- <el-card style="height: 400px"> -->
+              <div><h4>电网当前状态</h4></div>
               <el-table :data="netDetailInfo" border stripe :cell-style="cellStyle"
-                height="300" style="width:100%">
+                height="500" style="width:100%">
+                <el-table-column label="序号" type="index" width="50" align="center">
+                </el-table-column>
                 <el-table-column width="120" v-for="(item,index) in detailColumns"
                   :key="index" :prop="item" :label="item" :formatter="formatValues"></el-table-column>
               </el-table>
-            </el-card>
+            <!-- </el-card> -->
+          </el-col>
+          <el-col :span="12">
+            <img :src="'http://10.214.211.135:8030/img/learner118.png'" style="width: 500px; height: 500px; object-fit: fill;">
           </el-col>
         </el-row>
-        <el-row align="middle">
+        <!-- <el-row align="middle">
           <el-col :span="10">
-            <img :src="'http://10.214.211.135:8030/img/learner118.png'" style="width: 1000px">
+            <img :src="'http://10.214.211.135:8030/img/learner118.png'" style="width: 500px; height: 500px; object-fit: fill;">
           </el-col>
-        </el-row>
+        </el-row> -->
       </el-card>
     </div>
   </div>
@@ -75,7 +83,7 @@ const learnerTypeOptions = [
   { type: 'HumanInLoop', name: '人在回路' }
 ]
 // 有哪些列
-const detailColumns = ['p', 'q', 'v', 't']
+const detailColumns = ['P', 'Q', 'V', 'Theta']
 export default {
   filters: {
     // is_done转换成 “已完成” “未完成”
@@ -103,6 +111,14 @@ export default {
         learner_action: ''
       },
       netDetailInfo: [],
+      p_min: 0,
+      p_max: 0,
+      q_min: 0,
+      q_max: 0,
+      v_min: 0,
+      v_max: 0,
+      theta_min: 0,
+      theta_max: 0,
       submitActionForm: {},
       learnerTypeOptions,
       detailColumns
@@ -129,6 +145,50 @@ export default {
             learner_action: ''
           }
           this.netDetailInfo = resp.data.detail
+          let pMin = 999
+          let qMin = 999
+          let vMin = 999
+          let thetaMin = 999
+          let pMax = -999
+          let qMax = -999
+          let vMax = -999
+          let thetaMax = -999
+          this.netDetailInfo.forEach(item => {
+            if (item.P < pMin) {
+              pMin = item.P
+            }
+            if (item.P > pMax) {
+              pMax = item.P
+            }
+            if (item.Q < qMin) {
+              qMin = item.Q
+            }
+            if (item.Q > qMax) {
+              qMax = item.Q
+            }
+            if (item.V < vMin) {
+              vMin = item.V
+            }
+            if (item.V > vMax) {
+              vMax = item.V
+            }
+            if (item.Theta < thetaMin) {
+              thetaMin = item.Theta
+            }
+            if (item.Theta > thetaMax) {
+              thetaMax = item.Theta
+            }
+          })
+          this.p_min = pMin
+          this.p_max = pMax
+          this.q_min = qMin
+          this.q_max = qMax
+          this.v_min = vMin
+          this.v_max = vMax
+          this.theta_min = thetaMin
+          this.theta_max = thetaMax
+          console.log(pMin, pMax, qMin, qMax, vMin, vMax, thetaMin, thetaMax)
+          // console.log(this.netDetailInfo)
         }
       })
     },
@@ -159,34 +219,39 @@ export default {
       if (cellValue === false) {
         return 'false'
       }
-      return cellValue
+      return parseFloat(cellValue).toFixed(4)
     },
     cellStyle (row, column, rowIndex, columnIndex) {
       // 根据级别显示颜色
       // console.log(row);
       // console.log(row.column);
       if (row.column.label === 'P') {
-        let color = Math.floor(row.row.P)
-        if (color > 0xffffff) {
-          color = 0xffffff
+        const p = Math.floor((row.row.P - this.p_min) * 150 / (this.p_max - this.p_min))
+        let color = (p << 16) + 0x222222
+        while (color > 0xffffff) {
+          color = color - 0x1000000
         }
         return `background:#${color.toString(16)}`
       } else if (row.column.label === 'Q') {
-        let color = Math.floor(row.row.Q)
-        if (color > 0xffffff) {
-          color = 0xffffff
+        const q = Math.floor((row.row.Q - this.q_min) * 150 / (this.q_max - this.q_min))
+        // let color = ((q * 2) << 16) + (q << 8) + 0x111111
+        let color = (q << 16) + 0x222222
+        while (color > 0xffffff) {
+          color = color - 0x1000000
         }
         return `background:#${color.toString(16)}`
       } else if (row.column.label === 'V') {
-        let color = Math.floor(row.row.V)
-        if (color > 0xffffff) {
-          color = 0xffffff
+        const v = Math.floor((row.row.V - this.v_min) * 150 / (this.v_max - this.v_min))
+        let color = (v << 16) + 0x222222
+        while (color > 0xffffff) {
+          color = color - 0x1000000
         }
         return `background:#${color.toString(16)}`
       } else if (row.column.label === 'Theta') {
-        let color = Math.floor(row.row.Theta)
-        if (color > 0xffffff) {
-          color = 0xffffff
+        const t = Math.floor((row.row.Theta - this.theta_min) * 150 / (this.theta_max - this.theta_min))
+        let color = (t << 16) + 0x222222
+        while (color > 0xffffff) {
+          color = color - 0x1000000
         }
         return `background:#${color.toString(16)}`
       }

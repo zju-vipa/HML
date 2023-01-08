@@ -4,7 +4,7 @@
       <!-- <span class="logo-title">HML</span> -->
       <a href="#" class="logo">
         <img class="logo-img" src="./../../assets/img/logo.png" alt="图标">
-        <span class="logo-title">人在回路机器学习</span>
+        <span class="logo-title">大电网人机协同双向学习系统</span>
       </a>
       <!-- <div class="header-list">
         <span>模型列表</span>
