@@ -1,0 +1,46 @@
+ THE ISLANDS OF ALL BUS:
+   BUSNAME         ISLAND
+BUS14      1
+BUS15      1
+BUS13      1
+BUS4      1
+BUS5      1
+BUS3      1
+BUS2      1
+BUS18      1
+BUS17      1
+BUS27      1
+BUS16      1
+BUS19      1
+BUS24      1
+BUS21      1
+BUS22      1
+BUS35      1
+BUS23      1
+BUS36      1
+BUS33      1
+BUS20      1
+BUS34      1
+BUS26      1
+BUS28      1
+BUS29      1
+BUS25      1
+BUS37      1
+BUS38      1
+BUS30      1
+BUS1      1
+BUS39      1
+BUS9      1
+BUS8      1
+BUS7      1
+BUS6      1
+BUS31      1
+BUS11      1
+BUS12      1
+BUS10      1
+BUS32      1
+ THE DEAD ISLANDS ARE:
+ THE NO BALANCE ISLANDS ARE:
+ THE AUTO BALANCES OF THE NO BALANCE ISLANDS:
+ ISLAND        BUSNAME
+ islanding time£º           0 s           1  ms.

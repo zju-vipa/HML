@@ -18,7 +18,7 @@
                 </el-select>
             </el-form-item>
             <el-form-item label="是否进行分析" prop="if_profile">
-              <el-select v-model="uploadForm.if_profile" placeholder="请选择是否公开" style="width:400px">
+              <el-select v-model="uploadForm.if_profile" placeholder="请选择是否分析" style="width:400px">
                 <el-option label="是" :value=true></el-option>
                 <el-option label="否" :value=false></el-option>
               </el-select>
@@ -82,7 +82,8 @@ export default {
         if_profile: false
       },
       // 上传文件地址
-      uploadURL: 'http://10.214.211.135:8021/api/private/v1/dataset/upload',
+      // uploadURL: 'http://192.168.137.8:8021/api/private/v1/dataset/upload',
+      uploadURL: 'http://10.214.211.137:8021/api/private/v1/dataset/upload',
       uploadFormRules: {
         dataset_name: [
           { required: true, message: '请输入数据名称', trigger: 'blur' }

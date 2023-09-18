@@ -8,6 +8,7 @@ from utils.data_generation import emergency_data_generation_a
 from utils.network import read_examples
 from utils.matlab_data_generation import matlab_data_generation_b
 from utils.ctgan_data_generation import ctgan_data_generation_c
+from celery_tasks.algorithms import UnbiasedGeneration
 from flask import current_app
 power_net_datasetDao = PowerNetDatasetDao(db)
 
@@ -34,12 +35,15 @@ def power_net_dataset_to_bean(power_net_dataset_json):
     power_net_dataset_bean.n_sample = power_net_dataset_json['n_sample']
     power_net_dataset_bean.cond_stability = power_net_dataset_json['cond_stability']
     power_net_dataset_bean.cond_load = power_net_dataset_json['cond_load']
+    # unbiased generate 参数
+    power_net_dataset_bean.sample_num = power_net_dataset_json['sample_num']
+    power_net_dataset_bean.fault_line = power_net_dataset_json['fault_line']
 
     power_net_dataset_bean.start_time = power_net_dataset_json['start_time']
     power_net_dataset_bean.generate_state = power_net_dataset_json['generate_state']
     power_net_dataset_bean.user_id = power_net_dataset_json['user_id']
     power_net_dataset_bean.username = power_net_dataset_json['username']
-    
+
     return power_net_dataset_bean
 
 
@@ -131,6 +135,23 @@ def generate(self, power_net_dataset_json, file_path):
         # res.to_csv(file_path, header=True, index=False)
         current_app.logger.info("p3.4 task generate")
         current_app.logger.info(file_path)
+    elif power_net_dataset_type == 'D':
+        # unbiased generation
+        current_app.logger.info("p3.1 task generate")
+        self.update_state(state='PROCESS', meta={'progress': 0.05, 'message': 'read disturb params'})
+        sample_num = power_net_dataset_bean.sample_num
+        fault_line = power_net_dataset_bean.fault_line
+        dataset_id = power_net_dataset_bean.power_net_dataset_id
+        current_app.logger.info("p3.2 task generate")
+        # 生成电网数据集
+        self.update_state(state='PROCESS', meta={'progress': 0.10, 'message': 'generating'})
+
+        res = UnbiasedGeneration.unbiased_generation_d(file_path=file_path, dataset_id=dataset_id,
+                                                       sample_num=sample_num, fault_line=fault_line)
+        current_app.logger.info(file_path)
+        current_app.logger.info("p3.3 task generate")
+        self.update_state(state='PROCESS', meta={'progress': 0.90, 'message': 'saving result'})
+
     # 完成生成任务 更新任务状态为2
     self.update_state(state='PROCESS', meta={'progress': 0.95, 'message': 'update generate_state'})
     power_net_dataset_bean.generate_state = '2'
@@ -146,35 +167,3 @@ def generate(self, power_net_dataset_json, file_path):
     return 'SUCCESS'
 
 
-def run_algorithm_train_with_label(data, data_label, power_net_dataset_id, power_net_dataset_parameters):
-    if power_net_dataset_parameters['train_name'] == 'RFC':
-        n_estimators = power_net_dataset_parameters['n_estimators']
-        model_enc, model_rfc, y_prediction, report = Classification.algorithm_RFC_train(data, data_label, n_estimators)
-        save_power_net_dataset_model(model_enc, 'Label.pkl', power_net_dataset_id)
-        save_power_net_dataset_model(model_rfc, 'RFC.pkl', power_net_dataset_id)
-        save_power_net_dataset_y_prediction(y_prediction, power_net_dataset_id)
-        save_power_net_dataset_report(report, power_net_dataset_id)
-
-
-def save_power_net_dataset_model(model_object, model_file_name, power_net_dataset_id):
-    model_directory = os.path.join(celery_app.conf["SAVE_L_MODEL_PATH"], power_net_dataset_id)
-    if not os.path.exists(model_directory):
-        os.mkdir(model_directory)
-    model_path = os.path.join(model_directory, model_file_name)
-    joblib.dump(model_object, model_path)
-    return model_path
-
-
-def save_power_net_dataset_y_prediction(y_prediction, power_net_dataset_id):
-    file_directory = os.path.join(celery_app.conf["SAVE_L_MODEL_PATH"], power_net_dataset_id)
-    file_path = os.path.join(file_directory, 'y_prediction.csv')
-    y_prediction.to_csv(file_path, header=True, index=False)
-    return file_path
-
-
-def save_power_net_dataset_report(report, power_net_dataset_id):
-    file_directory = os.path.join(celery_app.conf["SAVE_L_MODEL_PATH"], power_net_dataset_id)
-    file_path = os.path.join(file_directory, 'report.txt')
-    with open(file_path, 'w') as f:
-        f.write(report)
-    return file_path

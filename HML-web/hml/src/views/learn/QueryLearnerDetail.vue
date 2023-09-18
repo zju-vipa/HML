@@ -62,7 +62,7 @@
             <!-- </el-card> -->
           </el-col>
           <el-col :span="12">
-            <img :src="'http://10.214.211.135:8030/img/learner118.png'" style="width: 500px; height: 500px; object-fit: fill;">
+            <img :src="'http://10.214.211.137:8030/img/learner118.png'" style="width: 500px; height: 500px; object-fit: fill;">
           </el-col>
         </el-row>
         <!-- <el-row align="middle">
