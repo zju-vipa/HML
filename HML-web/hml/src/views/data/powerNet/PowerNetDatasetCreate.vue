@@ -54,7 +54,7 @@
                   <el-option v-for="(option, index) in initNetOptionsA" :key="index" :label="option" :value="option"></el-option>
                 </el-select>
                 <!--暂稳数据 样例列表-->
-                <el-select v-else-if="powerNetJobInfo.pn_job_type==='B' || powerNetJobInfo.pn_job_type==='C' || powerNetJobInfo.pn_job_type==='D'" v-model="initPowerNetInfo.init_net_name" @change="handleInitNetChange" style="width: 300px">
+                <el-select v-else-if="powerNetJobInfo.pn_job_type==='B' || powerNetJobInfo.pn_job_type==='C'" v-model="initPowerNetInfo.init_net_name" @change="handleInitNetChange" style="width: 300px">
                   <el-option v-for="(option, index) in initNetOptionsB" :key="index" :label="option" :value="option"></el-option>
                 </el-select>
               </el-form-item>
@@ -227,6 +227,18 @@
           <el-row>
             <el-col :span="24">
               <el-form-item label="稳定性条件控制" prop="cond_stability">
+                <!-- <el-col :span="12">
+                  <el-switch v-model="ganSettings.stability_switch" @change="stabilityConditionSwitch">
+                  </el-switch>
+                </el-col>
+                <el-col :span="12"> -->
+                <!-- <el-slider  v-model="ganSettings.cond_stability"
+                  :format-tooltip="formatToolTip1"
+                  :show-tooltip="true"
+                  :min="0" :max="3" :step="1"
+                  @change="condControl1">
+                </el-slider> -->
+                <!-- </el-col> -->
                 <el-radio-group v-model="ganSettings.cond_stability" >
                   <el-radio v-for="(option, index) in ganStabilityOptions"
                   :key="index" :label="option.type">{{option.name}}
@@ -238,6 +250,11 @@
           <el-row>
             <el-col :span="24">
               <el-form-item label="负荷条件控制" prop="cond_load">
+                <!-- <el-switch v-model="ganSettings.load_switch" @change="loadConditionSwitch">
+                </el-switch>
+                <el-slider v-if="ganSettings.load_switch===true" v-model="ganSettings.cond_load"
+                 :min="0.7" :max="1.3" :step="0.1" show-stops>
+                </el-slider> -->
                 <el-radio-group v-model="ganSettings.cond_load" >
                   <el-radio v-for="(option, index) in ganLoadOptions"
                   :key="index" :label="option.type">{{option.name}}
@@ -246,44 +263,10 @@
               </el-form-item>
             </el-col>
           </el-row>
-          <el-row>
-            <el-col :span="24">
-              <el-form-item label="人在回路调参" prop="set_human">
-                <el-select v-model="ganSettings.set_human" placeholder="请选择是否设置人在回路调参" style="width:400px">
-                  <el-option label="是" :value=true></el-option>
-                  <el-option label="否" :value=false></el-option>
-                </el-select>
-              </el-form-item>
-            </el-col>
-          </el-row>
         </el-form>
         <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button>
       </el-card>
-      <!-- 方式D （清华 数据无偏化样本生成）：生成参数设置 -->
-      <el-card v-if="powerNetJobInfo.pn_job_type==='D'">
-        <div><h3>Step 3: 生成参数设置</h3></div>
-        <el-form label-position="right" label-width="150px" :model="unbiasedSettings" :rules="unbiasedSettingsFormRules" ref="unbiasedSettingsFormRef" class="demo-ruleForm">
-          <el-row>
-            <el-col :span="24">
-              <el-form-item label="生成样本数量" prop="sample_num">
-                <el-input v-model.number="unbiasedSettings.sample_num" style="width: 800px"></el-input>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="24">
-              <el-form-item label="故障线路选择" prop="fault_line">
-                <el-radio-group v-model="unbiasedSettings.fault_line" >
-                  <el-radio v-for="(option, index) in unbiasedFaultLineOptions"
-                  :key="index" :label="option.type">{{option.name}}
-                  </el-radio>
-                </el-radio-group>
-              </el-form-item>
-            </el-col>
-          </el-row>
-        </el-form>
-        <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button>
-      </el-card>
+
     </div>
   </div>
 </template>
@@ -293,8 +276,7 @@ import queryPowerNetApi from './../../../api/queryPowerNet'
 const generateTypeOptions = [
   { type: 'A', name: '潮流数据生成' }, // 潮流
   { type: 'B', name: '暂稳数据生成' }, // 暂稳
-  { type: 'C', name: 'CTGAN模型生成' },
-  { type: 'D', name: '数据无偏化样本生成' } // 清华 场景驱动的数据无偏化技术
+  { type: 'C', name: 'CTGAN模型生成' }
 ]
 // CTGAN生成条件：无；稳定；不稳定
 const ganStabilityOptions = [
@@ -318,11 +300,6 @@ const ganLoadOptions = [
   { type: '1.25', name: '125%' },
   { type: '1.3', name: '130%' }
 ]
-// 清华 数据无偏化样本生成，fault_line目前只支持12,26
-const unbiasedFaultLineOptions = [
-  { type: 12, name: '线路12' },
-  { type: 26, name: '线路26' }
-]
 // 方式A样例名称 （潮流）
 const initNetOptionsA = ['case5', 'case9', 'case14', 'case30', 'case_ieee30', 'case39', 'case57', 'case118', 'case300']
 // 方式B/c样例名称  （暂稳）
@@ -331,33 +308,24 @@ const initNetOptionsB = ['case39']
 const otherSelectOptions = ['line', 'shunt', 'switch', 'impedance', 'trafo']
 const componentColumns = {
   bus: ['name', 'vn_kv', 'type', 'zone', 'max_vm_pu', 'min_vm_pu', 'in_service'],
-  load: [// 'name',
-    'bus', 'p_mw', 'q_mvar', 'const_z_percent', 'const_i_percent', 'sn_mva', 'scaling',
-    'in_service',
-    // 'type',
-    'controllable'
+  load: ['name', 'bus', 'p_mw', 'q_mvar', 'const_z_percent', 'const_i_percent', 'sn_mva', 'scaling',
+    'in_service', 'type', 'controllable'
     // 'max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar'
   ],
-  gen: [// 'name', 'type',
-    'bus', 'p_mw', 'vm_pu',
-    // 'sn_mva',
-    'min_q_mvar', 'max_q_mvar',
+  gen: ['name', 'type', 'bus', 'p_mw', 'vm_pu', 'sn_mva', 'min_q_mvar', 'max_q_mvar',
     'scaling', 'max_p_mw', 'min_p_mw',
     // 'vn_kv', 'xdss_pu', 'rdss_pu', 'cos_phi',
     'in_service'],
-  line: [// 'name', 'std_type',
-    'from_bus', 'to_bus', 'length_km', 'r_ohm_per_km', 'x_ohm_per_km', 'c_nf_per_km',
+  line: ['name', 'std_type', 'from_bus', 'to_bus', 'length_km', 'r_ohm_per_km', 'x_ohm_per_km', 'c_nf_per_km',
     // 'r0_ohm_per_km', 'x0_ohm_per_km', 'c0_nf_per_km',
     'g_us_per_km', 'max_i_ka', 'parallel', 'df', 'type',
     'max_loading_percent',
     // 'endtemp_degree',
     'in_service'],
-  shunt: [// 'name',
-    'bus', 'p_mw', 'q_mvar', 'vn_kv', 'step', 'in_service'],
+  shunt: ['name', 'bus', 'p_mw', 'q_mvar', 'vn_kv', 'step', 'in_service'],
   switch: ['name', 'bus', 'element', 'et', 'type', 'closed'],
   impedance: ['name', 'from_bus', 'to_bus', 'rft_pu', 'xft_pu', 'rtf_pu', 'xtf_pu', 'sn_mva', 'in_service'],
-  trafo: [// 'name', 'std_type',
-    'hv_bus', 'lv_bus', 'sn_mva', 'vn_hv_kv', 'vn_lv_kv', 'vk_percent',
+  trafo: ['name', 'std_type', 'hv_bus', 'lv_bus', 'sn_mva', 'vn_hv_kv', 'vn_lv_kv', 'vk_percent',
     'vkr_percent', 'pfe_kw', 'i0_percent',
     // 'vk0_percent', 'vkr0_percent', 'mag0_percent', 'mag0_rx', 'si0_hv_partial','vector_group',
     'shift_degree', 'tap_side', 'tap_neutral', 'tap_min', 'tap_max', 'tap_step_percent', 'tap_step_degree',
@@ -426,17 +394,6 @@ export default {
         ],
         cond_load: [
           { required: true, message: '请选择负荷条件', trigger: 'blur' }
-        ],
-        set_human: [
-          { required: true, message: '请选择是否设置人在回路调参', trigger: 'blur' }
-        ]
-      },
-      unbiasedSettingsFormRules: {
-        sample_num: [
-          { required: true, message: '请填写样本数', trigger: 'blur' }
-        ],
-        fault_line: [
-          { required: true, message: '请选择故障线路', trigger: 'blur' }
         ]
       },
       // 任务ID，名称，生成方式，描述
@@ -486,15 +443,10 @@ export default {
       },
       ganSettings: {
         n_sample: 10,
-        // stability_switch: false,
+        stability_switch: false,
         cond_stability: 1,
-        // load_switch: false,
-        cond_load: '0',
-        set_human: false
-      },
-      unbiasedSettings: {
-        sample_num: 10,
-        fault_line: 12
+        load_switch: false,
+        cond_load: '0'
       },
       // to do
       // 潮流计算结果
@@ -507,8 +459,7 @@ export default {
       componentOtherColumns: [],
       linePercentageOptions,
       ganStabilityOptions,
-      ganLoadOptions,
-      unbiasedFaultLineOptions
+      ganLoadOptions
     }
   },
   created () {
@@ -589,8 +540,6 @@ export default {
         valid3 = this.$refs.faultSettingsFormRef.validate
       } else if (this.powerNetJobInfo.pn_job_type === 'C') {
         valid3 = this.$refs.ganSettingsFormRef.validate
-      } else if (this.powerNetJobInfo.pn_job_type === 'D') {
-        valid3 = this.$refs.unbiasedSettingsFormRef.validate
       }
       // 转换成query需要的格式
       if (valid1 && valid2 && valid3) {
@@ -610,10 +559,7 @@ export default {
           n_sample: this.ganSettings.n_sample,
           // cond_stability: this.ganSettings.cond_stability.toString,
           cond_stability: this.ganSettings.cond_stability,
-          cond_load: this.ganSettings.cond_load,
-          set_human: this.ganSettings.set_human,
-          sample_num: this.unbiasedSettings.sample_num,
-          fault_line: this.unbiasedSettings.fault_line
+          cond_load: this.ganSettings.cond_load
         }
       }
       queryPowerNetApi.addPowerNetDataset(this.addPowerNetDatasetForm).then(response => {
@@ -641,16 +587,16 @@ export default {
       return cellValue
     },
     // 方式C：是否设置生成条件
-    // stabilityConditionSwitch () {
-    //   if (this.ganSettings.stability_switch === false) {
-    //     this.ganSettings.cond_stability = 0
-    //   }
-    // },
-    // loadConditionSwitch () {
-    //   if (this.ganSettings.load_switch === false) {
-    //     this.ganSettings.cond_load = '0'
-    //   }
-    // },
+    stabilityConditionSwitch () {
+      if (this.ganSettings.stability_switch === false) {
+        this.ganSettings.cond_stability = 0
+      }
+    },
+    loadConditionSwitch () {
+      if (this.ganSettings.load_switch === false) {
+        this.ganSettings.cond_load = 0
+      }
+    },
     formatToolTip1 (val) {
       return val
     },
