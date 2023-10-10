@@ -66,6 +66,10 @@ class PowerNetDatasetService:
             file_ext = ".mat"
         file_path = os.path.join(current_app.config["SAVE_PN_DATASET_PATH"],
                                  str(power_net_dataset_id) + '_pn_power_flow' + file_ext)
+        # ctgan数据生成
+        if pn_type == "C":
+            file_path = os.path.join(current_app.config["SAVE_PN_DATASET_PATH"],
+                                     str(power_net_dataset_id) + '_ctgan')
         # 数据无偏化样本生成（用到psasp）,结果为文件夹
         if pn_type == "D":
             file_path = os.path.join(current_app.config["SAVE_PN_DATASET_PATH"],

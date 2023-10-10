@@ -163,9 +163,15 @@
         </el-form>
       </el-card>
       <!-- 方式C（CTGAN）：生成参数设置 -->
-      <el-card v-if="powerNetJobInfo.pn_job_type==='C' && ganSettings.set_human===true">
+      <el-card v-if="powerNetJobInfo.pn_job_type==='C' && ganSettings.set_human_origin===true">
         <div><h3>Step 3: 生成参数设置</h3></div>
         <el-form label-position="right" label-width="150px" :model="ganSettings" :rules="ganSettingsFormRules" ref="ganSettingsFormRef" class="demo-ruleForm">
+          <el-row align="middle" style="margin-bottom: 30px">
+            <el-col align="center">
+              <img :src="ganSettings.loss_img">
+              <!-- <span style="margin-top: 5px;">图</span> -->
+            </el-col>
+          </el-row>
           <el-row>
             <el-col :span="24">
               <el-form-item label="生成样本数量" prop="n_sample">
@@ -206,7 +212,7 @@
             </el-col>
           </el-row>
         </el-form>
-        <el-button v-if="powerNetJobInfo.pn_job_type==='C' && ganSettings.set_human===true" class="createbtn" size="medium" type="primary" @click="addHumanSetPowerNetDataset">重新生成</el-button>
+        <el-button v-if="powerNetJobInfo.pn_job_type==='C' && ganSettings.set_human_origin===true" class="createbtn" size="medium" type="primary" @click="addHumanSetPowerNetDataset">重新生成</el-button>
       </el-card>
       <el-card v-if="powerNetJobInfo.pn_job_type==='A'">
         <h3>潮流计算结果（至多显示30条）</h3>
@@ -281,24 +287,33 @@ const initNetOptions = ['case5', 'case9', 'case14', 'case30', 'case_ieee30', 'ca
 const otherSelectOptions = ['line', 'shunt', 'switch', 'impedance', 'trafo']
 const componentColumns = {
   bus: ['name', 'vn_kv', 'type', 'zone', 'max_vm_pu', 'min_vm_pu', 'in_service'],
-  load: ['name', 'bus', 'p_mw', 'q_mvar', 'const_z_percent', 'const_i_percent', 'sn_mva', 'scaling',
-    'in_service', 'type', 'controllable'
+  load: [// 'name',
+    'bus', 'p_mw', 'q_mvar', 'const_z_percent', 'const_i_percent', 'sn_mva', 'scaling',
+    'in_service',
+    // 'type',
+    'controllable'
     // 'max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar'
   ],
-  gen: ['name', 'type', 'bus', 'p_mw', 'vm_pu', 'sn_mva', 'min_q_mvar', 'max_q_mvar',
+  gen: [// 'name', 'type',
+    'bus', 'p_mw', 'vm_pu',
+    // 'sn_mva',
+    'min_q_mvar', 'max_q_mvar',
     'scaling', 'max_p_mw', 'min_p_mw',
     // 'vn_kv', 'xdss_pu', 'rdss_pu', 'cos_phi',
     'in_service'],
-  line: ['name', 'std_type', 'from_bus', 'to_bus', 'length_km', 'r_ohm_per_km', 'x_ohm_per_km', 'c_nf_per_km',
+  line: [// 'name', 'std_type',
+    'from_bus', 'to_bus', 'length_km', 'r_ohm_per_km', 'x_ohm_per_km', 'c_nf_per_km',
     // 'r0_ohm_per_km', 'x0_ohm_per_km', 'c0_nf_per_km',
     'g_us_per_km', 'max_i_ka', 'parallel', 'df', 'type',
     'max_loading_percent',
     // 'endtemp_degree',
     'in_service'],
-  shunt: ['name', 'bus', 'p_mw', 'q_mvar', 'vn_kv', 'step', 'in_service'],
+  shunt: [// 'name',
+    'bus', 'p_mw', 'q_mvar', 'vn_kv', 'step', 'in_service'],
   switch: ['name', 'bus', 'element', 'et', 'type', 'closed'],
   impedance: ['name', 'from_bus', 'to_bus', 'rft_pu', 'xft_pu', 'rtf_pu', 'xtf_pu', 'sn_mva', 'in_service'],
-  trafo: ['name', 'std_type', 'hv_bus', 'lv_bus', 'sn_mva', 'vn_hv_kv', 'vn_lv_kv', 'vk_percent',
+  trafo: [// 'name', 'std_type',
+    'hv_bus', 'lv_bus', 'sn_mva', 'vn_hv_kv', 'vn_lv_kv', 'vk_percent',
     'vkr_percent', 'pfe_kw', 'i0_percent',
     // 'vk0_percent', 'vkr0_percent', 'mag0_percent', 'mag0_rx', 'si0_hv_partial','vector_group',
     'shift_degree', 'tap_side', 'tap_neutral', 'tap_min', 'tap_max', 'tap_step_percent', 'tap_step_degree',
@@ -320,6 +335,21 @@ export default {
     //   powerNetJobDoneCnt: 0,
     //   powerNetJobUndoneCnt: 0
       // 任务ID，名称，生成方式，描述
+      addHumanSetPowerNetDatasetForm: {},
+      ganSettingsFormRules: {
+        n_sample: [
+          { required: true, message: '请填写样本数', trigger: 'blur' }
+        ],
+        cond_stability: [
+          { required: true, message: '请选择稳定条件', trigger: 'blur' }
+        ],
+        cond_load: [
+          { required: true, message: '请选择负荷条件', trigger: 'blur' }
+        ],
+        set_human: [
+          { required: true, message: '请选择是否设置人在回路调参', trigger: 'blur' }
+        ]
+      },
       powerNetJobInfo: {
         pn_job_id: '',
         pn_job_name: '',
@@ -368,11 +398,11 @@ export default {
       },
       ganSettings: {
         n_sample: 10,
-        stability_switch: false,
         cond_stability: 1,
-        load_switch: false,
         cond_load: '0',
-        set_human: false
+        set_human_origin: false,
+        set_human: false,
+        loss_img: ''
       },
       unbiasedSettings: {
         sample_num: 10,
@@ -411,22 +441,27 @@ export default {
           }
           // 潮流计算结果
           this.powerFlowResultData = resp.data.resultData
-          // 参数设置
-          this.disturbSettings.disturb_src_type_list = resp.data.powerNetDataset.disturb_src_type_list
+          // 参数设置 方式A
+          this.disturbSettings.disturb_src_type_list = resp.data.powerNetDataset.disturb_src_type_list.split(',')
           this.disturbSettings.disturb_n_var = resp.data.powerNetDataset.disturb_n_var
           this.disturbSettings.disturb_radio = resp.data.powerNetDataset.disturb_radio
           this.disturbSettings.disturb_n_sample = resp.data.powerNetDataset.disturb_n_sample
-          // ctgan 参数设置
+          // 方式B 参数设置
+          // 方式C ctgan 参数设置
           this.ganSettings.n_sample = resp.data.powerNetDataset.n_sample
-          this.ganSettings.stability_switch = resp.data.powerNetDataset.stability_switch
           this.ganSettings.cond_stability = resp.data.powerNetDataset.cond_stability
-          this.ganSettings.load_switch = resp.data.powerNetDataset.load_switch
           this.ganSettings.cond_load = resp.data.powerNetDataset.cond_load
+          // set_human_origin 是原任务的是否人在回路（决定了是否有这个功能），set_human 是调参的新任务是否继续人在回路调参
+          this.ganSettings.set_human_origin = resp.data.powerNetDataset.set_human
           this.ganSettings.set_human = resp.data.powerNetDataset.set_human
+          if (this.ganSettings.set_human_origin === true) {
+            this.ganSettings.loss_img = 'data:image/jpeg;base64,' + resp.data.loss_img
+          }
           // 样例信息
           this.initPowerNetInfo.init_net_name = resp.data.powerNetDataset.init_net_name
           this.getInitNetInfo(this.initPowerNetInfo.init_net_name)
         }
+        console.log(this.ganSettings)
       })
     },
     // 根据样例名称获得样例描述、组件数统计、组件内容、网络拓扑图
@@ -536,22 +571,14 @@ export default {
     // 一键生成
     addHumanSetPowerNetDataset () {
       // 验证表单数据正确
-      const valid1 = this.$refs.powerNetJobInfoFormRef.validate
-      const valid2 = this.$refs.initPowerNetInfoFormRef.validate
-      var valid3 = false
-      if (this.powerNetJobInfo.pn_job_type === 'A') {
-        valid3 = this.$refs.disturbSettingsFormRef.validate
-      } else if (this.powerNetJobInfo.pn_job_type === 'B') {
-        valid3 = this.$refs.faultSettingsFormRef.validate
-      } else if (this.powerNetJobInfo.pn_job_type === 'C') {
-        valid3 = this.$refs.ganSettingsFormRef.validate
-      } else if (this.powerNetJobInfo.pn_job_type === 'D') {
-        valid3 = this.$refs.unbiasedSettingsFormRef.validate
+      var valid = false
+      if (this.powerNetJobInfo.pn_job_type === 'C') {
+        valid = this.$refs.ganSettingsFormRef.validate
       }
       // 转换成query需要的格式
-      if (valid1 && valid2 && valid3) {
-        this.addPowerNetDatasetForm = {
-          pn_job_name: this.powerNetJobInfo.pn_job_name,
+      if (valid) {
+        this.addHumanSetPowerNetDatasetForm = {
+          pn_job_name: `${this.powerNetJobInfo.pn_job_name}_hml`,
           pn_job_type: this.powerNetJobInfo.pn_job_type,
           pn_job_description: this.powerNetJobInfo.pn_job_description,
           init_net_name: this.initPowerNetInfo.init_net_name,
@@ -572,7 +599,8 @@ export default {
           fault_line: this.unbiasedSettings.fault_line
         }
       }
-      queryPowerNetApi.addPowerNetDataset(this.addPowerNetDatasetForm).then(response => {
+      console.log(this.addHumanSetPowerNetDatasetForm)
+      queryPowerNetApi.addPowerNetDataset(this.addHumanSetPowerNetDatasetForm).then(response => {
         const resp = response.data
         console.log(response)
         if (resp.meta.code === 204) {

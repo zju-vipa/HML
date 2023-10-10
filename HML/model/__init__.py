@@ -74,6 +74,7 @@ class PowerNetDataset(db.Model):
     n_sample = db.Column(db.Integer, nullable=True, info='样本数')
     cond_stability = db.Column(db.Integer, nullable=True, info='稳定条件')
     cond_load = db.Column(db.String(32), nullable=True, info='负荷条件')
+    set_human = db.Column(db.Boolean, nullable=True, default=False, info='是否人在回路调参')
     # unbiased generate 参数
     sample_num = db.Column(db.Integer, nullable=True, info='生成样本数')
     fault_line = db.Column(db.Integer, nullable=True, info='故障线路')

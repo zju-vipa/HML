@@ -331,24 +331,33 @@ const initNetOptionsB = ['case39']
 const otherSelectOptions = ['line', 'shunt', 'switch', 'impedance', 'trafo']
 const componentColumns = {
   bus: ['name', 'vn_kv', 'type', 'zone', 'max_vm_pu', 'min_vm_pu', 'in_service'],
-  load: ['name', 'bus', 'p_mw', 'q_mvar', 'const_z_percent', 'const_i_percent', 'sn_mva', 'scaling',
-    'in_service', 'type', 'controllable'
+  load: [// 'name',
+    'bus', 'p_mw', 'q_mvar', 'const_z_percent', 'const_i_percent', 'sn_mva', 'scaling',
+    'in_service',
+    // 'type',
+    'controllable'
     // 'max_p_mw', 'min_p_mw', 'max_q_mvar', 'min_q_mvar'
   ],
-  gen: ['name', 'type', 'bus', 'p_mw', 'vm_pu', 'sn_mva', 'min_q_mvar', 'max_q_mvar',
+  gen: [// 'name', 'type',
+    'bus', 'p_mw', 'vm_pu',
+    // 'sn_mva',
+    'min_q_mvar', 'max_q_mvar',
     'scaling', 'max_p_mw', 'min_p_mw',
     // 'vn_kv', 'xdss_pu', 'rdss_pu', 'cos_phi',
     'in_service'],
-  line: ['name', 'std_type', 'from_bus', 'to_bus', 'length_km', 'r_ohm_per_km', 'x_ohm_per_km', 'c_nf_per_km',
+  line: [// 'name', 'std_type',
+    'from_bus', 'to_bus', 'length_km', 'r_ohm_per_km', 'x_ohm_per_km', 'c_nf_per_km',
     // 'r0_ohm_per_km', 'x0_ohm_per_km', 'c0_nf_per_km',
     'g_us_per_km', 'max_i_ka', 'parallel', 'df', 'type',
     'max_loading_percent',
     // 'endtemp_degree',
     'in_service'],
-  shunt: ['name', 'bus', 'p_mw', 'q_mvar', 'vn_kv', 'step', 'in_service'],
+  shunt: [// 'name',
+    'bus', 'p_mw', 'q_mvar', 'vn_kv', 'step', 'in_service'],
   switch: ['name', 'bus', 'element', 'et', 'type', 'closed'],
   impedance: ['name', 'from_bus', 'to_bus', 'rft_pu', 'xft_pu', 'rtf_pu', 'xtf_pu', 'sn_mva', 'in_service'],
-  trafo: ['name', 'std_type', 'hv_bus', 'lv_bus', 'sn_mva', 'vn_hv_kv', 'vn_lv_kv', 'vk_percent',
+  trafo: [// 'name', 'std_type',
+    'hv_bus', 'lv_bus', 'sn_mva', 'vn_hv_kv', 'vn_lv_kv', 'vk_percent',
     'vkr_percent', 'pfe_kw', 'i0_percent',
     // 'vk0_percent', 'vkr0_percent', 'mag0_percent', 'mag0_rx', 'si0_hv_partial','vector_group',
     'shift_degree', 'tap_side', 'tap_neutral', 'tap_min', 'tap_max', 'tap_step_percent', 'tap_step_degree',
@@ -477,9 +486,9 @@ export default {
       },
       ganSettings: {
         n_sample: 10,
-        stability_switch: false,
+        // stability_switch: false,
         cond_stability: 1,
-        load_switch: false,
+        // load_switch: false,
         cond_load: '0',
         set_human: false
       },
@@ -632,16 +641,16 @@ export default {
       return cellValue
     },
     // 方式C：是否设置生成条件
-    stabilityConditionSwitch () {
-      if (this.ganSettings.stability_switch === false) {
-        this.ganSettings.cond_stability = 0
-      }
-    },
-    loadConditionSwitch () {
-      if (this.ganSettings.load_switch === false) {
-        this.ganSettings.cond_load = 0
-      }
-    },
+    // stabilityConditionSwitch () {
+    //   if (this.ganSettings.stability_switch === false) {
+    //     this.ganSettings.cond_stability = 0
+    //   }
+    // },
+    // loadConditionSwitch () {
+    //   if (this.ganSettings.load_switch === false) {
+    //     this.ganSettings.cond_load = '0'
+    //   }
+    // },
     formatToolTip1 (val) {
       return val
     },
