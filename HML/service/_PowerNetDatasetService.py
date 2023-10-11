@@ -66,8 +66,30 @@ class PowerNetDatasetService:
             file_ext = ".mat"
         file_path = os.path.join(current_app.config["SAVE_PN_DATASET_PATH"],
                                  str(power_net_dataset_id) + '_pn_power_flow' + file_ext)
+        # ctgan数据生成
+        if pn_type == "C":
+            file_path = os.path.join(current_app.config["SAVE_PN_DATASET_PATH"],
+                                     str(power_net_dataset_id) + '_ctgan')
+        # 数据无偏化样本生成（用到psasp）,结果为文件夹
+        if pn_type == "D":
+            file_path = os.path.join(current_app.config["SAVE_PN_DATASET_PATH"],
+                                 str(power_net_dataset_id) + '_unbiased_gen')
         # if not os.path.exists(file_path):
         #     return None
+        return file_path
+
+    def getPowerNetResultZIPPath(self, power_net_dataset_id):
+        # 数据无偏化样本生成（用到psasp）,结果为文件夹
+
+        file_folder_path = os.path.join(current_app.config["SAVE_PN_DATASET_PATH"],
+                                 str(power_net_dataset_id) + '_unbiased_gen')
+        if not os.path.exists(file_folder_path):
+            return None
+        # 以zip压缩包的形式下载所有结果文件
+        file_path = file_folder_path + ".zip"
+        if not os.path.exists(file_path):
+            shutil.make_archive(file_folder_path, "zip", file_folder_path)
+
         return file_path
 
     def getPowerNetResultData(self, file_path):

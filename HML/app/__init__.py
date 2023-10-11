@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 from app.db import db
+from app.db import auto_alter_tables
 
 """
 app init
@@ -38,3 +39,4 @@ app.register_blueprint(_PowerNetDatasetApp.bp)
 # db init
 db.create_all()
 db.session.commit()
+auto_alter_tables(app)

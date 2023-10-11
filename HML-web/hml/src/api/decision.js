@@ -1,26 +1,6 @@
 import request from '../utils/request'
 
 export default {
-  // 断面算法
-  addMam (form) {
-    return request({
-      url: '/decision/apply/mam',
-      method: 'POST',
-      data: {
-        // decision_name: form.decision_name,
-        // decision_type: form.decision_type,
-        // decision_parameters: form.decision_parameters,
-        // learner_id: form.learner_id,
-        // featureEng_id: form.featureEng_id,
-        // dataset_id: form.dataset_id
-        task: form.task,
-        case: form.case
-      },
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    })
-  },
   // 添加数据集 - 应用决策者
   addAllDec (form) {
     return request({
