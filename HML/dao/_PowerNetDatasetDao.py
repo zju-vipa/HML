@@ -57,10 +57,6 @@ class PowerNetDatasetDao(BaseDao):
         power_net_dataset.n_sample = power_net_dataset_bean.n_sample
         power_net_dataset.cond_stability = power_net_dataset_bean.cond_stability
         power_net_dataset.cond_load = power_net_dataset_bean.cond_load
-        power_net_dataset.set_human = power_net_dataset_bean.set_human
-        # unbiased generate 参数
-        power_net_dataset.sample_num = power_net_dataset_bean.sample_num
-        power_net_dataset.fault_line = power_net_dataset_bean.fault_line
 
         power_net_dataset.start_time = power_net_dataset_bean.start_time
         power_net_dataset.generate_state = power_net_dataset_bean.generate_state
