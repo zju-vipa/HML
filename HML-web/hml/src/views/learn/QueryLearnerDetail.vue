@@ -40,7 +40,11 @@
           <el-row>
             <el-col :span="10">
               <el-form-item label="输入动作" prop="pn_job_name">
-                <el-input v-model="learnerInfo.learner_action" style="width: 200px"></el-input>
+                <!-- <el-input v-model="learnerInfo.learner_action" style="width: 200px"></el-input> -->
+                <el-select  v-model="learnerInfo.learner_action" style="width: 200px">
+                  <el-option v-for="(option, index) in actionOptions" :key="index" :label="option.name" :value="option.type"></el-option>
+                  <!-- <el-option v-for="count in 106" :key="count-1" :label="count-1">{{((count-1)/2)}}号发电机调至{{((count-1)%2)? '0.5':'1.4'}}</el-option> -->
+                </el-select>
               </el-form-item>
             </el-col>
             <el-col :span="10">
@@ -63,6 +67,7 @@
           </el-col>
           <el-col :span="12">
             <img :src="'http://10.214.211.135:8030/img/learner118.png'" style="width: 500px; height: 500px; object-fit: fill;">
+            <!-- <img :src="'http://192.168.137.8:8030/img/learner118.png'" style="width: 500px; height: 500px; object-fit: fill;"> -->
           </el-col>
         </el-row>
         <!-- <el-row align="middle">
@@ -121,13 +126,25 @@ export default {
       theta_max: 0,
       submitActionForm: {},
       learnerTypeOptions,
+      actionOptions: [],
       detailColumns
     }
   },
   created () {
+    this.setActionOptions()
     this.getLearnerInfo(this.$route.query.learnerId)
   },
   methods: {
+    setActionOptions () {
+      this.actionOptions = []
+      const ratioOption = ['40%', '150%']
+      for (var i = 0; i < 106; i++) {
+        const genidx = Math.floor(i / 2)
+        const ratio = ratioOption[i % 2]
+        const s = `${genidx}号发电机出力水平调至${ratio}`
+        this.actionOptions.push({ type: i, name: s })
+      }
+    },
     getLearnerInfo (learnerId) {
       learnApi.queryActionDetail(learnerId).then(response => {
         console.log(learnerId)
@@ -226,34 +243,42 @@ export default {
       // console.log(row);
       // console.log(row.column);
       if (row.column.label === 'P') {
-        const p = Math.floor((row.row.P - this.p_min) * 150 / (this.p_max - this.p_min))
-        let color = (p << 16) + 0x222222
-        while (color > 0xffffff) {
-          color = color - 0x1000000
-        }
-        return `background:#${color.toString(16)}`
+        // const p = Math.floor((row.row.P - this.p_min) * 150 / (this.p_max - this.p_min))
+        // let color = (p << 16) + 0x222222
+        // while (color > 0xffffff) {
+        //   color = color - 0x1000000
+        // }
+        const p = 255 - Math.floor((row.row.P - this.p_min) * 200 / (this.p_max - this.p_min))
+        const color = 0xff0000 + (p << 8) + p
+        return `color:black; font-size:16px; background:#${color.toString(16)};`
       } else if (row.column.label === 'Q') {
-        const q = Math.floor((row.row.Q - this.q_min) * 150 / (this.q_max - this.q_min))
-        // let color = ((q * 2) << 16) + (q << 8) + 0x111111
-        let color = (q << 16) + 0x222222
-        while (color > 0xffffff) {
-          color = color - 0x1000000
-        }
-        return `background:#${color.toString(16)}`
+        // const q = Math.floor((row.row.Q - this.q_min) * 150 / (this.q_max - this.q_min))
+        // // let color = ((q * 2) << 16) + (q << 8) + 0x111111
+        // let color = (q << 16) + 0x222222
+        // while (color > 0xffffff) {
+        //   color = color - 0x1000000
+        // }
+        const q = 255 - Math.floor((row.row.Q - this.q_min) * 200 / (this.q_max - this.q_min))
+        const color = 0xff0000 + (q << 8) + q
+        return `color:black; font-size:16px; background:#${color.toString(16)}`
       } else if (row.column.label === 'V') {
-        const v = Math.floor((row.row.V - this.v_min) * 150 / (this.v_max - this.v_min))
-        let color = (v << 16) + 0x222222
-        while (color > 0xffffff) {
-          color = color - 0x1000000
-        }
-        return `background:#${color.toString(16)}`
+        // const v = Math.floor((row.row.V - this.v_min) * 150 / (this.v_max - this.v_min))
+        // let color = (v << 16) + 0x222222
+        // while (color > 0xffffff) {
+        //   color = color - 0x1000000
+        // }
+        const v = 255 - Math.floor((row.row.V - this.v_min) * 200 / (this.v_max - this.v_min))
+        const color = 0xff0000 + (v << 8) + v
+        return `color:black; font-size:16px; background:#${color.toString(16)}`
       } else if (row.column.label === 'Theta') {
-        const t = Math.floor((row.row.Theta - this.theta_min) * 150 / (this.theta_max - this.theta_min))
-        let color = (t << 16) + 0x222222
-        while (color > 0xffffff) {
-          color = color - 0x1000000
-        }
-        return `background:#${color.toString(16)}`
+        // const t = Math.floor((row.row.Theta - this.theta_min) * 150 / (this.theta_max - this.theta_min))
+        // let color = (t << 16) + 0x222222
+        // while (color > 0xffffff) {
+        //   color = color - 0x1000000
+        // }
+        const t = 255 - Math.floor((row.row.Theta - this.theta_min) * 200 / (this.theta_max - this.theta_min))
+        const color = 0xff0000 + (t << 8) + t
+        return `color:black; font-size:16px; background:#${color.toString(16)}`
       }
     },
     // 返回上一页

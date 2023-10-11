@@ -1,0 +1,33 @@
+ ****** 计算过程中的错误和警告信息 ******
+PSASP Transient Stability Calculation Version:20181210
+ 基本元件信息  当前     系统最大
+       母线数 =       42    60000
+       线路数 =       34   120000
+     变压器数 =       12   120000
+   常规直流数 =        0      120
+     发电机数 =       10    10000
+       负荷数 =       19    40000
+系统基准容量(MVA)  =   100.0
+     Load BUS12        7 in LF data not in ST data                                                                                                                                                                                                                                                                              
+     Load BUS15        8 in LF data not in ST data                                                                                                                                                                                                                                                                              
+     Load BUS16        9 in LF data not in ST data                                                                                                                                                                                                                                                                              
+     Load BUS18       10 in LF data not in ST data                                                                                                                                                                                                                                                                              
+     Load BUS20       11 in LF data not in ST data                                                                                                                                                                                                                                                                              
+     Load BUS21       12 in LF data not in ST data                                                                                                                                                                                                                                                                              
+     Load BUS23       13 in LF data not in ST data                                                                                                                                                                                                                                                                              
+     Load BUS24       14 in LF data not in ST data                                                                                                                                                                                                                                                                              
+     Load BUS25       15 in LF data not in ST data                                                                                                                                                                                                                                                                              
+     Load BUS26       16 in LF data not in ST data                                                                                                                                                                                                                                                                              
+     Load BUS27       17 in LF data not in ST data                                                                                                                                                                                                                                                                              
+     Load BUS28       18 in LF data not in ST data                                                                                                                                                                                                                                                                              
+     Load BUS29       19 in LF data not in ST data                                                                                                                                                                                                                                                                              
+     Load BUS3        2 in LF data not in ST data                                                                                                                                                                                                                                                                               
+     Load BUS31       20 in LF data not in ST data                                                                                                                                                                                                                                                                              
+     Load BUS39       21 in LF data not in ST data                                                                                                                                                                                                                                                                              
+     Load BUS4        3 in LF data not in ST data                                                                                                                                                                                                                                                                               
+     Load BUS7        4 in LF data not in ST data                                                                                                                                                                                                                                                                               
+     Load BUS8        5 in LF data not in ST data                                                                                                                                                                                                                                                                               
+Transient stability calculation completed! 
+elapsed:           0.209s                                                       
+
+Calculation finished ,close windows please....
