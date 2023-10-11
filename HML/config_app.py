@@ -5,7 +5,7 @@ SECRET_KEY = 'vipa-hml'
 
 # Database config
 # db_host = '10.214.211.205'
-db_host = '10.214.211.137'
+db_host = '192.168.1.9'
 db_port = 8023
 db_name = 'hml'
 db_username = 'hml'
@@ -29,13 +29,7 @@ SAVE_FE_MODEL_PATH = os.path.join(ROOT_MODEL_PATH, 'featureEng')
 SAVE_L_MODEL_PATH = os.path.join(ROOT_MODEL_PATH, 'learner')
 SAVE_D_RESULT_PATH = os.path.join(ROOT_MODEL_PATH, 'result')
 SAVE_PN_DATASET_PATH = os.path.join(ROOT_FILE_PATH, 'power_net_dataset')
-SAVE_PN_DATASET_PROCESS_PATH = os.path.join(SAVE_PN_DATASET_PATH, 'process')
 
-if not os.path.exists(ROOT_FILE_PATH):
-    os.mkdir(ROOT_FILE_PATH)
-
-if not os.path.exists(ROOT_MODEL_PATH):
-    os.mkdir(ROOT_MODEL_PATH)
 
 if not os.path.exists(SAVE_DATASET_PATH):
     os.mkdir(SAVE_DATASET_PATH)
@@ -57,6 +51,3 @@ if not os.path.exists(SAVE_D_RESULT_PATH):
 
 if not os.path.exists(SAVE_PN_DATASET_PATH):
     os.mkdir(SAVE_PN_DATASET_PATH)
-
-if not os.path.exists(SAVE_PN_DATASET_PROCESS_PATH):
-    os.mkdir(SAVE_PN_DATASET_PROCESS_PATH)
