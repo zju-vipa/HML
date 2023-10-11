@@ -30,7 +30,11 @@ class DatasetService:
         return data
 
     def addDataset(self, dataset, tmp_file_path):
-        shutil.move(tmp_file_path, current_app.config["SAVE_DATASET_PATH"])
+        try:
+            for _file_path in tmp_file_path:
+                shutil.move(_file_path, current_app.config["SAVE_DATASET_PATH"])
+        except Exception:
+            pass
         file_path = self.getDatasetFilePath(dataset)
         dataset.profile_state = '0'
 

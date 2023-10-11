@@ -37,15 +37,6 @@ def login_required(view):
             return get_error(RET.SESSIONERR, 'Error: header lacks token')
         user_id = verify_token(token)  # reverse, get userid by token
         user = userService.queryUserById(user_id)
-        log = '\n\n' + '------------------------test auth ------------------------'
-        log += '\n' + 'token is:"' + str(token) + '"\n'
-        log += '\n' + 'user_id is:"' + str(user_id) + '"\n'
-        current_app.logger.info(log)
-        log = '\n' + 'user.username is:"' + str(user.username) + '"\n\n'
-        current_app.logger.info(log)
-        print("test user token !")
-        print(user)
-        print(user_id)
         if user_id is None or user is None:
             return get_error(RET.SESSIONERR, 'Error: token wrong')
 

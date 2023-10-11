@@ -5,6 +5,8 @@ from utils.CommonUtil import download_file
 from model import Dataset
 from service import DatasetService
 import os
+import shutil
+from pathlib import Path
 datasetService = DatasetService()
 
 bp = Blueprint('dataset', __name__, url_prefix='/api/private/v1/dataset')
@@ -121,35 +123,42 @@ def add_dataset():
             return get_error(RET.PARAMERR, 'Error: request lacks dataset_name')
         if not tmp_file_path:
             return get_error(RET.PARAMERR, 'Error: request lacks tmp_file_path')
-        if not os.path.exists(tmp_file_path):
+        if not tmp_file_path or not os.path.exists(tmp_file_path[0]):
             return get_error(RET.FILEERR, 'Error: file not exists')
 
-        file_name = os.path.split(tmp_file_path)[-1]
-        file_id = os.path.splitext(file_name)[0]
-        file_type = os.path.splitext(file_name)[-1][1:]
+        file_type_lis = []
+        for index, file_path in enumerate(tmp_file_path):
+            file_name = os.path.split(file_path)[-1]
+            file_id = os.path.splitext(file_name)[0]
+            file_type = os.path.splitext(file_name)[-1][1:]
+            file_type_lis.append(file_type)
 
-        if file_id != dataset_id:
-            return get_error(RET.PARAMERR, 'Error: dataset_id or tmp_file_path wrong')
+            # if file_id != dataset_id[index]:
+            #     return get_error(RET.PARAMERR, 'Error: dataset_id or tmp_file_path wrong')
 
-        dataset_bean = Dataset()
-        dataset_bean.dataset_id = dataset_id
-        dataset_bean.dataset_name = dataset_name
-        dataset_bean.file_type = file_type
-        dataset_bean.if_profile = (str(if_profile) == "true")
-        dataset_bean.if_public = (str(if_public) == "true")
-        dataset_bean.introduction = introduction
-        dataset_bean.if_featureEng = (str(if_featureEng) == "true")
-        dataset_bean.featureEng_id = featureEng_id
-        dataset_bean.original_dataset_id = original_dataset_id
-        dataset_bean.user_id = user_id
-        dataset_bean.username = username
+        try:
+            dataset_bean = Dataset()
+            dataset_bean.dataset_id = dataset_id[0]
+            dataset_bean.dataset_name = dataset_name
+            dataset_bean.file_type = file_type_lis[0]
+            dataset_bean.if_profile = (str(if_profile) == "true")
+            dataset_bean.if_public = (str(if_public) == "true")
+            dataset_bean.introduction = introduction
+            dataset_bean.if_featureEng = (str(if_featureEng) == "true")
+            dataset_bean.featureEng_id = featureEng_id
+            dataset_bean.original_dataset_id = original_dataset_id
+            dataset_bean.user_id = user_id
+            dataset_bean.username = username
 
-        dataset = datasetService.addDataset(dataset_bean, tmp_file_path).serialize
+            dataset = datasetService.addDataset(dataset_bean, tmp_file_path).serialize
 
-        msg = 'add dataset success'
+            msg = 'add dataset success'
 
-        if dataset['task_id']:
-            msg = 'add dataset success and generate profile immediately'
+            if dataset['task_id']:
+                msg = 'add dataset success and generate profile immediately'
+        except Exception as e:
+            # return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
+            return get_error(RET.FILEERR, f'{e}')
 
         return {'meta': {'msg': msg, 'code': 200}, 'data': dataset}, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
@@ -296,3 +305,42 @@ def get_task_analyze_profile_state():
 
         return {'meta': {'msg': 'get state success', 'code': 200}, 'data': data}, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
+
+
+
+
+
+# 断面算法
+@bp.route('/uploadCrossSectionTrainingSet', methods=('POST',))
+@login_required
+def upload_cross_section_training_set():
+    return upload_cross_section_file()
+
+# 断面算法
+@bp.route('/uploadCrossSectionTestSet', methods=('POST',))
+@login_required
+def upload_cross_section_test_set():
+    return upload_cross_section_file()
+
+
+# 断面算法
+def upload_cross_section_file():
+    file = request.files.get('file')
+    folder_name = request.form.get('folderName', '').strip()
+
+    if not file:
+        return get_error(RET.PARAMERR, 'Error: request lacks file')
+
+    filename = file.filename
+
+    base_path = "/root/HML/Decision/MAM_Factor-main/data"
+    save_path = base_path if not folder_name else os.path.join(base_path, folder_name)
+
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
+    file_path = os.path.join(save_path, filename)
+    file.save(file_path)
+
+    return {'meta': {'msg': 'upload success', 'code': 200}, 'data': None}, 200
+

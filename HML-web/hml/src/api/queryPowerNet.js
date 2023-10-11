@@ -53,11 +53,7 @@ export default {
         // 方式3：CTGAN
         n_sample: form.n_sample,
         cond_stability: form.cond_stability,
-        cond_load: form.cond_load,
-        set_human: form.set_human,
-        // 方式D：数据无偏化样本生成
-        sample_num: form.sample_num,
-        fault_line: form.fault_line
+        cond_load: form.cond_load
       },
       headers: {
         // 'content-type': 'application/x-www-form-urlencoded'
@@ -85,13 +81,6 @@ export default {
       url: `/data/powerNetDataset/download/result?id=${id}`,
       method: 'GET',
       responseType: 'blob'
-    })
-  },
-  downloadZIP (id) {
-    return request({
-      url: `/data/powerNetDataset/download/result_zip?id=${id}`,
-      method: 'GET',
-      responseType: 'arraybuffer'
     })
   }
 //   // 下载决策特征工程的

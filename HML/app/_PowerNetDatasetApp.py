@@ -5,7 +5,6 @@ from utils.CommonUtil import download_file
 from model import PowerNetDataset
 from service import PowerNetDatasetService
 import os
-import base64
 powerNetDatasetService = PowerNetDatasetService()
 
 bp = Blueprint('powerNetDataset', __name__, url_prefix='/api/private/v1/data/powerNetDataset')
@@ -57,13 +56,9 @@ def query_power_net_dataset_result():
 
         result_path = powerNetDatasetService.getPowerNetResultPath(power_net_dataset_id, powerNetDataset.power_net_dataset_type)
         result_data = powerNetDatasetService.getPowerNetResultData(result_path)
-        img_base64 = None
-        if powerNetDataset.set_human:
-            img_path = result_path + '_loss_vs_epoch.jpg'
-            with open(img_path, "rb") as f:
-                img_base64 = str(base64.b64encode(f.read()), encoding="utf-8")
+
         return {'meta': {'msg': 'query powerNetDataset result success', 'code': 200},
-                'data': {'powerNetDataset': powerNetDataset.serialize, 'resultData': result_data, 'loss_img': img_base64}}, 200
+                'data': {'powerNetDataset': powerNetDataset.serialize, 'resultData': result_data}}, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
 
 # 根据样例名称查询电网样例
@@ -155,9 +150,6 @@ def add_powerNetDataset():
             n_sample = request.json.get('n_sample')
             cond_stability = request.json.get('cond_stability')
             cond_load = request.json.get('cond_load')
-            set_human = request.json.get('set_human')
-            sample_num = request.json.get('sample_num')
-            fault_line = request.json.get('fault_line')
             current_app.logger.info("p1 app add_powerNetDataset")
         except Exception:
             return get_error(RET.PARAMERR, 'Error: no request')
@@ -193,14 +185,10 @@ def add_powerNetDataset():
             return get_error(RET.PARAMERR, 'Error: request lacks fault_time_list')
         if not n_sample:
             return get_error(RET.PARAMERR, 'Error: request lacks n_sample')
-        # if not cond_stability:
-        #     return get_error(RET.PARAMERR, 'Error: request lacks cond_stability')
+        if not cond_stability:
+            return get_error(RET.PARAMERR, 'Error: request lacks cond_stability')
         if not cond_load:
             return get_error(RET.PARAMERR, 'Error: request lacks cond_load')
-        if not sample_num:
-            return get_error(RET.PARAMERR, 'Error: request lacks sample_num')
-        if not fault_line:
-            return get_error(RET.PARAMERR, 'Error: request lacks fault_line')
 
         #
         power_net_dataset_bean = PowerNetDataset()
@@ -225,10 +213,6 @@ def add_powerNetDataset():
         power_net_dataset_bean.n_sample = n_sample
         power_net_dataset_bean.cond_stability = cond_stability
         power_net_dataset_bean.cond_load = cond_load
-        power_net_dataset_bean.set_human = set_human
-        # unbiased generate 参数
-        power_net_dataset_bean.sample_num = sample_num
-        power_net_dataset_bean.fault_line = fault_line
 
 
         # power_net_dataset_bean.start_time = start_time
@@ -263,34 +247,8 @@ def download_result():
             return get_error(RET.PARAMERR, 'Error: power_net_dataset_id not exists')
 
         file_path = powerNetDatasetService.getPowerNetResultPath(power_net_dataset_id, powerNetDataset.power_net_dataset_type)
-        if powerNetDataset.power_net_dataset_type == "C":
-            file_path = file_path + '.csv'
         if not os.path.exists(file_path):
             return get_error(RET.FILEERR, 'Error: result file not exists')
-
-        file = download_file(file_path)
-
-        return file, 200
-    return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
-
-
-@bp.route("/download/result_zip", methods=['GET', 'POST'])
-@login_required
-def download_all_result_in_zipfile():
-    if request.method == 'GET':
-        try:
-            power_net_dataset_id = request.args.get('id')
-        except Exception:
-            return get_error(RET.PARAMERR, 'Error: no request')
-
-        if not power_net_dataset_id:
-            return get_error(RET.PARAMERR, 'Error: request lacks power_net_dataset_id')
-
-        # file_path = task_service.download_all_task_result_in_zipfile(task_id)
-        file_path = powerNetDatasetService.getPowerNetResultZIPPath(power_net_dataset_id)
-
-        if not os.path.exists(file_path):
-            return get_error(RET.FILEERR, 'Error: result zip file not exists')
 
         file = download_file(file_path)
 
