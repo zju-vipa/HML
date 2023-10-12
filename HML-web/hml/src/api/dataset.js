@@ -3,6 +3,7 @@ import request from '../utils/request'
 export default {
   // 添加数据集
   addDataset (form) {
+    console.log('form: ', form)
     return request({
       url: '/dataset/add',
       method: 'post',

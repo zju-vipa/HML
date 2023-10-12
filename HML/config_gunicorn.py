@@ -10,7 +10,7 @@ if not os.path.exists('log'):
 
 debug = True
 loglevel = 'debug'
-bind = '127.0.0.1:8025'
+bind = '0.0.0.0:8025'
 timeout = 300
 pidfile = 'log/gunicorn.pid'
 errorlog = 'log/gunicorn_error.log'

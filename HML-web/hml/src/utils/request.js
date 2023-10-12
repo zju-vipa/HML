@@ -1,7 +1,7 @@
 import axios from 'axios'
 // 2,创建一个axios实例对象
 const request = axios.create({
-  baseURL: 'http://10.214.211.135:8021/api/private/v1',
+  baseURL: 'http://192.168.1.9:8021/api/private/v1',
   timeout: 1000000
 })
 // 请求拦截

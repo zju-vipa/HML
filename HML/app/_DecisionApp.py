@@ -1,4 +1,4 @@
-from flask import Blueprint, request, g, json
+from flask import Blueprint, send_from_directory,  request, g, json
 from app.constant import get_error, RET
 from app._UserApp import login_required
 from utils.CommonUtil import download_file
@@ -7,6 +7,11 @@ from service import DecisionService
 from service import DatasetService
 from service import FeatureEngService
 from service import LearnerService
+import os
+import base64
+from flask import send_file
+from flask import jsonify
+# import subprocess
 decisionService = DecisionService()
 datasetService = DatasetService()
 featureEngService = FeatureEngService()
@@ -539,3 +544,78 @@ def get_task_apply_decision_state():
 
         return {'meta': {'msg': 'get state success', 'code': 200}, 'data': data}, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
+
+
+
+# 断面算法
+@bp.route('/apply/mam', methods=('GET', 'POST'))
+@login_required
+def apply_mam():
+    """
+    request params:
+    name: the name of the decision **required**
+    """
+    if request.method == 'POST':
+
+        data = request.json
+        task = data.get('task')
+        case1 = data.get('case')
+        msg = 'add decision success and apply immediately'
+        script_path = "/root/HML/Decision/MAM_Factor-main/test.py"
+        # script_path = "/root/HML/Decision/MAM_Factor-main/train.py"
+
+        # # 在执行脚本之前检查并删除文件
+        # image_path = "/root/HML/Decision/MAM_Factor-main/q_table/q_table.png"
+        # text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/q_table_evenly_spaced_states.txt"
+        # if os.path.exists(image_path):
+        #     os.remove(image_path)
+        # if os.path.exists(text_file_path):
+        #     os.remove(text_file_path)
+
+        print(f"Task: {task}, Case: {case1}")
+        ret = os.system(f"python3 {script_path} --case {case1} --task {task}")
+        if ret != 0:
+            msg = '没有正确返回值'
+
+
+        image_path = "/root/HML/Decision/MAM_Factor-main/q_table/q_table.png"
+        text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/q_table_evenly_spaced_states.txt"
+        response_data = {'meta': {'msg': msg, 'code': 204}}
+        if os.path.exists(image_path):
+            with open(image_path, "rb") as image_file:
+                encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+            response_data['data'] = {'imageData': 'data:image/png;base64,' + encoded_image}
+
+        if os.path.exists(text_file_path):
+            with open(text_file_path, "r") as text_file:
+                encoded_text = base64.b64encode(text_file.read().encode()).decode('utf-8')
+            response_data['data']['textData'] = 'data:text/plain;base64,' + encoded_text
+
+        return jsonify(response_data), 200
+
+
+    if request.method == 'GET':
+        return send_from_directory(os.path.join("HML", "Decision", "MAM_Factor-main"), "q_table.png")
+
+    # return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
+
+    return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
+
+
+# 断面算法
+@bp.route('/download/image', methods=['GET'])
+@login_required
+def download_image():
+    image_path = "/root/HML/Decision/MAM_Factor-main/q_table/q_table.png"
+    # return send_file(image_path, as_attachment=True, attachment_filename='q_table.png')
+    return send_file(image_path, as_attachment=True, attachment_filename='q_table.png', mimetype='image/png')
+
+# 断面算法
+@bp.route('/download/txt', methods=['GET'])
+@login_required
+def download_txt():
+    txt_path = "/root/HML/Decision/MAM_Factor-main/q_table/q_table_evenly_spaced_states.txt"
+    return send_file(txt_path, as_attachment=True, attachment_filename='q_table_evenly_spaced_states.txt')
+
+
+

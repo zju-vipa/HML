@@ -5,7 +5,7 @@ SECRET_KEY = 'vipa-hml'
 
 # Database config
 # db_host = '10.214.211.205'
-db_host = '10.214.211.135'
+db_host = '192.168.1.9'
 db_port = 8023
 db_name = 'hml'
 db_username = 'hml'
