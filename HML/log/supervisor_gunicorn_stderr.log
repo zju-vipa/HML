@@ -3539,3 +3539,50 @@ usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
 test.py: error: argument --case: expected one argument
 usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
 test.py: error: argument --case: expected one argument
+usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
+test.py: error: argument --case: expected one argument
+usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
+test.py: error: argument --case: expected one argument
+usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
+test.py: error: argument --case: expected one argument
+usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
+test.py: error: argument --case: expected one argument
+usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
+test.py: error: argument --case: expected one argument
+usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
+test.py: error: argument --case: expected one argument
+Using backend: pytorch
+Using backend: pytorch
+Using backend: pytorch
+usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
+test.py: error: argument --case: expected one argument
+usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
+test.py: error: argument --case: expected one argument
+usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
+test.py: error: argument --case: expected one argument
+usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
+test.py: error: argument --case: expected one argument
+usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
+test.py: error: argument --case: expected one argument
+Using backend: pytorch
+Traceback (most recent call last):
+  File "src/gevent/greenlet.py", line 906, in gevent._gevent_cgreenlet.Greenlet.run
+  File "/root/anaconda3/envs/hml/lib/python3.7/site-packages/gunicorn/arbiter.py", line 242, in handle_chld
+    self.reap_workers()
+  File "/root/anaconda3/envs/hml/lib/python3.7/site-packages/gunicorn/arbiter.py", line 525, in reap_workers
+    raise HaltServer(reason, self.WORKER_BOOT_ERROR)
+gunicorn.errors.HaltServer: <HaltServer 'Worker failed to boot.' 3>
+2023-10-19T15:31:47Z <Greenlet at 0x7fc39e36def0: <bound method Arbiter.handle_chld of <gunicorn.arbiter.Arbiter object at 0x7fc39ef0fc10>>(17, None)> failed with HaltServer
+
+Using backend: pytorch
+usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
+test.py: error: argument --case: expected one argument
+usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
+test.py: error: argument --case: expected one argument
+usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
+test.py: error: argument --case: expected one argument
+usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
+test.py: error: argument --case: expected one argument
+usage: test.py [-h] [--case {case118,case300,case9241}] [--task {S4,S10,M5}]
+test.py: error: argument --case: expected one argument
+Using backend: pytorch

@@ -555,7 +555,32 @@ def apply_mam():
     request params:
     name: the name of the decision **required**
     """
+
     if request.method == 'POST':
+
+        # def fetch_decision_tree1():
+        #     image_path_t1 = "/root/HML/Decision/GCN_xgboost/decision_tree.png"
+        #     return send_file(image_path, mimetype='image/png')
+        #
+        # def fetch_decision_tree2():
+        #     image_path_t2 = "/root/HML/Decision/GCN_xgboost_old/GCN_xgboost/decision_tree.png"
+        #     return send_file(image_path, mimetype='image/png')
+        # 1023：决策树
+        # data = request.json
+        # tree_type = data.get('treeType', '')
+        # if tree_type == 'tree1':
+        #     image_path = "/root/HML/Decision/GCN_xgboost/decision_tree.png"
+        # elif tree_type == 'tree2':
+        #     image_path = "/root/HML/Decision/GCN_xgboost_old/GCN_xgboost/decision_tree.png"
+        # else:
+        #     return jsonify({'meta': {'msg': 'Invalid tree type', 'code': 400}}), 400
+        # try:
+        #     with open(image_path, "rb") as image_file:
+        #         encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+        #     return jsonify({'meta': {'msg': 'Success', 'code': 204},
+        #                     'data': {'imageData': 'data:image/png;base64,' + encoded_image}})
+        # except Exception as e:
+        #     return jsonify({'meta': {'msg': 'Error: ' + str(e), 'code': 500}}), 500
 
         data = request.json
         task = data.get('task')
@@ -578,8 +603,40 @@ def apply_mam():
             msg = '没有正确返回值'
 
 
-        image_path = "/root/HML/Decision/MAM_Factor-main/q_table/q_table.png"
-        text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/q_table_evenly_spaced_states.txt"
+        # 1019补全data
+        # if task+case1 == "M5case118":
+        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/M5case118/q_table.png"
+        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/M5case118/q_table_evenly_spaced_states.txt"
+        # if task+case1 == "M5case300":
+        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/M5case300/q_table.png"
+        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/M5case300/q_table_evenly_spaced_states.txt"
+        # if task+case1 == "M5case9241":
+        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/M5case9241/q_table.png"
+        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/M5case9241/q_table_evenly_spaced_states.txt"
+        # if task+case1 == "S4case118":
+        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/S4case118/q_table.png"
+        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/S4case118/q_table_evenly_spaced_states.txt"
+        # if task+case1 == "S4case300":
+        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/S4case300/q_table.png"
+        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/S4case300/q_table_evenly_spaced_states.txt"
+        # if task+case1 == "S4case9241":
+        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/S4case9241/q_table.png"
+        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/S4case9241/q_table_evenly_spaced_states.txt"
+        # if task+case1 == "S10case118":
+        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/S10case118/q_table.png"
+        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/S10case118/q_table_evenly_spaced_states.txt"
+        # if task+case1 == "S10case300":
+        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/S10case300/q_table.png"
+        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/S10case300/q_table_evenly_spaced_states.txt"
+        # if task+case1 == "S10case9241":
+        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/S10case9241/q_table.png"
+        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/S10case9241/q_table_evenly_spaced_states.txt"
+        # image_path = "/root/HML/Decision/MAM_Factor-main/q_table/q_table.png"
+        # text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/q_table_evenly_spaced_states.txt"
+        image_path = "/root/HML/Decision/MAM_Factor-main/q_table/"+task+case1+"/q_table.png"
+        text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/"+task+case1+"/q_table_evenly_spaced_states.txt"
+
+
         response_data = {'meta': {'msg': msg, 'code': 204}}
         if os.path.exists(image_path):
             with open(image_path, "rb") as image_file:
@@ -617,5 +674,36 @@ def download_txt():
     txt_path = "/root/HML/Decision/MAM_Factor-main/q_table/q_table_evenly_spaced_states.txt"
     return send_file(txt_path, as_attachment=True, attachment_filename='q_table_evenly_spaced_states.txt')
 
+
+
+
+# 1024：决策树
+@bp.route('/apply/mam1', methods=('GET', 'POST'))
+@login_required
+def apply_mam1():
+    """
+    request params:
+    name: the name of the decision **required**
+    """
+
+    if request.method == 'POST':
+
+        # 1023：决策树
+        data = request.json
+        tree_type = data.get('treeType', '')
+        print(tree_type)
+        if tree_type == 'tree1':
+            image_path = "/root/HML/Decision/GCN_xgboost/decision_tree.png"
+        elif tree_type == 'tree2':
+            image_path = "/root/HML/Decision/GCN_xgboost_old/GCN_xgboost/decision_tree.png"
+        else:
+            return jsonify({'meta': {'msg': 'Invalid tree type', 'code': 400}}), 400
+        try:
+            with open(image_path, "rb") as image_file:
+                encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+            return jsonify({'meta': {'msg': 'Success', 'code': 204},
+                            'data': {'imageData': 'data:image/png;base64,' + encoded_image}})
+        except Exception as e:
+            return jsonify({'meta': {'msg': 'Error: ' + str(e), 'code': 500}}), 500
 
 

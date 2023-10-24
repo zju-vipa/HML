@@ -142,7 +142,7 @@
         </el-row>
       </el-form>
     </el-card>
-    <el-card>
+    <el-card v-if="decideHFAndLeaForm.decision_type === 'Section_Algorithm'">
       <!-- 断面算法：新建卡片显示断面算法调整结果、图像、表格数据，下载结果、图像、表格数据 -->
       <!-- 提交所有表单  -->
       <h3 >断面调整算法数据查看模块</h3>
@@ -180,7 +180,7 @@
         <el-button type="primary" @click="downloadTxt">下载TXT文件</el-button>
       </a> -->
     </el-card>
-    <el-card>
+    <el-card v-if="decideHFAndLeaForm.decision_type === 'Section_Algorithm'">
     <!-- 断面算法：新建卡片显示人机交互结果，保存几人交互state、action记录，下载state、action记录 -->
     <!-- <h3 v-if="imageUrl">断面算法人机交互模块</h3>-->
     <h3 >断面调整算法人机交互模块</h3>
@@ -229,52 +229,26 @@
       <el-form-item v-if="selectedAction !== ''" label="Selected Action">
         <el-input v-model="selectedAction" readonly></el-input>
       </el-form-item>
+      <!-- 断面算法1019：决策树 -->
+      <el-button @click="generateAndDownloadDecisionTree">下载决策树</el-button>
+      <div id="decisionTree"></div>
     </el-form>
   </el-card>
-  <el-card>
-    <h3 v-if="imageUrl">人机交互模块2</h3>
-    <el-form>
-      <el-form-item label="选择State">
-        <el-select v-model="selectedState" placeholder="请选择State" @change="findTopActions">
-<!--          <el-option v-for="(item, index) in qTableData" :key="index" :label="item.state" :value="item.state"></el-option>-->
-          <el-option
-            v-for="(state, index) in qTableData.map(item => item.state).filter((value, index, self) => self.indexOf(value) === index)"
-            :key="index"
-            :label="state"
-            :value="state">
-          </el-option>
-        </el-select>
-        <!-- 选择 action -->
-        <el-select v-model="selectedAction" placeholder="请选择Action" @change="updateSelectedQValue">
-          <el-option
-            v-for="(action, index) in topActions"
-            :key="index"
-            :label="action.action"
-            :value="action.action">
-          </el-option>
-          <!-- 显示 q 值 -->
-          <el-input v-model="selectedQValue" readonly placeholder="Q 值"></el-input>
-          <!-- 继续按钮 -->
-<!--          <el-button @click="continueInteraction">继续</el-button>-->
-          <!-- 下载交互结果按钮 -->
-<!--          <el-button @click="downloadInteractions">下载交互结果</el-button>-->
-        </el-select>
-        <!-- 继续按钮 -->
-        <el-button @click="continueInteraction">继续</el-button>
-        <!-- 下载交互结果按钮 -->
-        <el-button @click="downloadInteractions">下载交互结果</el-button>
-        <el-button @click="downloadInteractionsHistory" type="primary">下载交互历史</el-button>
-      </el-form-item>
-      <el-form-item v-if="topActions.length > 0" label="Top 3 Actions">
-        <el-select v-model="selectedAction" placeholder="请选择一个Action">
-          <el-option v-for="(action, index) in topActions" :key="index" :label="'Action: ' + action.action + ', Q-value: ' + action.qValue" :value="action.action"></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item v-if="selectedAction !== ''" label="Selected Action">
-        <el-input v-model="selectedAction" readonly></el-input>
-      </el-form-item>
-    </el-form>
+  <el-card >
+    <h3 >决策规则抽取模块</h3>
+      <el-button @click="fetchDecisionTree11">查看决策树渲染结果1</el-button>
+      <el-button @click="fetchDecisionTree22">查看决策树渲染结果2</el-button>
+<!--      <img v-if="tree1ImageUrl" :src="tree1ImageUrl" alt="决策树1" />-->
+<!--      <img v-if="tree2ImageUrl" :src="tree2ImageUrl" alt="决策树2" />-->
   </el-card>
+    <!-- 决策树1的弹窗 -->
+    <el-dialog title="决策树1" :visible.sync="tree1DialogVisible" width="auto">
+      <img v-if="tree1ImageUrl" :src="tree1ImageUrl" alt="决策树1" :width="imgWidth1 + 'px'" height="auto" @wheel="handleWheel($event, 'tree1')" @load="setInitialSize('tree1')" />
+    </el-dialog>
+    <!-- 决策树2的弹窗 -->
+    <el-dialog title="决策树2" :visible.sync="tree2DialogVisible" width="auto">
+      <img v-if="tree2ImageUrl" :src="tree2ImageUrl" alt="决策树2" :width="imgWidth2 + 'px'" height="auto" @wheel="handleWheel($event, 'tree2')" @load="setInitialSize('tree2')" />
+    </el-dialog>
       <!--      选择数据集，弹出的窗口-->
     <el-dialog title="选择数据集" :visible.sync="datasetDialogVisible" @close="getColumns">
       <dataset :isDialog="true" @dataset-choose = chooseDataset></dataset>
@@ -297,12 +271,13 @@ import QueryLearner from './../learn/QueryLearner'
 import featureApi from './../../api/feature'
 import decisionApi from './../../api/decision'
 import axios from 'axios'
+import * as d3 from 'd3'
 // 学习器类型
 const decisionTypeOptions = [
   { type: 'Manual_FE', name: '应用特征工程' },
   { type: 'Manual_L', name: '应用学习器' },
   { type: 'Manual_D', name: '应用决策者' },
-  { type: 'Section_Algorithm', name: '断面算法' }
+  { type: 'Section_Algorithm', name: '应用断面算法' }
 ]
 export default {
   name: 'Decision',
@@ -313,6 +288,12 @@ export default {
   },
   data () {
     return {
+      imgWidth1: null, // 1024：决策树1的图片宽度
+      imgWidth2: null, // 1024：决策树2的图片宽度
+      tree1DialogVisible: false, // 1024：控制决策树1的弹窗可见性
+      tree2DialogVisible: false, // 1024：控制决策树2的弹窗可见性
+      tree1ImageUrl: '', // 1024：决策树图像url
+      tree2ImageUrl: '', // 1024：决策树图像url
       selectedDescription: '',
       nGen: 53,
       nAdjustStep: 2,
@@ -724,6 +705,196 @@ export default {
         txtLink.download = 'interactions_history.txt'
         document.body.appendChild(txtLink)
         txtLink.click()
+      }
+    },
+    // 断面算法：1019生成并下载决策树
+    generateAndDownloadDecisionTree () {
+      // 清除之前的 SVG 元素
+      d3.select('#decisionTree svg').remove()
+      const interactions = this.interactionsHistory
+      const treeData = this.convertInteractionsToTree(interactions)
+      this.renderDecisionTree(treeData)
+      this.downloadSVGAsPNG()
+    },
+    // 断面算法：1019将交互记录转换为决策树数据
+    // convertInteractionsToTree (interactions) {
+    //   const root = { name: 'Root', children: [] }
+    //   interactions.forEach(interaction => {
+    //     let existingStateNode = root.children.find(child => child.name === interaction.state)
+    //     if (!existingStateNode) {
+    //       existingStateNode = { name: interaction.state, children: [] }
+    //       root.children.push(existingStateNode)
+    //     }
+    //     const color = interaction.qValue > 0.5 ? 'red' : 'blue' // 基于 qValue 确定颜色
+    //     existingStateNode.children.push({ name: interaction.action, color })
+    //   })
+    //   return root
+    // },
+    // 断面算法：1019将交互记录转换为决策树数据,有蓝色节点，有注释，但是红色节点位置全部在末尾这一点要改
+    convertInteractionsToTree (interactions) {
+      const root = { name: 'Root', children: [] }
+      let currentNode = root
+      interactions.forEach(interaction => {
+        const actionNode = { name: interaction.action, color: 'red', children: [], state: interaction.state }
+        const stateNodes = [] // 添加多个蓝色节点
+        // 添加与当前action关联的所有可能的state
+        // for (let i = 0; i < this.totalActions; i++) {
+        for (let i = 0; i < 106; i++) {
+          const stateNode = { name: `action${i}`, color: 'blue', children: [] }
+          stateNodes.push(stateNode)
+        }
+        actionNode.children = stateNodes
+        // 将当前action添加为新的节点，并将其设置为当前节点
+        currentNode.children.push(actionNode)
+        currentNode = actionNode // 将选中的action设置为当前节点
+      })
+      return root
+    },
+    // 断面算法：1019使用 D3.js 渲染决策树
+    // 修改后的使用 D3.js 渲染决策树
+    renderDecisionTree (treeData) {
+      d3.select('#decisionTree svg').remove()
+      const svg = d3.select('#decisionTree').append('svg')
+        .attr('width', 1000) // 调整为较小的尺寸
+        .attr('height', 1000) // 调整为较小的尺寸
+      const root = d3.hierarchy(treeData)
+      const treeLayout = d3.tree().size([900, 900])
+      const treeRoot = treeLayout(root)
+      // 添加节点
+      const nodes = svg.selectAll('.node')
+        .data(treeRoot.descendants())
+        .enter()
+        .append('g')
+        .attr('transform', d => `translate(${d.x}, ${d.y})`)
+      nodes.append('circle')
+        .attr('class', 'node')
+        .attr('r', 5) // 缩小节点大小
+        .attr('fill', d => d.data.color)
+      // 添加连线
+      svg.selectAll('.link')
+        .data(treeRoot.links())
+        .enter()
+        .append('line')
+        .attr('class', 'link')
+        .attr('x1', d => d.source.x)
+        .attr('y1', d => d.source.y)
+        .attr('x2', d => d.target.x)
+        .attr('y2', d => d.target.y)
+        .attr('stroke', 'black')
+      // 添加备注到红色节点
+      nodes.filter(d => d.data.color === 'red')
+        .append('text')
+        .attr('dx', -10)
+        .attr('dy', -10)
+        .attr('font-size', '10px')
+        .text(d => `state: ${d.data.state || ''}, action: ${d.data.name}`)
+    },
+    // 断面算法：1019下载 SVG 为 PNG
+    downloadSVGAsPNG () {
+      const svg = document.querySelector('#decisionTree svg')
+      const canvas = document.createElement('canvas')
+      canvas.width = svg.width.baseVal.value
+      canvas.height = svg.height.baseVal.value
+      const ctx = canvas.getContext('2d')
+      const data = (new XMLSerializer()).serializeToString(svg)
+      const blob = new Blob([data], { type: 'image/svg+xml;charset=utf-8' })
+      const url = window.URL.createObjectURL(blob)
+      const img = new Image()
+      img.onload = function () {
+        ctx.drawImage(img, 0, 0)
+        window.URL.revokeObjectURL(url)
+        // 保存为 PNG 图片
+        const imgURL = canvas.toDataURL('image/png')
+        const link = document.createElement('a')
+        link.href = imgURL
+        link.download = '决策树.png'
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+      }
+      img.src = url
+    },
+    // 1024：查看渲染决策树
+    fetchDecisionTree11 () {
+      this.tree1ImageUrl = ''
+      this.tree2ImageUrl = ''
+      decisionApi.fetchDecisionTree1({ treeType: 'tree1' }).then(response => {
+        const resp = response.data
+        if (resp.meta.code === 204) {
+          this.$message.success('获取决策树1成功')
+          if (resp.data && resp.data.imageData) {
+            this.tree1ImageUrl = ''
+            this.tree1ImageUrl = resp.data.imageData
+            // 集成的下载图片代码
+            const link = document.createElement('a')
+            link.href = resp.data.imageData
+            this.tree1DialogVisible = true // 显示决策树1的弹窗
+            link.download = '决策树1.png'
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+          }
+        } else {
+          this.$message.error('获取决策树1失败')
+        }
+      }).catch(error => {
+        console.error('Fetch Decision Tree 1 failed:', error)
+        this.$message.error('获取决策树1失败')
+      })
+    },
+    // 1024：查看渲染决策树
+    fetchDecisionTree22 () {
+      this.tree1ImageUrl = ''
+      this.tree2ImageUrl = ''
+      decisionApi.fetchDecisionTree2({ treeType: 'tree2' }).then(response => {
+        const resp = response.data
+        if (resp.meta.code === 204) {
+          this.$message.success('获取决策树2成功')
+          if (resp.data && resp.data.imageData) {
+            this.tree2ImageUrl = ''
+            this.tree2ImageUrl = resp.data.imageData
+            // 集成的下载图片代码
+            const link = document.createElement('a')
+            link.href = resp.data.imageData
+            this.tree2DialogVisible = true // 显示决策树2的弹窗
+            link.download = '决策树2.png'
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+          }
+        } else {
+          this.$message.error('获取决策树2失败')
+        }
+      }).catch(error => {
+        console.error('Fetch Decision Tree 2 failed:', error)
+        this.$message.error('获取决策树2失败')
+      })
+    },
+    // 1024：决策树弹窗
+    showTree1Dialog () {
+      this.fetchDecisionTree1() // 获取决策树1的数据
+      this.tree1DialogVisible = true // 显示决策树1的弹窗
+    },
+    // 1024：决策树弹窗
+    showTree2Dialog () {
+      this.fetchDecisionTree2() // 获取决策树2的数据
+      this.tree2DialogVisible = true // 显示决策树2的弹窗
+    },
+    // 1024：鼠标滚轮调整决策树图像大小
+    handleWheel (event, treeType) {
+      const delta = event.deltaY > 0 ? 200 : -200
+      if (treeType === 'tree1') {
+        this.imgWidth1 = Math.max(1000, this.imgWidth1 + delta)
+      } else if (treeType === 'tree2') {
+        this.imgWidth2 = Math.max(1000, this.imgWidth2 + delta)
+      }
+    },
+    // 1024：鼠标滚轮调整决策树图像大小
+    setInitialSize (treeType) {
+      if (treeType === 'tree1') {
+        this.imgWidth1 = 1000
+      } else if (treeType === 'tree2') {
+        this.imgWidth2 = 800
       }
     }
   }

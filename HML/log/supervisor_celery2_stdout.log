@@ -4496,3 +4496,601 @@
   . learner.train
   . power_net_dataset.generate
 
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-19 02:47:25
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f827fef3350
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-19 03:07:54
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f99e13e0690
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-19 03:10:36
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7fb871f648d0
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-19 03:11:37
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f439d159810
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-19 03:13:37
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f333d3f8150
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-19 03:19:52
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f3be14906d0
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-19 03:22:18
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f8d011c7790
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-19 03:25:11
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f1686f5e710
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-19 03:26:43
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f7f132bc650
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-19 07:35:13
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f5aaae05150
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-19 15:31:37
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f89a05cf890
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-19 15:39:12
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7fcf382f8c10
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-20 07:14:41
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7fd1f4e6f650
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-23 12:40:39
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f43c0a78350
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-23 13:47:27
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f65a4346490
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-23 13:48:28
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f8683b0d750
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-23 13:51:09
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f940e6c5190
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-23 13:53:37
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f32eaa42e90
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-23 13:57:57
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f43377b0710
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-23 14:12:52
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7fbae265f990
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-23 14:29:01
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7fd4033f3050
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-23 14:38:38
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f483bfc69d0
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
+/root/HML/celery_tasks/algorithms/_Reinforcementlearning_utils/section_adjust/env
+ 
+ -------------- worker2@367149d737f7 v5.1.2 (sun-harmonics)
+--- ***** ----- 
+-- ******* ---- Linux-5.10.16.3-microsoft-standard-WSL2-x86_64-with-debian-buster-sid 2023-10-24 02:32:23
+- *** --- * --- 
+- ** ---------- [config]
+- ** ---------- .> app:         celery_tasks.tasks:0x7f9166454a10
+- ** ---------- .> transport:   redis://127.0.0.1:6379/0
+- ** ---------- .> results:     redis://127.0.0.1:6379/1
+- *** --- * --- .> concurrency: 8 (prefork)
+-- ******* ---- .> task events: OFF (enable -E to monitor tasks in this worker)
+--- ***** ----- 
+ -------------- [queues]
+                .> celery           exchange=celery(direct) key=celery
+                
+
+[tasks]
+  . dataset.analyzeProfile
+  . decision.applyDecision
+  . decision.applyFeatureEng
+  . decision.applyLearner
+  . featureEng.operate
+  . learner.train
+  . power_net_dataset.generate
+
