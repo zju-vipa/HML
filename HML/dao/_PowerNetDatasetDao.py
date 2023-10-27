@@ -61,6 +61,7 @@ class PowerNetDatasetDao(BaseDao):
         # unbiased generate 参数
         power_net_dataset.sample_num = power_net_dataset_bean.sample_num
         power_net_dataset.fault_line = power_net_dataset_bean.fault_line
+        power_net_dataset.generate_algorithm = power_net_dataset_bean.generate_algorithm
 
         power_net_dataset.start_time = power_net_dataset_bean.start_time
         power_net_dataset.generate_state = power_net_dataset_bean.generate_state

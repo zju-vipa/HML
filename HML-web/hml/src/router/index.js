@@ -9,6 +9,7 @@ import Home from '../views/Home'
 import Data from '../views/data/Data'
 import OriginDataset from '../views/data/OriginDataset'
 import HumanFeaDataset from '../views/data/HumanFeaDataset'
+import DataManage from '../views/data/DataManage'
 
 import Feature from '../views/feature/Feature'
 import HumanFea from '../views/feature/HumanFea'
@@ -65,6 +66,11 @@ const routes = [
       },
       {
         path: '/data',
+        name: 'DataManage',
+        component: DataManage
+      },
+      {
+        path: '/data/uploadDataset',
         name: 'Data',
         component: Data
       },

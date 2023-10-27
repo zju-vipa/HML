@@ -82,7 +82,8 @@ def query_net_description():
         init_net, description = powerNetDatasetService.queryInitNetByName(net_name)
 
         # 图片先搞个样例的
-        img_url = "http://10.214.211.135:8030/img/example_" + net_name + ".png"
+        # img_url = "http://192.168.137.8:8030/img/example_" + net_name + ".png"
+        img_url = "http://10.214.211.137:8030/img/example_" + net_name + ".png"
 
         return {'meta': {'msg': 'query init net success', 'code': 200},
                 'data': {'example': net_name,
@@ -158,6 +159,7 @@ def add_powerNetDataset():
             set_human = request.json.get('set_human')
             sample_num = request.json.get('sample_num')
             fault_line = request.json.get('fault_line')
+            generate_algorithm = request.json.get('generate_algorithm')
             current_app.logger.info("p1 app add_powerNetDataset")
         except Exception:
             return get_error(RET.PARAMERR, 'Error: no request')
@@ -229,6 +231,7 @@ def add_powerNetDataset():
         # unbiased generate 参数
         power_net_dataset_bean.sample_num = sample_num
         power_net_dataset_bean.fault_line = fault_line
+        power_net_dataset_bean.generate_algorithm = generate_algorithm
 
 
         # power_net_dataset_bean.start_time = start_time

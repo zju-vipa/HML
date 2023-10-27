@@ -11,6 +11,8 @@ HML-web/hml/dist
 HML/utils/model
 *.pkl
 # data
+*.rar
+*.zip
 
 
 # local env files
