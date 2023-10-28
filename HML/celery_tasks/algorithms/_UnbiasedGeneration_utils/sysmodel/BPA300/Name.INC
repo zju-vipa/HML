@@ -1,0 +1,11 @@
+0
+LF
+ST
+DATALIB
+0
+0
+0.01
+ST
+..\Lib\UDLIB
+LF
+LF

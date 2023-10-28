@@ -2,7 +2,8 @@
     <div>
 <!--      tab便签区域-->
       <el-card>
-        <div class="buttons">
+        <div><h3>本地数据集导入与上传</h3></div>
+        <div class="buttons" v-if="false">
           <el-button @click="gotoPowerNetDataset" type="primary">电网数据</el-button>
           <el-button @click="queryDataset" type="primary">查看原数据集</el-button>
           <el-button @click="queryDatasetHuFea" type="primary">查看特征处理数据集</el-button>
@@ -48,6 +49,7 @@
       </el-card>
       <!-- 新增的卡片界面 -->
       <el-card>
+        <div><h3>断面算法数据集导入</h3></div>
         <div>
           <el-form label-width="200px" label-position="right">
             <el-form-item label="断面算法训练集">

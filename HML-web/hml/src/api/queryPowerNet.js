@@ -57,7 +57,8 @@ export default {
         set_human: form.set_human,
         // 方式D：数据无偏化样本生成
         sample_num: form.sample_num,
-        fault_line: form.fault_line
+        fault_line: form.fault_line,
+        generate_algorithm: form.generate_algorithm
       },
       headers: {
         // 'content-type': 'application/x-www-form-urlencoded'

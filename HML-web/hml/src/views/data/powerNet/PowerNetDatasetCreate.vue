@@ -273,8 +273,24 @@
           <el-row>
             <el-col :span="24">
               <el-form-item label="故障线路选择" prop="fault_line">
-                <el-radio-group v-model="unbiasedSettings.fault_line" >
+                <el-radio-group v-if="initPowerNetInfo.init_net_name=='case39'" v-model="unbiasedSettings.fault_line" >
                   <el-radio v-for="(option, index) in unbiasedFaultLineOptions"
+                  :key="index" :label="option.type">{{option.name}}
+                  </el-radio>
+                </el-radio-group>
+                <el-radio-group v-else-if="initPowerNetInfo.init_net_name=='case300'" v-model="unbiasedSettings.fault_line" >
+                  <el-radio v-for="(option, index) in unbiasedFaultLineOptions300"
+                  :key="index" :label="option.type">{{option.name}}
+                  </el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-row>
+            <el-col :span="24">
+              <el-form-item label="生成算法选择" prop="generate_algorithm">
+                <el-radio-group v-model="unbiasedSettings.generate_algorithm" >
+                  <el-radio v-for="(option, index) in unbiasedAlgorithmOptions"
                   :key="index" :label="option.type">{{option.name}}
                   </el-radio>
                 </el-radio-group>
@@ -323,10 +339,22 @@ const unbiasedFaultLineOptions = [
   { type: 12, name: '线路12' },
   { type: 26, name: '线路26' }
 ]
+const unbiasedFaultLineOptions300 = [
+  { type: 3, name: '线路3' },
+  { type: 33, name: '线路33' },
+  { type: 49, name: '线路3' },
+  { type: 50, name: '线路33' },
+  { type: 116, name: '线路116' },
+  { type: 171, name: '线路171' }
+]
+const unbiasedAlgorithmOptions = [
+  { type: 1, name: '蒙特卡洛生成' },
+  { type: 2, name: '数据无偏化生成' }
+]
 // 方式A样例名称 （潮流）
 const initNetOptionsA = ['case5', 'case9', 'case14', 'case30', 'case_ieee30', 'case39', 'case57', 'case118', 'case300']
 // 方式B/c样例名称  （暂稳）
-const initNetOptionsB = ['case39']
+const initNetOptionsB = ['case39', 'case300']
 // 其他组件内容选择
 const otherSelectOptions = ['line', 'shunt', 'switch', 'impedance', 'trafo']
 const componentColumns = {
@@ -437,6 +465,9 @@ export default {
         ],
         fault_line: [
           { required: true, message: '请选择故障线路', trigger: 'blur' }
+        ],
+        generate_algorithm: [
+          { required: true, message: '请选择生成算法', trigger: 'blur' }
         ]
       },
       // 任务ID，名称，生成方式，描述
@@ -494,7 +525,8 @@ export default {
       },
       unbiasedSettings: {
         sample_num: 10,
-        fault_line: 12
+        fault_line: 12,
+        generate_algorithm: 1
       },
       // to do
       // 潮流计算结果
@@ -508,7 +540,9 @@ export default {
       linePercentageOptions,
       ganStabilityOptions,
       ganLoadOptions,
-      unbiasedFaultLineOptions
+      unbiasedFaultLineOptions,
+      unbiasedFaultLineOptions300,
+      unbiasedAlgorithmOptions
     }
   },
   created () {
@@ -613,7 +647,8 @@ export default {
           cond_load: this.ganSettings.cond_load,
           set_human: this.ganSettings.set_human,
           sample_num: this.unbiasedSettings.sample_num,
-          fault_line: this.unbiasedSettings.fault_line
+          fault_line: this.unbiasedSettings.fault_line,
+          generate_algorithm: this.unbiasedSettings.generate_algorithm
         }
       }
       queryPowerNetApi.addPowerNetDataset(this.addPowerNetDatasetForm).then(response => {
