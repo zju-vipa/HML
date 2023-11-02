@@ -1,5 +1,5 @@
 import os
-
+IMG_URL = 'http://10.214.211.137:8030/img'
 # Token
 SECRET_KEY = 'vipa-hml'
 
