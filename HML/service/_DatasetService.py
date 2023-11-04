@@ -19,7 +19,6 @@ class DatasetService:
         file_name = dataset_id + file_type
         tmp_file_path = os.path.join(current_app.config["SAVE_TMP_DATASET_PATH"], file_name)
         file.save(tmp_file_path)
-
         # hgs ignore type limitation
         # try:
         #     pd.read_csv(tmp_file_path, delimiter=',', header=0, nrows=16, encoding='utf-8')
@@ -30,14 +29,10 @@ class DatasetService:
         return data
 
     def addDataset(self, dataset, tmp_file_path):
-        try:
-            for _file_path in tmp_file_path:
-                shutil.move(_file_path, current_app.config["SAVE_DATASET_PATH"])
-        except Exception:
-            pass
+        shutil.move(tmp_file_path, current_app.config["SAVE_DATASET_PATH"])
         file_path = self.getDatasetFilePath(dataset)
         dataset.profile_state = '0'
-
+        
         task_id = None
         if dataset.if_profile:
             dataset.profile_state = '1'
@@ -79,7 +74,6 @@ class DatasetService:
         file_name = dataset.dataset_id + '.' + dataset.file_type
         file_directory = current_app.config["SAVE_DATASET_PATH"]
         file_path = os.path.join(file_directory, file_name)
-
         if not os.path.exists(file_path):
             return None
 

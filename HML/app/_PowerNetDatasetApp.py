@@ -83,7 +83,7 @@ def query_net_description():
 
         # 图片先搞个样例的
         # img_url = "http://192.168.137.8:8030/img/example_" + net_name + ".png"
-        img_url = "http://10.214.211.137:8030/img/example_" + net_name + ".png"
+        img_url = "http://10.82.29.169:8030/img/example_" + net_name + ".png"
 
         return {'meta': {'msg': 'query init net success', 'code': 200},
                 'data': {'example': net_name,

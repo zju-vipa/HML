@@ -8,31 +8,32 @@
     </el-breadcrumb> -->
     <el-card>
         <!-- 当前任务 -->
-        <h3 v-if="!isLearnDialog">当前学习器</h3>
+        <h1 v-if="!isLearnDialog">当前学习器</h1>
         <div v-if="!isLearnDialog">
-            <el-button class="opbtn" size="mini" type="info" plain @click="backPage" icon="el-icon-arrow-left">返回</el-button>
+            <el-button class="opbtn" size="mini" type="info" plain @click="backPage" icon="el-icon-arrow-left" style="font-size: 16px">返回</el-button>
         </div>
-        <el-table :data="LearnerData" border stripe  style="width: 100%" :cell-style="cellStyle"
+        <el-table :data="LearnerData" border stripe :row-style="{height:'80px'}" style="font-size: 20px" :cell-style="cellStyle"
         :highlight-current-row="isLearnDialog" @current-change="clickCurrentChange">
           <!-- 操作 -->
           <el-table-column type="expand" v-if="!isLearnDialog">
-            <template slot-scope="scope">
-              <el-button v-if="scope.row.action===-1" size="mini" plain @click="handleLearner(scope.row.learner_id)">待处理</el-button>
-              <el-button  size="mini" plain @click="trainProgress(scope.row.task_id)">训练进度</el-button>
-              <el-button size="mini" plain @click="handleDownLoadPrediction(scope.row)">下载预测结果</el-button>
-              <el-button size="mini" plain @click="handleDownLoadReport(scope.row)">下载预测报告</el-button>
-              <el-button  size="mini" type="danger" plain icon="el-icon-delete" @click="handleDelete(scope.row.learner_id)">删除</el-button>
+            <template slot-scope="scope" >
+              <el-button v-if="scope.row.action===-1" size="mini" plain @click="handleLearner(scope.row.learner_id)" style="font-size: 16px">待处理</el-button>
+              <el-button  size="mini" plain @click="trainProgress(scope.row.task_id)" style="font-size: 16px">训练进度</el-button>
+              <el-button size="mini" plain @click="handleDownLoadPrediction(scope.row)" style="font-size: 16px">下载预测结果</el-button>
+              <el-button size="mini" plain @click="handleDownLoadReport(scope.row)" style="font-size: 16px">下载预测报告</el-button>
+              <el-button  size="mini" type="danger" plain icon="el-icon-delete" @click="handleDelete(scope.row.learner_id)" style="font-size: 16px">删除</el-button>
               <!-- <el-button  size="mini" type="primary" plain  @click="taskProgress(scope.row.task_id)">操作进度</el-button>
               <el-button  size="mini" type="danger" plain  @click="handleDelete(scope.row.featureEng_id)">删除</el-button> -->
             </template>
           </el-table-column>
-          <el-table-column  label="序号" type="index"> </el-table-column>
-          <el-table-column prop="learner_name" label="学习器名"> </el-table-column>
-          <el-table-column prop="learner_type" label="学习器类型">
+          <el-table-column label="序号" type="index"> </el-table-column>
+          <el-table-column prop="learner_name" label="学习器名" sortable :sort-method="sortByLearnerName"> </el-table-column>
+          <el-table-column prop="learner_type" label="学习器类型" sortable :sort-method="sortByLearnerType">
             <template slot-scope="scope">{{scope.row.learner_type | learnerTypeTrans}}</template>
           </el-table-column>
-          <el-table-column prop="train_state" label="训练状态">
-            <template slot-scope="scope">{{scope.row.train_state | trainTypeTrans(scope.row.action)}}</template>
+          <el-table-column prop="start_time" label="创建时间" sortable :sort-method="sortByLearnerStartTime"> </el-table-column>
+          <el-table-column prop="train_state" label="训练状态" sortable :sort-method="sortByTrainState">
+            <template slot-scope="scope">{{scope.row.train_state | trainTypeTrans(scope)}}</template>
           </el-table-column>
           <!-- <el-table-column label="操作" width="400" v-if="!isLearnDialog">
             <template slot-scope="scope">
@@ -72,10 +73,11 @@ export default {
       const obj = learnerTypeOptions.find(item => item.type === type)
       return obj ? obj.name : null
     },
-    trainTypeTrans (type, action) {
+    trainTypeTrans (type, ss) {
+      console.log(ss)
       const obj = trainStatus.find(item => item.type === type)
       if (obj) {
-        if (obj.type === '1' && action === -1) {
+        if (obj.type === '1' && ss.row.action === -1) {
           return '待处理'
         } else {
           return obj.name
@@ -114,6 +116,7 @@ export default {
   methods: {
     // 获取学习器信息
     getLearnerInfo () {
+      // console.log('getLearnerInfo')
       learnApi.query().then(response => {
         // console.log(response)
         const resp = response.data
@@ -122,6 +125,21 @@ export default {
           this.LearnerData = resp.data
         }
       })
+    },
+    // 排序
+    sortByLearnerType (obj1, obj2) {
+      return obj1.learner_type.localeCompare(obj2.learner_type)
+    },
+    sortByLearnerName (obj1, obj2) {
+      return obj1.learner_name.localeCompare(obj2.learner_name)
+    },
+    sortByTrainState (obj1, obj2) {
+      return (obj1.train_state > obj2.train_state) ? 1 : ((obj1.train_state === obj2.train_state) ? (obj1.action - obj2.action) : -1)
+    },
+    sortByLearnerStartTime (obj1, obj2) {
+      var date1 = new Date(obj1.start_time)
+      var date2 = new Date(obj2.start_time)
+      return (date1.getTime() - date2.getTime())
     },
     handleLearner (rowId) {
       console.log(rowId)
@@ -253,8 +271,9 @@ export default {
   .el-card{
     margin: 10px 20px;
   }
-  h3{
+  h1{
     padding-bottom: 10px;
+    font-size: 32px;
     border-bottom: 3px solid rgb(102, 102, 102)
   }
   .opbtn{

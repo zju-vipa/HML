@@ -109,13 +109,13 @@ export default {
         dataset_name: '',
         if_public: false,
         introduction: '',
-        tmp_file_path: [],
-        dataset_id: [],
+        tmp_file_path: '',
+        dataset_id: '',
         if_profile: false
       },
       // 上传文件地址
       // uploadURL: 'http://192.168.137.8:8021/api/private/v1/dataset/upload',
-      uploadURL: 'http://10.214.211.137:8021/api/private/v1/dataset/upload',
+      uploadURL: 'http://10.82.29.169:8021/api/private/v1/dataset/upload',
       uploadFormRules: {
         dataset_name: [
           { required: true, message: '请输入数据名称', trigger: 'blur' }
@@ -207,10 +207,10 @@ export default {
       } else {
         this.$message.error('导入数据集失败')
       }
-      // this.uploadForm.dataset_id = resp.dataset_id
-      this.uploadForm.dataset_id.push(resp.dataset_id)
-      // this.uploadForm.tmp_file_path = resp.tmp_file_path
-      this.uploadForm.tmp_file_path.push(resp.tmp_file_path)
+      this.uploadForm.dataset_id = resp.dataset_id
+      // this.uploadForm.dataset_id.push(resp.dataset_id)
+      this.uploadForm.tmp_file_path = resp.tmp_file_path
+      // this.uploadForm.tmp_file_path.push(resp.tmp_file_path)
     },
     handleRemove () {
     },

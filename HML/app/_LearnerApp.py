@@ -6,6 +6,7 @@ from model import Learner
 from service import LearnerService
 from service import DatasetService
 import os
+import numpy
 import pandas as pd
 learnerService = LearnerService()
 datasetService = DatasetService()
@@ -251,7 +252,7 @@ def get_task_train_state():
         return {'meta': {'msg': 'get state success', 'code': 200}, 'data': data}, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
 
-# action
+# 
 @bp.route('/action/query', methods=('GET', 'POST'))
 @login_required
 def query_action_detail():
@@ -263,22 +264,62 @@ def query_action_detail():
 
         if not learner_id:
             return get_error(RET.PARAMERR, 'Error: request lacks learner_id')
-
         learner = learnerService.queryLearnerById(learner_id)
         if not learner:
             return get_error(RET.PARAMERR, 'Error: learner_id not exists')
         # p, q, v, theta
         file_path = learnerService.getActionFilePath(learner)
-        detail = None
         if os.path.exists(file_path):
-            # 先簡單處理一下
-            file = pd.read_csv(file_path, delimiter=',', header=0, encoding='utf-8')
-            # detail = file.to_json(orient="records")
-            file = file.to_dict(orient='index')
-            detail = [file[i] for i in range(len(file))]
-
+            # 先简单处理一下
+            file = numpy.load(file_path,allow_pickle=True).item()
+            detail=file.copy()
         return {'meta': {'msg': 'query learner action detail success', 'code': 200},
                 'data': {'learner': learner.serialize, 'detail': detail}
+                }, 200
+    return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
+
+@bp.route('/action/queryDangerWarnInfo', methods=('GET', 'POST'))
+@login_required
+def query_danger_warn_info():
+    if request.method == 'GET':
+        try:
+            learner_id = request.args.get('learner_id')
+        except Exception:
+            return get_error(RET.PARAMERR, 'Error: no request')
+
+        if not learner_id:
+            return get_error(RET.PARAMERR, 'Error: request lacks learner_id')
+        learner = learnerService.queryLearnerById(learner_id)
+        if not learner:
+            return get_error(RET.PARAMERR, 'Error: learner_id not exists')
+        
+        file_path = learnerService.getActionFilePath(learner)
+        if os.path.exists(file_path):
+            # 先简单处理一下
+            file = numpy.load(file_path,allow_pickle=True).item()
+            detail=file.copy()
+            dangerInfo=[]
+            for index,info in enumerate(detail['v_pair']):
+              if info[-1]!='区间内':
+                dangerInfo.append(detail['v_str'][index])
+                
+            for index,info in enumerate(detail['balance_pair']):
+              if info[-1]!='区间内':
+                dangerInfo.append(detail['balance_str'][index])
+                
+            # for index,info in enumerate(detail['line_pair']):
+            #   if info[-1]!='区间内':
+            #     dangerInfo.append(detail['line_str'][index])
+                
+            for index,info in enumerate(detail['gen_pair']):
+              if info[-1]!='区间内':
+                dangerInfo.append(detail['gen_str'][index])
+                
+            for index,info in enumerate(detail['sec_pair']):
+              if info[-1]!='区间内':
+                dangerInfo.append(detail['sec_str'][index])
+        return {'meta': {'msg': 'query learner action detail success', 'code': 200},
+                'data': {'learner': learner.serialize, 'dangerInfo': dangerInfo}
                 }, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
 
