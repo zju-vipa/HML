@@ -98,14 +98,14 @@
       <el-card>
         <el-row style="margin-bottom: 30px">
           <el-col :span="12" align="center">
-            <el-row style="font-size: 28px; margin-bottom: 30px">母线电压</el-row>
-            <el-row style="font-size: 18px; margin: 20px">
-              <el-row style="height:500px; border: 2px solid black; text-align: center; overflow-y: auto; z-index: 10;">
+            <el-row class="fakeTableLabel">母线电压</el-row>
+            <el-row style="font-size: 18px; margin: 0 10px;">
+              <el-row style="height:500px; border:1px solid #ebeef5; overflow-y: auto; z-index: 10;">
                 <el-col :span="6" align="center" v-for="(item,id) in netDetailInfo.v_pair" :key="id" style="list-style: none; min-width: 180px;">
                   <li>
-                    <div style="border: 2px solid black; margin: 10%; text-align: center;">
-                      <el-row> {{ item[0] }} </el-row>
-                      <el-row> {{ formatValues(item[1]) }} </el-row>
+                    <div class="box" :style="cellStyleV(item)">
+                      <el-row style="height: 30px; line-height: 30px"> {{ item[0] }} </el-row>
+                      <el-row style="height: 30px; line-height: 30px"> {{ formatValues(item[1]) }} </el-row>
                     </div>
                   </li>
                 </el-col>
@@ -113,14 +113,14 @@
             </el-row>
           </el-col>
           <el-col :span="12" align="center">
-            <el-row style="font-size: 28px; margin-bottom: 30px">线路功率</el-row>
-            <el-row style="font-size: 18px; margin: 20px">
-              <el-row style="height:500px; border: 2px solid black; text-align: center; overflow-y: auto; z-index: 10;">
-                <el-col :span="6" align="center" v-for="(item,id) in netDetailInfo.line_pair" :key="id" style="list-style: none;">
+            <el-row class="fakeTableLabel">线路功率</el-row>
+            <el-row style="font-size: 18px; margin: 0 10px;">
+              <el-row style="height:500px; border:1px solid #ebeef5; overflow-y: auto; z-index: 10;">
+                <el-col :span="6" align="center" v-for="(item,id) in netDetailInfo.line_pair" :key="id" style="list-style: none; min-width: 180px;">
                   <li>
-                    <div style="border: 2px solid black; margin: 10%; text-align: center;">
-                      <el-row> {{ item[0] }} </el-row>
-                      <el-row> {{ formatValues(item[1]) }} </el-row>
+                    <div class="box" :style="cellStyleLine(item)">
+                      <el-row style="height: 30px; line-height: 30px"> {{ item[0] }} </el-row>
+                      <el-row style="height: 30px; line-height: 30px"> {{ formatValues(item[1]) }} </el-row>
                     </div>
                   </li>
                 </el-col>
@@ -128,20 +128,22 @@
             </el-row>
           </el-col>
         </el-row>
-        <el-row style="font-size: 28px; margin-bottom: 30px">
-          <el-row style="font-size: 28px; margin-bottom: 30px; text-align: center;">发电机功率</el-row>
-            <el-row style="font-size: 18px; margin: 20px">
-              <el-row style="height:500px; border: 2px solid black; text-align: center; overflow-y: auto; z-index: 999;">
-                <el-col :span="4" align="center" v-for="(item,id) in netDetailInfo.gen_pair" :key="id" style="list-style: none;">
+        <el-row style="margin-bottom: 30px">
+          <el-col align="center">
+            <el-row class="fakeTableLabel">发电机功率</el-row>
+            <el-row style="font-size: 18px; margin: 0 10px;">
+              <el-row style="height:500px; border:1px solid #ebeef5; overflow-y: auto; z-index: 10;">
+                <el-col :span="4" align="center" v-for="(item,id) in netDetailInfo.gen_pair" :key="id" style="list-style: none; min-width: 180px;">
                   <li>
-                    <div style="border: 2px solid black; margin: 10%; text-align: center;">
-                      <el-row> {{ item[0] }} </el-row>
-                      <el-row> {{ formatValues(item[1]) }} </el-row>
+                    <div class="box" :style="cellStyleGen(item)">
+                      <el-row style="height: 30px; line-height: 30px"> {{ item[0] }} </el-row>
+                      <el-row style="height: 30px; line-height: 30px"> {{ formatValues(item[1]) }} </el-row>
                     </div>
                   </li>
                 </el-col>
               </el-row>
             </el-row>
+          </el-col>
         </el-row>
       </el-card>
 
@@ -236,6 +238,12 @@ export default {
         v_pair: '',
         v_str: ''
       },
+      gen_min: 0,
+      gen_max: 0,
+      line_min: 0,
+      line_max: 0,
+      v_min: 0,
+      v_max: 0,
       netDangerWarnInfo: '',
       netDetailInfoColumns,
       submitActionForm: {},
@@ -333,6 +341,42 @@ export default {
           console.log(this.netDetailInfo.target_sec_pair[0])
           console.log(this.netDetailInfo.target_sec_pair[0][1])
           console.log(this.netDetailInfo.target_sec_pair[0][2])
+          let genMin = 999
+          let lineMin = 999
+          let vMin = 999
+          let genMax = -999
+          let lineMax = -999
+          let vMax = -999
+          this.netDetailInfo.v_pair.forEach(item => {
+            if (item[1] < vMin) {
+              vMin = item[1]
+            }
+            if (item[1] > vMax) {
+              vMax = item[1]
+            }
+          })
+          this.netDetailInfo.line_pair.forEach(item => {
+            if (item[1] < lineMin) {
+              lineMin = item[1]
+            }
+            if (item[1] > lineMax) {
+              lineMax = item[1]
+            }
+          })
+          this.netDetailInfo.gen_pair.forEach(item => {
+            if (item[1] < vMin) {
+              genMin = item[1]
+            }
+            if (item[1] > vMax) {
+              genMax = item[1]
+            }
+          })
+          this.gen_min = genMin
+          this.gen_max = genMax
+          this.line_min = lineMin
+          this.line_max = lineMax
+          this.v_min = vMin
+          this.v_max = vMax
         }
       })
     },
@@ -360,48 +404,22 @@ export default {
       }
       return parseFloat(cellValue).toFixed(3)
     },
-    cellStyle (row, column, rowIndex, columnIndex) {
-      // 根据级别显示颜色
-      // console.log(row);
-      // console.log(row.column);
-      if (row.column.label === 'P') {
-        // const p = Math.floor((row.row.P - this.p_min) * 150 / (this.p_max - this.p_min))
-        // let color = (p << 16) + 0x222222
-        // while (color > 0xffffff) {
-        //   color = color - 0x1000000
-        // }
-        const p = 255 - Math.floor((row.row.P - this.p_min) * 200 / (this.p_max - this.p_min))
-        const color = 0xff0000 + (p << 8) + p
-        return `color:black; font-size:16px; background:#${color.toString(16)};`
-      } else if (row.column.label === 'Q') {
-        // const q = Math.floor((row.row.Q - this.q_min) * 150 / (this.q_max - this.q_min))
-        // // let color = ((q * 2) << 16) + (q << 8) + 0x111111
-        // let color = (q << 16) + 0x222222
-        // while (color > 0xffffff) {
-        //   color = color - 0x1000000
-        // }
-        const q = 255 - Math.floor((row.row.Q - this.q_min) * 200 / (this.q_max - this.q_min))
-        const color = 0xff0000 + (q << 8) + q
-        return `color:black; font-size:16px; background:#${color.toString(16)}`
-      } else if (row.column.label === 'V') {
-        // const v = Math.floor((row.row.V - this.v_min) * 150 / (this.v_max - this.v_min))
-        // let color = (v << 16) + 0x222222
-        // while (color > 0xffffff) {
-        //   color = color - 0x1000000
-        // }
-        const v = 255 - Math.floor((row.row.V - this.v_min) * 200 / (this.v_max - this.v_min))
-        const color = 0xff0000 + (v << 8) + v
-        return `color:black; font-size:16px; background:#${color.toString(16)}`
-      } else if (row.column.label === 'Theta') {
-        // const t = Math.floor((row.row.Theta - this.theta_min) * 150 / (this.theta_max - this.theta_min))
-        // let color = (t << 16) + 0x222222
-        // while (color > 0xffffff) {
-        //   color = color - 0x1000000
-        // }
-        const t = 255 - Math.floor((row.row.Theta - this.theta_min) * 200 / (this.theta_max - this.theta_min))
-        const color = 0xff0000 + (t << 8) + t
-        return `color:black; font-size:16px; background:#${color.toString(16)}`
-      }
+    // 根据级别显示颜色
+    cellStyleLine (item) {
+      console.log(item)
+      const v = 255 - Math.floor((item[1] - this.line_min) * 200 / (this.line_max - this.line_min))
+      const color = 0xff0000 + (v << 8) + v
+      return `background:#${color.toString(16)}`
+    },
+    cellStyleV (item) {
+      const v = 255 - Math.floor((item[1] - this.v_min) * 200 / (this.v_max - this.v_min))
+      const color = 0xff0000 + (v << 8) + v
+      return `background:#${color.toString(16)}`
+    },
+    cellStyleGen (item) {
+      const v = 255 - Math.floor((item[1] - this.gen_min) * 200 / (this.gen_max - this.gen_min))
+      const color = 0xff0000 + (v << 8) + v
+      return `background:#${color.toString(16)}`
     },
     // 返回上一页
     backPage () {
@@ -455,7 +473,7 @@ export default {
     min-height: 1px;
   }
   .el-form-item{
-  margin-bottom: 30px;
+    margin-bottom: 30px;
   }
 .dealBtn{
   float: left;
@@ -464,4 +482,18 @@ export default {
   margin-left: 10px;
   margin-right: 10px;
 }
+  .box{
+    height:60px;
+    border-right: 1px solid #ebeef5;
+    border-bottom: 1px solid #EBEEF5;
+    text-align: center;
+    padding: 12px 0;
+  }
+  .fakeTableLabel{
+    font-size: 28px;
+    border: 1px solid #ebeef5;
+    height:60px;
+    line-height: 60px ;
+    margin: 0 10px;
+  }
 </style>
