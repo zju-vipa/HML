@@ -69,8 +69,9 @@
               </el-select>
             </el-form-item>
             <el-form-item class="label" v-for="(params, index) in algorithm_parameters"
-                      :label="params.introduction" :key="index">
-              <el-select v-if="params.name==='label'"  :multiple="labelMultible" style="width:300px"
+                      :key="index" style="font-size: 20px">
+              <template slot="label"><div class="label" style="font-size: 20px">{{params.introduction}}</div></template>
+              <el-select v-if="params.name==='label'"  :multiple="labelMultible" style="width:300px; font-size: 20px"
                           v-model="params.value" placeholder="请选择标签列">
                 <el-option
                   v-for="(item,index) in columnsList" :key="index"
@@ -329,8 +330,8 @@ export default {
   .methodImages{
     flex: 7;
   } */
-  .el-form{
-    margin-top: 50px;
+  .el-form-item{
+    margin-top: 40px;
     /* border: 1px solid #bfcbd9; */
   }
   h1{

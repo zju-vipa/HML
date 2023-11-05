@@ -91,7 +91,7 @@
         </el-row>
         <el-row style="font-size: 28px; margin-bottom: 30px">
           <div @click="previewBig" style="width: 100%; height: 100%;">
-            <pdf ref="pdf" :src= "pdfSrc"> </pdf>
+            <pdf ref="pdf" :src= "pdfurl"> </pdf>
           </div>
         </el-row>
       </el-card>
@@ -241,30 +241,35 @@ export default {
       submitActionForm: {},
       learnerTypeOptions,
       actionOptions: [],
-      // pdfurl: 'http://localhost:8080/case300.pdf',
+      pdfurl: '',
+      // pdfurl: 'http://10.82.29.169:8080/case300.pdf',
       // pdfurl: require('@/assets/case300.pdf'),
       // pdfurl: 'http://10.82.29.169:8080/case300.pdf',
-      // pdfurl: 'http://10.82.29.169:8030/img/case300.pdf',
-      pdfurl: `${window.location.origin}/case300.pdf`,
-      pdfSrc: '',
+      // pdfurl: 'http://10.82.29.169:8030/case300.pdf',
+      // pdfurl: `${window.location.origin}/case300.pdf`,
+      // pdfurl: './case300.pdf',
+      // pdfurl: './../../assets/img/case300.pdf',
+      // pdfSrc: '',
       pdfDialogVisible: false
     }
   },
   created () {
     console.log(`${window.location.origin}`)
-    this.getTitlePdfurl()
+    this.pdfurl = 'http://' + document.location.host + '/case300.pdf'
+    // this.getTitlePdf()
     this.setActionOptions()
     this.getDangerWarnInfo(this.$route.query.learnerId)
     this.getLearnerInfo(this.$route.query.learnerId)
   },
   methods: {
-    getTitlePdfurl () {
-      console.log('getTitlePdfurl1')
-      this.pdfSrc = pdf.createLoadingTask(this.pdfurl)
-      this.pdfSrc.promise.then(pdf => {
-        this.numPages = pdf.numPages
-      })
-    },
+    // getTitlePdf () {
+    //   console.log('getTitlePdf')
+    //   this.pdfSrc = pdf.createLoadingTask(this.pdfurl)
+    //   console.log('this.pdfSrc: ', this.pdfSrc)
+    //   // this.pdfSrc.promise.then(pdf => {
+    //   //   this.numPages = pdf.numPages
+    //   // })
+    // },
     // 弹出大pdf对话框
     previewBig () {
       console.log('previewBig')
@@ -287,8 +292,6 @@ export default {
         const resp = response.data
         if (resp.meta.code === 200) {
           this.netDangerWarnInfo = resp.data.dangerInfo
-          console.log('this.netDangerWarnInfo1:', this.netDangerWarnInfo)
-          console.log('this.netDangerWarnInfo1:', this.netDangerWarnInfo.length)
         }
       })
     },
@@ -325,6 +328,11 @@ export default {
           this.netDetailInfo.v_str = resp.data.detail.v_str
           console.log('this.netDetailInfo:', this.netDetailInfo)
           // console.log(this.netDetailInfo)
+          console.log(this.netDetailInfo.target_sec_pair)
+          console.log(typeof this.netDetailInfo.target_sec_pair)
+          console.log(this.netDetailInfo.target_sec_pair[0])
+          console.log(this.netDetailInfo.target_sec_pair[0][1])
+          console.log(this.netDetailInfo.target_sec_pair[0][2])
         }
       })
     },
