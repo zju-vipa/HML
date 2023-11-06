@@ -97,7 +97,7 @@
                   <el-col span="12">
                     <el-card class="card-form">
                       <el-col span="4">
-                        <span>特征解耦</span>
+                        <span>特征选择</span>
                       </el-col>
                       <el-col span="14">
                         <el-select v-model="processSelectionForm.operate_name" placeholder="请选择方法" @change="handleselectTrainname4" :disabled="!addFeatureForm.checkedModules.includes('4')">
@@ -196,7 +196,7 @@
       width="30%">
       <el-form label-width="150px" label-position="left" :model="processLearningForm">
         <el-form-item class="label" v-for="(params, index) in algorithm_parameters2" :label="params.introduction" :key="index">
-          <el-select v-if="params.name==='col_retain'" style="width:360px"  :multiple="labelMultible2"
+          <el-select v-if="params.name==='col_retain'" style="width:100%"  :multiple="labelMultible2"
                      v-model="params.value" placeholder="请选择保留列">
             <el-option
               v-for="(item,index) in columnsList" :key="index"
@@ -204,7 +204,7 @@
               :value="item">
             </el-option>
           </el-select>
-          <el-input v-else style="width:360px" v-model.number="params.value"></el-input>
+          <el-input v-else style="width:100%" v-model.number="params.value"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
