@@ -55,7 +55,7 @@
                   <el-row><span style="color: darkgray">暂无记录</span></el-row>
                 </div>
               </el-row>
-              <el-row v-else-if="newResultForm.isNewResult==true && newResultForm.checkedModules.length==4">
+              <el-row v-else-if="newResultForm.isNewResult==true">
                 <el-col span="13">
                   <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }">
                     <div slot="header" class="header">
@@ -299,18 +299,18 @@
                     </div>
                     <div style="margin: 15px; text-align: center">
                       <el-row  v-for="item in newResultForm.taskDetails" :key="item.type" style="line-height: 5px">
-                        <el-col span="5">
+                        <el-col span="6">
                           <h3 style="text-align: left">{{item.label}}</h3>
                         </el-col>
-                        <el-col span="19" style="text-align: left">
+                        <el-col span="18" style="text-align: left">
                           <h4 style="font-weight: lighter">{{item.value}}</h4>
                         </el-col>
                       </el-row>
                       <el-row style="line-height: 5px" type="flex" align="middle">
-                        <el-col span="5">
+                        <el-col span="6">
                           <h3 style="text-align: left">已选功能模块</h3>
                         </el-col>
-                        <el-col span="19">
+                        <el-col span="18" style="text-align: left">
                           <el-checkbox-group v-model="newResultForm.checkedModules">
                             <el-checkbox v-for="(item, index) in moduleOptions" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
                           </el-checkbox-group>
@@ -332,14 +332,14 @@
                       <el-row>
                         <el-col span="12">
                           <el-row>
-                            <el-progress type="dashboard" :percentage="newResultForm.efficiency" :stroke-width="20" :width="190" style="font-weight: bolder; font-size: 20px;">
+                            <el-progress type="dashboard" :percentage="newResultForm.efficiency" :stroke-width="20" :width="165" style="font-weight: bolder; font-size: 20px;">
                             </el-progress>
                           </el-row>
                           <span style="color: steelblue; font-size: 18px;">初始特征有效率</span>
                         </el-col>
                         <el-col span="12">
                           <el-row>
-                            <el-progress type="dashboard" :percentage="newResultForm.accuracy" :stroke-width="20" :width="190" style="font-weight: bolder; font-size: 20px;">
+                            <el-progress type="dashboard" :percentage="newResultForm.accuracy" :stroke-width="20" :width="165" style="font-weight: bolder; font-size: 20px;">
                             </el-progress>
                           </el-row>
                           <span style="color: steelblue; font-size: 18px;">初始任务准确率</span>
@@ -534,7 +534,7 @@ export default {
         ]
       },
       HumanInLoopForm: {
-        node: 0,
+        node: '',
         operator: '',
         nodesForDelete: '',
         operatorForAdd: '',
@@ -600,13 +600,15 @@ export default {
     this.HumanFeaData = []
     this.taskFeatureList = []
     for (let i = 1; i <= this.countTotal_featureLibrary; i = i + 1) {
-      this.featureLibraryList.push({ name: 'feature' + i, dataset: '暂稳数据集', task: '---', featureDecoupling: '---', featureLearning: '---', featureDerivation: '---', featureSelection: '---' })
+      const nameString = String.fromCharCode(i / 4 + 65) + '_' + i % 4
+      this.featureLibraryList.push({ name: nameString, dataset: '暂稳数据集', task: '暂态判稳任务', featureDecoupling: '基于因子图的特征解耦', featureLearning: '基于GNN的特征提取', featureDerivation: '人机协同特征生成', featureSelection: '基于模型的特征选择' })
     }
     for (let i = 0; i < this.countTotal_featureEngList; i++) {
       this.HumanFeaData.push({ featureEng_name: '特征工程' + i, featureEng_type: '暂稳数据集', featureEng_result: '20', featureEng_efficiency: '10', operate_state: '已完成' })
     }
     for (let i = 0; i < this.countTotal_taskFeature; i++) {
-      this.taskFeatureList.push({ name: 'feature' + i, dataset: '暂稳数据集', task: '---', featureDecoupling: '---', featureLearning: '---', featureDerivation: '---', featureSelection: '---' })
+      const nameString = String.fromCharCode(i / 4 + 65) + '_' + i % 4
+      this.taskFeatureList.push({ name: nameString, dataset: '暂稳数据集', task: '暂态判稳任务', featureDecoupling: '基于因子图的特征解耦', featureLearning: '基于GNN的特征提取', featureDerivation: '人机协同特征生成', featureSelection: '基于模型的特征选择' })
     }
   },
 
