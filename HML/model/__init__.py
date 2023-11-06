@@ -78,7 +78,6 @@ class PowerNetDataset(db.Model):
     # unbiased generate 参数
     sample_num = db.Column(db.Integer, nullable=True, info='生成样本数')
     fault_line = db.Column(db.Integer, nullable=True, info='故障线路')
-    generate_algorithm = db.Column(db.Integer, nullable=True, info='生成算法选择')
 
     start_time = db.Column(db.DateTime, nullable=True, info='开始时间')
     generate_state = db.Column(db.String(1), nullable=False, default='0', info='生成状态')

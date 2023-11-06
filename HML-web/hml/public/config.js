@@ -1,5 +1,4 @@
 
 const VUE_APP_URL = {
-  baseUrl: 'http://10.214.211.137:8021/api/private/v1',
+  baseUrl: 'http://192.168.1.15:8021/api/private/v1',
 };
-

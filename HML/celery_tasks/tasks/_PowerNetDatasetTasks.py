@@ -2,11 +2,6 @@ from celery_tasks.celery import celery_app
 import pandas as pd
 import os
 import joblib
-# import sys
-# UTILPATH = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-# UTILPATH = os.path.join(UTILPATH, "utils")
-# sys.path.append(UTILPATH)
-# print("utils sys.path=", sys.path)
 from dao import PowerNetDatasetDao
 from model import db, PowerNetDataset
 from utils.data_generation import emergency_data_generation_a
@@ -44,7 +39,6 @@ def power_net_dataset_to_bean(power_net_dataset_json):
     # unbiased generate 参数
     power_net_dataset_bean.sample_num = power_net_dataset_json['sample_num']
     power_net_dataset_bean.fault_line = power_net_dataset_json['fault_line']
-    power_net_dataset_bean.generate_algorithm = power_net_dataset_json['generate_algorithm']
 
     power_net_dataset_bean.start_time = power_net_dataset_json['start_time']
     power_net_dataset_bean.generate_state = power_net_dataset_json['generate_state']
@@ -142,25 +136,18 @@ def generate(self, power_net_dataset_json, file_path):
         current_app.logger.info("p3.4 task generate")
         current_app.logger.info(file_path)
     elif power_net_dataset_type == 'D':
-        # unbiased generation: MC or unbiased
+        # unbiased generation
         current_app.logger.info("p3.1 task generate")
         self.update_state(state='PROCESS', meta={'progress': 0.05, 'message': 'read disturb params'})
         sample_num = power_net_dataset_bean.sample_num
         fault_line = power_net_dataset_bean.fault_line
         dataset_id = power_net_dataset_bean.power_net_dataset_id
-        generate_algorithm = power_net_dataset_bean.generate_algorithm
-        init_net_name = power_net_dataset_bean.init_net_name
         current_app.logger.info("p3.2 task generate")
         # 生成电网数据集
         self.update_state(state='PROCESS', meta={'progress': 0.10, 'message': 'generating'})
-        if generate_algorithm == 2:
-            res = UnbiasedGeneration.unbiased_generation_d(file_path=file_path, dataset_id=dataset_id,
-                                                           sample_num=sample_num, fault_line=fault_line,
-                                                           init_net_name=init_net_name)
-        elif generate_algorithm == 1:
-            res = UnbiasedGeneration.montecarlo_generation_d(file_path=file_path, dataset_id=dataset_id,
-                                                             sample_num=sample_num, fault_line=fault_line,
-                                                             init_net_name=init_net_name)
+
+        res = UnbiasedGeneration.unbiased_generation_d(file_path=file_path, dataset_id=dataset_id,
+                                                       sample_num=sample_num, fault_line=fault_line)
         current_app.logger.info(file_path)
         current_app.logger.info("p3.3 task generate")
         self.update_state(state='PROCESS', meta={'progress': 0.90, 'message': 'saving result'})

@@ -22,12 +22,6 @@ export default {
       method: 'GET'
     })
   },
-  queryUnbiasedFeatureImg (id, feature) {
-    return request({
-      url: `/data/powerNetDataset/queryUnbiasedFeature?id=${id}&feature=${feature}`,
-      method: 'GET'
-    })
-  },
   // 根据样例名称查询样例描述
   queryNetDescription (name) {
     return request({
@@ -63,8 +57,7 @@ export default {
         set_human: form.set_human,
         // 方式D：数据无偏化样本生成
         sample_num: form.sample_num,
-        fault_line: form.fault_line,
-        generate_algorithm: form.generate_algorithm
+        fault_line: form.fault_line
       },
       headers: {
         // 'content-type': 'application/x-www-form-urlencoded'

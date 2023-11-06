@@ -9,7 +9,6 @@ celery_app.config_from_object('celery_tasks.config_celery')
 
 # 设置项目根目录
 sys.path.append(celery_app.conf["ROOT_PATH"])
-print(sys.path)
 
 # 自动搜索任务
 celery_app.autodiscover_tasks(['celery_tasks.tasks'])

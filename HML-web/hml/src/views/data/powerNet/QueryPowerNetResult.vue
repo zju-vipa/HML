@@ -214,76 +214,6 @@
         </el-form>
         <el-button v-if="powerNetJobInfo.pn_job_type==='C' && ganSettings.set_human_origin===true" class="createbtn" size="medium" type="primary" @click="addHumanSetPowerNetDataset">重新生成</el-button>
       </el-card>
-      <!--方式D 数据无偏化生成方法 -->
-      <el-card v-if="powerNetJobInfo.pn_job_type==='D' && ganSettings.set_human_origin===true">
-        <div><h3>人在回路调参</h3></div>
-        <el-form label-position="right" label-width="150px" :model="unbiasedSettings" :rules="unbiasedSettingsFormRules" ref="unbiasedSettingsFormRef" class="demo-ruleForm">
-          <el-row align="middle" style="margin-bottom: 30px">
-            <el-col align="center" :span="8">
-              <el-row>
-                <img :src="unbiasedSettings.key_feature_img_url" class="img">
-              </el-row>
-              <el-row>
-                <el-radio-group v-model="unbiasedSettings.feature" @change="getUnbiasedFeatureImg">
-                  <el-radio v-for="i in 10" :key="i" :label="i" style="margin-right: 6px;">{{ "" }}</el-radio>
-                </el-radio-group>
-              </el-row>
-            </el-col>
-            <el-col align="center" :span="8">
-              <img :src="unbiasedSettings.feature_distribution_img_1" class="img">
-            </el-col>
-            <el-col align="center" :span="8">
-              <img :src="unbiasedSettings.feature_distribution_img_2" class="img">
-            </el-col>
-          </el-row>
-          <el-row>
-            <h4 style="margin-left: 40px;font-size: 20px;">本次生成失稳样本比例为{{unbiasedSettings.unstable_percent}}%</h4>
-            <h3>调整以下参数重新生成</h3>
-          </el-row>
-          <el-row>
-            <el-col :span="24">
-              <el-form-item label="生成样本数量" prop="sample_num">
-                <el-input v-model.number="unbiasedSettings.sample_num" style="width: 800px"></el-input>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="24">
-              <el-form-item label="故障线路选择" prop="fault_line">
-                <el-radio-group v-if="initPowerNetInfo.init_net_name=='case39'" v-model="unbiasedSettings.fault_line" >
-                  <el-radio v-for="(option, index) in unbiasedFaultLineOptions"
-                  :key="index" :label="option.type">{{option.name}}
-                  </el-radio>
-                </el-radio-group>
-                <el-radio-group v-else-if="initPowerNetInfo.init_net_name=='case300'" v-model="unbiasedSettings.fault_line" @change="handleFaultLineChange">
-                  <el-radio v-for="(option, index) in unbiasedFaultLineOptions300"
-                  :key="index" :label="option.type">{{option.name}}
-                  </el-radio>
-                </el-radio-group>
-              </el-form-item>
-            </el-col>
-          </el-row>
-          <el-row>
-            <el-col :span="12">
-              <el-form-item label="生成算法选择" prop="generate_algorithm">
-                <el-radio-group v-model="unbiasedSettings.generate_algorithm">
-                  <el-radio v-for="(option, index) in unbiasedAlgorithmOptions"
-                  :key="index" :label="option.type">{{option.name}}
-                  </el-radio>
-                </el-radio-group>
-              </el-form-item>
-            </el-col>
-            <el-col :span="8" align="center">
-              <el-button class="createbtn" size="medium" type="primary" @click="addHumanSetPowerNetDataset">重新生成</el-button>
-            </el-col>
-          </el-row>
-          <el-row v-if="initPowerNetInfo.init_net_name=='case300'" align="middle" style="margin-bottom: 30px">
-            <el-col align="center">
-              <img :src="case300_fault_line_url">
-            </el-col>
-          </el-row>
-        </el-form>
-      </el-card>
       <el-card v-if="powerNetJobInfo.pn_job_type==='A'">
         <h3>潮流计算结果（至多显示30条）</h3>
         <el-table :data="powerFlowResultData" border stripe  style="width: 100%">
@@ -322,7 +252,6 @@
 </template>
 <script>
 import queryPowerNetApi from './../../../api/queryPowerNet'
-const IMG_BASE_URL = 'http://10.214.211.137:8030/img/'
 // 生成方式类型
 const generateTypeOptions = [
   { type: 'A', name: '潮流数据生成' }, // 潮流
@@ -351,23 +280,6 @@ const ganLoadOptions = [
   { type: '1.2', name: '120%' },
   { type: '1.25', name: '125%' },
   { type: '1.3', name: '130%' }
-]
-// 清华 数据无偏化样本生成，fault_line目前只支持12,26
-const unbiasedFaultLineOptions = [
-  { type: 12, name: '线路12' },
-  { type: 26, name: '线路26' }
-]
-const unbiasedFaultLineOptions300 = [
-  { type: 3, name: '线路3' },
-  { type: 33, name: '线路33' },
-  { type: 49, name: '线路49' },
-  { type: 50, name: '线路50' },
-  { type: 116, name: '线路116' },
-  { type: 171, name: '线路171' }
-]
-const unbiasedAlgorithmOptions = [
-  { type: 1, name: '蒙特卡洛生成' },
-  { type: 2, name: '数据无偏化生成' }
 ]
 // 样例名称
 const initNetOptions = ['case5', 'case9', 'case14', 'case30', 'case_ieee30', 'case39', 'case57', 'case118', 'case300']
@@ -407,14 +319,6 @@ const componentColumns = {
     'shift_degree', 'tap_side', 'tap_neutral', 'tap_min', 'tap_max', 'tap_step_percent', 'tap_step_degree',
     'tap_pos', 'tap_phase_shifter', 'parallel', 'max_loading_percent', 'df', 'in_service']
 }
-const featureNames = {
-  line3: ['Pg@Gen1B-4', 'Ql@bus1A-17-525.0-0', 'Pg@Gen1B-3', 'Pg@Gen1B-6', 'Ql@bus1A-10-525.0-0', 'Ql@bus2W-10-525.0-0', 'Pl@bus3D-12-525.0-0', 'Pl@bus1B-2-525.0-0', 'Pl@bus2E-5-525.0-0', 'Ql@bus1B-5-525.0-0'],
-  line33: ['Pl@bus1B-8-525.0-0', 'Pl@bus3L-33-525.0-0', 'Ql@bus3L-39-525.0-0', 'Ql@bus2W-4-525.0-0', 'Ql@bus3D-22-525.0-0', 'Pg@Gen3L-10', 'Pl@bus2W-28-525.0-0', 'Pl@bus3L-44-525.0-0', 'Ql@bus3L-43-525.0-0', 'Ql@bus1A-19-525.0-0'],
-  line49: ['Pl@bus2W-8-525.0-0', 'Ql@bus1A-1-525.0-0', 'Pg@Gen3L-20', 'Ql@bus3L-46-525.0-0', 'Pl@bus3L-31-525.0-0', 'Pg@Gen2E-2', 'Ql@bus3L-11-525.0-0', 'Pl@bus3L-24-525.0-0', 'Pl@bus3L-23-525.0-0', 'Pg@Gen2W-6'],
-  line50: ['Pl@bus2E-32-525.0-0', 'Pl@bus2E-3-525.0-0', 'Ql@bus1B-2-525.0-0', 'Pl@bus2W-2-525.0-0', 'Ql@bus2E-24-525.0-0', 'Ql@bus3L-23-525.0-0', 'Ql@bus3L-31-525.0-0', 'Pl@bus3D-28-525.0-0', 'Pg@Gen3D-25', 'Pl@bus3L-31-525.0-0'],
-  line116: ['Pg@Gen1B-6', 'Ql@bus3L-24-525.0-0', 'Pl@bus3L-26-525.0-0', 'Pg@Gen1B-4', 'Pg@Gen1B-3', 'Pg@Gen3L-18', 'Ql@bus3L-47-525.0-0', 'Pg@Gen3L-21', 'Ql@bus2W-3-525.0-0', 'Pl@bus2E-29-525.0-0'],
-  line171: ['Pg@Gen1B-6', 'Pg@Gen1B-4', 'Pl@bus2W-13-525.0-0', 'Ql@bus3L-35-525.0-0', 'Ql@bus2E-23-525.0-0', 'Ql@bus3L-28-525.0-0', 'Ql@bus2W-27-525.0-0', 'Ql@bus1B-8-525.0-0', 'Ql@bus3L-5-525.0-0', 'Pl@bus2E-3-525.0-0']
-}
 export default {
   filters: {
     // is_done转换成 “已完成” “未完成”
@@ -444,17 +348,6 @@ export default {
         ],
         set_human: [
           { required: true, message: '请选择是否设置人在回路调参', trigger: 'blur' }
-        ]
-      },
-      unbiasedSettingsFormRules: {
-        sample_num: [
-          { required: true, message: '请填写样本数', trigger: 'blur' }
-        ],
-        fault_line: [
-          { required: true, message: '请选择故障线路', trigger: 'blur' }
-        ],
-        generate_algorithm: [
-          { required: true, message: '请选择生成算法', trigger: 'blur' }
         ]
       },
       powerNetJobInfo: {
@@ -513,15 +406,8 @@ export default {
       },
       unbiasedSettings: {
         sample_num: 10,
-        fault_line: 33,
-        generate_algorithm: 1,
-        key_feature_img_url: '',
-        feature_distribution_img_1: '',
-        feature_distribution_img_2: '',
-        unstable_percent: 0,
-        feature: 1
+        fault_line: 12
       },
-      case300_fault_line_url: IMG_BASE_URL + 'case300_fault_line_33.png',
       // to do
       // 潮流计算结果
       powerFlowResultData: [],
@@ -531,11 +417,7 @@ export default {
       initNetOptions,
       otherSelectOptions,
       componentColumns,
-      componentOtherColumns: [],
-      unbiasedFaultLineOptions,
-      unbiasedFaultLineOptions300,
-      unbiasedAlgorithmOptions,
-      featureNames
+      componentOtherColumns: []
     }
   },
   created () {
@@ -572,19 +454,9 @@ export default {
           // set_human_origin 是原任务的是否人在回路（决定了是否有这个功能），set_human 是调参的新任务是否继续人在回路调参
           this.ganSettings.set_human_origin = resp.data.powerNetDataset.set_human
           this.ganSettings.set_human = resp.data.powerNetDataset.set_human
-          if (this.ganSettings.set_human_origin === true && this.powerNetJobInfo.pn_job_type === 'C') {
+          if (this.ganSettings.set_human_origin === true) {
             this.ganSettings.loss_img = 'data:image/jpeg;base64,' + resp.data.loss_img
           }
-          // 方式D unbiased 参数设置
-          this.unbiasedSettings.sample_num = resp.data.powerNetDataset.sample_num
-          this.unbiasedSettings.fault_line = resp.data.powerNetDataset.fault_line
-          this.unbiasedSettings.generate_algorithm = resp.data.powerNetDataset.generate_algorithm
-          if (this.powerNetJobInfo.pn_job_type === 'D') {
-            this.unbiasedSettings.key_feature_img_url = resp.data.key_feature_img_path
-            this.unbiasedSettings.unstable_percent = resp.data.unstable_percent
-            this.getUnbiasedFeatureImg()
-          }
-          console.log(this.unbiasedSettings.key_feature_img_url)
           // 样例信息
           this.initPowerNetInfo.init_net_name = resp.data.powerNetDataset.init_net_name
           this.getInitNetInfo(this.initPowerNetInfo.init_net_name)
@@ -592,37 +464,10 @@ export default {
         console.log(this.ganSettings)
       })
     },
-    getUnbiasedFeatureImg () {
-      let featureName = 'Pg@Gen1B-4'
-      const i = this.unbiasedSettings.feature - 1
-      console.log(i)
-      if (this.unbiasedSettings.fault_line === 3) {
-        featureName = featureNames.line3[i]
-      } else if (this.unbiasedSettings.fault_line === 33) {
-        featureName = featureNames.line33[i]
-      } else if (this.unbiasedSettings.fault_line === 49) {
-        featureName = featureNames.line49[i]
-      } else if (this.unbiasedSettings.fault_line === 50) {
-        featureName = featureNames.line50[i]
-      } else if (this.unbiasedSettings.fault_line === 116) {
-        featureName = featureNames.line116[i]
-      } else if (this.unbiasedSettings.fault_line === 171) {
-        featureName = featureNames.line171[i]
-      }
-      console.log(featureName)
-      queryPowerNetApi.queryUnbiasedFeatureImg(this.powerNetJobInfo.pn_job_id, featureName).then(response => {
-        const resp = response.data
-        if (resp.meta.code === 200) {
-          // this.$message.success('加载样例成功')
-          this.unbiasedSettings.feature_distribution_img_1 = 'data:image/jpeg;base64,' + resp.data.stable_feature_img
-          this.unbiasedSettings.feature_distribution_img_2 = 'data:image/jpeg;base64,' + resp.data.unstable_feature_img
-        }
-      })
-    },
     // 根据样例名称获得样例描述、组件数统计、组件内容、网络拓扑图
     getInitNetInfo (name) {
       queryPowerNetApi.queryNetDescription(name).then(response => {
-        // console.log(response)
+        console.log(response)
         const resp = response.data
         if (resp.meta.code === 200) {
           this.$message.success('加载样例成功')
@@ -679,9 +524,6 @@ export default {
       // console.log(this.initPowerNetInfo.init_net_components.other)
       // console.log(this.componentOtherColumns)
     },
-    handleFaultLineChange () {
-      this.case300_fault_line_url = IMG_BASE_URL + 'case300_fault_line_' + this.unbiasedSettings.fault_line.toString() + '.png'
-    },
     handleDownloadResult () {
       if (this.powerNetJobInfo.pn_job_generate_state === '2') {
         queryPowerNetApi.downloadResult(this.powerNetJobInfo.pn_job_id).then(response => {
@@ -726,16 +568,12 @@ export default {
         return this.$message.error('未完成，不能下载')
       }
     },
-    // 一键重新生成
+    // 一键生成
     addHumanSetPowerNetDataset () {
       // 验证表单数据正确
       var valid = false
       if (this.powerNetJobInfo.pn_job_type === 'C') {
         valid = this.$refs.ganSettingsFormRef.validate
-      } else if (this.powerNetJobInfo.pn_job_type === 'D') {
-        valid = this.$refs.unbiasedSettingsFormRef.validate
-        // 数据无偏化生成，默认人在回路调参
-        this.ganSettings.set_human = true
       }
       // 转换成query需要的格式
       if (valid) {
@@ -758,8 +596,7 @@ export default {
           cond_load: this.ganSettings.cond_load,
           set_human: this.ganSettings.set_human,
           sample_num: this.unbiasedSettings.sample_num,
-          fault_line: this.unbiasedSettings.fault_line,
-          generate_algorithm: this.unbiasedSettings.generate_algorithm
+          fault_line: this.unbiasedSettings.fault_line
         }
       }
       console.log(this.addHumanSetPowerNetDatasetForm)
@@ -809,10 +646,6 @@ export default {
   h4{
     padding-bottom: 10px;
     /* border-bottom: 2px solid rgb(102, 102, 102) */
-  }
-  .img{
-    width: 100%;
-    height: auto;
   }
   .backbtn{
     margin-top: 20px;
