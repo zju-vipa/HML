@@ -14,6 +14,7 @@ import DataManage from '../views/data/DataManage'
 import Feature from '../views/feature/Feature'
 import HumanFea from '../views/feature/HumanFea'
 import QueryHumanFeature from '../views/feature/QueryHumanFeature'
+import QueryResult from './../views/feature/Result'
 
 import Learn from '../views/learn/Learn'
 import QueryLearner from '../views/learn/QueryLearner'
@@ -98,6 +99,11 @@ const routes = [
         path: '/feature/queryFea',
         name: 'QueryHumanFeature',
         component: QueryHumanFeature
+      },
+      {
+        path: '/feature/result',
+        name: 'QueryResult',
+        component: QueryResult
       },
       {
         path: '/learn',
