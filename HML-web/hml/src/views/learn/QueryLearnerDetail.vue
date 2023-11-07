@@ -72,8 +72,8 @@
           </el-col>
           <el-col class = "Power" :span="6" align="center">
             <el-row class = "basicGenPower">平衡机Gen2E-7当前功率为：{{ formatValues(netDetailInfo.balance_pair[1][1]) }}</el-row>
-            <el-row class = "basicGenPower">平衡机Gen2E-7功率下界为：{{ formatValues(netDetailInfo.balance_pair[1][1]) }}</el-row>
-            <el-row class = "basicGenPower">平衡机Gen2E-7功率上界为：{{ formatValues(netDetailInfo.balance_pair[1][1]) }}</el-row>
+            <el-row class = "basicGenPower">平衡机Gen2E-7功率下界为：{{ formatValues(netDetailInfo.balance_pair[1][2]) }}</el-row>
+            <el-row class = "basicGenPower">平衡机Gen2E-7功率上界为：{{ formatValues(netDetailInfo.balance_pair[1][3]) }}</el-row>
           </el-col>
         </el-row>
         <el-row style="font-size: 28px; margin-bottom: 30px">
