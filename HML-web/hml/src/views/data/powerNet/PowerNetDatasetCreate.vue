@@ -170,8 +170,13 @@
               </el-form-item>
             </el-col>
           </el-row>
+          <el-row>
+            <el-col :span="24" align="center">
+              <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button>
+            </el-col>
+          </el-row>
         </el-form>
-        <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button>
+        <!-- <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button> -->
       </el-card>
       <!-- 方式B（暂稳数据）：暂稳参数设置 -->
       <el-card v-if="powerNetJobInfo.pn_job_type==='B'">
@@ -210,8 +215,13 @@
               </el-form-item>
             </el-col>
           </el-row>
+          <el-row>
+            <el-col :span="24" align="center">
+              <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button>
+            </el-col>
+          </el-row>
         </el-form>
-        <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button>
+        <!-- <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button> -->
       </el-card>
       <!-- 方式C（CTGAN）：生成参数设置 -->
       <el-card v-if="powerNetJobInfo.pn_job_type==='C'">
@@ -256,8 +266,12 @@
               </el-form-item>
             </el-col>
           </el-row>
+          <el-row>
+            <el-col :span="24" align="center">
+              <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button>
+            </el-col>
+          </el-row>
         </el-form>
-        <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button>
       </el-card>
       <!-- 方式D （清华 数据无偏化样本生成）：生成参数设置 -->
       <el-card v-if="powerNetJobInfo.pn_job_type==='D'">
@@ -278,7 +292,7 @@
                   :key="index" :label="option.type">{{option.name}}
                   </el-radio>
                 </el-radio-group>
-                <el-radio-group v-else-if="initPowerNetInfo.init_net_name=='case300'" v-model="unbiasedSettings.fault_line" >
+                <el-radio-group v-else-if="initPowerNetInfo.init_net_name=='case300'" v-model="unbiasedSettings.fault_line" @change="handleFaultLineChange">
                   <el-radio v-for="(option, index) in unbiasedFaultLineOptions300"
                   :key="index" :label="option.type">{{option.name}}
                   </el-radio>
@@ -287,24 +301,32 @@
             </el-col>
           </el-row>
           <el-row>
-            <el-col :span="24">
+            <el-col :span="12">
               <el-form-item label="生成算法选择" prop="generate_algorithm">
-                <el-radio-group v-model="unbiasedSettings.generate_algorithm" >
+                <el-radio-group v-model="unbiasedSettings.generate_algorithm">
                   <el-radio v-for="(option, index) in unbiasedAlgorithmOptions"
                   :key="index" :label="option.type">{{option.name}}
                   </el-radio>
                 </el-radio-group>
               </el-form-item>
             </el-col>
+            <el-col :span="8" align="center">
+              <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button>
+            </el-col>
+          </el-row>
+          <el-row v-if="initPowerNetInfo.init_net_name=='case300'" align="middle" style="margin-bottom: 30px">
+            <el-col align="center">
+              <img :src="case300_fault_line_url">
+            </el-col>
           </el-row>
         </el-form>
-        <el-button class="createbtn" size="medium" type="primary" @click="addPowerNetDataset">一键生成</el-button>
       </el-card>
     </div>
   </div>
 </template>
 <script>
 import queryPowerNetApi from './../../../api/queryPowerNet'
+const IMG_BASE_URL = 'http://10.214.211.137:8030/img/'
 // 生成方式类型
 const generateTypeOptions = [
   { type: 'A', name: '潮流数据生成' }, // 潮流
@@ -342,8 +364,8 @@ const unbiasedFaultLineOptions = [
 const unbiasedFaultLineOptions300 = [
   { type: 3, name: '线路3' },
   { type: 33, name: '线路33' },
-  { type: 49, name: '线路3' },
-  { type: 50, name: '线路33' },
+  { type: 49, name: '线路49' },
+  { type: 50, name: '线路50' },
   { type: 116, name: '线路116' },
   { type: 171, name: '线路171' }
 ]
@@ -525,9 +547,10 @@ export default {
       },
       unbiasedSettings: {
         sample_num: 10,
-        fault_line: 12,
+        fault_line: 33,
         generate_algorithm: 1
       },
+      case300_fault_line_url: IMG_BASE_URL + 'case300_fault_line_33.png',
       // to do
       // 潮流计算结果
       powerFlowResultData: [],
@@ -611,6 +634,9 @@ export default {
       // console.log(this.initPowerNetInfo.init_net_components.other)
       // console.log(this.componentOtherColumns)
     },
+    handleFaultLineChange () {
+      this.case300_fault_line_url = IMG_BASE_URL + 'case300_fault_line_' + this.unbiasedSettings.fault_line.toString() + '.png'
+    },
     // 一键生成
     addPowerNetDataset () {
       // 验证表单数据正确
@@ -625,6 +651,8 @@ export default {
         valid3 = this.$refs.ganSettingsFormRef.validate
       } else if (this.powerNetJobInfo.pn_job_type === 'D') {
         valid3 = this.$refs.unbiasedSettingsFormRef.validate
+        // 数据无偏化生成，默认人在回路调参
+        this.ganSettings.set_human = true
       }
       // 转换成query需要的格式
       if (valid1 && valid2 && valid3) {
@@ -724,8 +752,10 @@ export default {
   .createbtn{
     /* float: right; */
     /* margin-top: 20px; */
+    margin-top: 10px;
     margin-bottom: 10px;
-    margin-left:400px;
+    /* margin-left:400px; */
+    text-align: center;
   }
   .el-col{
     min-height: 1px;

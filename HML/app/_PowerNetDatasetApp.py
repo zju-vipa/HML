@@ -6,6 +6,7 @@ from model import PowerNetDataset
 from service import PowerNetDatasetService
 import os
 import base64
+import pandas as pd
 powerNetDatasetService = PowerNetDatasetService()
 
 bp = Blueprint('powerNetDataset', __name__, url_prefix='/api/private/v1/data/powerNetDataset')
@@ -57,13 +58,68 @@ def query_power_net_dataset_result():
 
         result_path = powerNetDatasetService.getPowerNetResultPath(power_net_dataset_id, powerNetDataset.power_net_dataset_type)
         result_data = powerNetDatasetService.getPowerNetResultData(result_path)
-        img_base64 = None
-        if powerNetDataset.set_human:
+        loss_img_base64 = None
+        if powerNetDataset.set_human and powerNetDataset.power_net_dataset_type == 'C':
             img_path = result_path + '_loss_vs_epoch.jpg'
             with open(img_path, "rb") as f:
-                img_base64 = str(base64.b64encode(f.read()), encoding="utf-8")
+                loss_img_base64 = str(base64.b64encode(f.read()), encoding="utf-8")
+        key_feature_img_path = current_app.config["IMG_URL"] + "/key_feature_" + str(powerNetDataset.fault_line) + ".png"
+        unstable_persent = 0
+        if powerNetDataset.power_net_dataset_type == 'D':
+            result_st_path = result_path + '/ST' + str(powerNetDataset.fault_line)
+            if powerNetDataset.generate_algorithm == 1:
+                result_st_path = result_st_path + '-MC_st_result_data.csv'
+            elif powerNetDataset.generate_algorithm == 2:
+                result_st_path = result_st_path + '-GEN_st_result_data.csv'
+            st_res = pd.read_csv(result_st_path, encoding='gbk')
+            data_st_result = st_res[[i for i in st_res.columns if i.startswith('STresult')]]
+            data_st_unstable = (data_st_result.sum(1) > 0).sum()
+            unstable_persent = (data_st_unstable / st_res.shape[0]) * 100
         return {'meta': {'msg': 'query powerNetDataset result success', 'code': 200},
-                'data': {'powerNetDataset': powerNetDataset.serialize, 'resultData': result_data, 'loss_img': img_base64}}, 200
+                'data': {'powerNetDataset': powerNetDataset.serialize,
+                         'resultData': result_data,
+                         'loss_img': loss_img_base64,
+                         'key_feature_img_path': key_feature_img_path,
+                         'unstable_percent': unstable_persent
+                         }
+                }, 200
+    return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
+
+# 根据ID查询电网数据集和结果
+@bp.route('/queryUnbiasedFeature', methods=('GET', 'POST'))
+@login_required
+def query_power_net_dataset_result_unbiased_feature():
+    if request.method == 'GET':
+        try:
+            power_net_dataset_id = request.args.get('id')
+            feature_name = request.args.get('feature')
+        except Exception:
+            return get_error(RET.PARAMERR, 'Error: no request')
+
+        if not power_net_dataset_id:
+            return get_error(RET.PARAMERR, 'Error: request lacks power_net_dataset_id')
+        if not feature_name:
+            return get_error(RET.PARAMERR, 'Error: request lacks feature_name')
+
+        powerNetDataset = powerNetDatasetService.queryPowerNetDatasetById(power_net_dataset_id)
+
+        if not powerNetDataset:
+            return get_error(RET.PARAMERR, 'Error: power_net_dataset_id not exists')
+
+        result_path = powerNetDatasetService.getPowerNetResultPath(power_net_dataset_id, powerNetDataset.power_net_dataset_type)
+        stable_feature_img_base64 = None
+        unstable_feature_img_base64 = None
+        stable_img_path = result_path + '/fig/' + str(powerNetDataset.fault_line) + 'stable_' + feature_name + '.png'
+        unstable_img_path = result_path + '/fig/' + str(powerNetDataset.fault_line) + 'unstable_' + feature_name + '.png'
+        with open(stable_img_path, "rb") as f:
+            stable_feature_img_base64 = str(base64.b64encode(f.read()), encoding="utf-8")
+        with open(unstable_img_path, "rb") as f:
+            unstable_feature_img_base64 = str(base64.b64encode(f.read()), encoding="utf-8")
+        return {'meta': {'msg': 'query powerNetDataset result unbiased feature images success', 'code': 200},
+                'data': {'stable_feature_img': stable_feature_img_base64,
+                         'unstable_feature_img': unstable_feature_img_base64
+                         }
+                }, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
 
 # 根据样例名称查询电网样例
@@ -83,7 +139,7 @@ def query_net_description():
 
         # 图片先搞个样例的
         # img_url = "http://192.168.137.8:8030/img/example_" + net_name + ".png"
-        img_url = "http://10.82.29.169:8030/img/example_" + net_name + ".png"
+        img_url = current_app.config["IMG_URL"] + "/example_" + net_name + ".png"
 
         return {'meta': {'msg': 'query init net success', 'code': 200},
                 'data': {'example': net_name,
