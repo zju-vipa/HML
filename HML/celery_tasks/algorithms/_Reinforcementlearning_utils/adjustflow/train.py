@@ -86,11 +86,11 @@ def get_human_policy(learner_id):
         file_directory = os.path.join(current_app.config["SAVE_L_MODEL_PATH"], learner_id)
         if not os.path.exists(file_directory):
             os.mkdir(file_directory)
-        file_name = 'action_pqvt.npy'
+        file_name = 'action_pqvt'
         file_path = os.path.join(file_directory, file_name)
         # path = "action_pqvt.csv"
         #if(not os.path.exists(path)): os.makedirs(path)
-        numpy.savez(file_path, info[0])
+        numpy.save(file_path, info[0])
 
         #action = input("Human Action:")
         #return action
