@@ -6,6 +6,7 @@ from flask import current_app
 import os
 import shutil
 import pandas as pd
+import time
 
 
 class LearnerService:
@@ -17,7 +18,7 @@ class LearnerService:
         learner.learner_id = get_uid()
         learner.train_state = '1'
         learner.action = 0
-
+        learner.start_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         task = LearnerTasks.train.apply_async((learner.serialize,
                                                learner_parameters,
                                                dataset_file_path), countdown=1)
@@ -59,7 +60,7 @@ class LearnerService:
     def getActionFilePath(self, learner):
         # to get the file path of the csv file that stores p,q,v theta
         file_directory = os.path.join(current_app.config["SAVE_L_MODEL_PATH"], learner.learner_id)
-        file_name = 'action_pqvt.csv'
+        file_name = 'action_pqvt.npy'
         file_path = os.path.join(file_directory, file_name)
         # if not os.path.exists(file_path):
         #     return None

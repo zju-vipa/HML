@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding= "UTF-8" ?>
+<LFCutConf version="1.0">
+ <LFCut Desc="" Name="cut_1">
+  <Branch BranchType="6" BranchIName="bus3L-31" BranchJName="bus3L-38" BranchDirection="1" BranchSubtype="0" BranchName="AC305"/>
+  <Branch BranchType="6" BranchIName="bus3L-31" BranchJName="bus3L-38" BranchDirection="1" BranchSubtype="0" BranchName="AC306"/>
+  <Branch BranchType="6" BranchIName="bus3L-24" BranchJName="bus3L-36" BranchDirection="1" BranchSubtype="0" BranchName="AC309"/>
+  <Branch BranchType="6" BranchIName="bus3L-24" BranchJName="bus3L-36" BranchDirection="1" BranchSubtype="0" BranchName="AC310"/>
+ </LFCut>
+</LFCutConf>
