@@ -322,7 +322,7 @@
 </template>
 <script>
 import queryPowerNetApi from './../../../api/queryPowerNet'
-const IMG_BASE_URL = 'http://10.214.211.137:8030/img/'
+const IMG_BASE_URL = 'http://10.82.29.169:8030/img/'
 // 生成方式类型
 const generateTypeOptions = [
   { type: 'A', name: '潮流数据生成' }, // 潮流
