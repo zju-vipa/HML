@@ -1,4 +1,4 @@
-from flask import Blueprint, request, json
+from flask import Blueprint, request, json, current_app
 from app.constant import get_error, RET
 from app._UserApp import login_required
 from model import Algorithm
@@ -44,7 +44,7 @@ def query_train_methods_introductions():
         if not trainName:
             return get_error(RET.PARAMERR, 'Error: request lacks trainName')
         print('trainName:', trainName)
-        img_url = "http://10.82.29.169:8030/img/trainMethod_" + trainName + ".jpg"
+        img_url = current_app.config["IMG_URL"] + "/trainMethod_" + trainName + ".jpg"
         trainMethodsIntro={}
         trainMethodsIntro['image_url']=img_url
         if trainName==learnerTrainMethodsNames[0]:
