@@ -68,6 +68,20 @@ export default {
       method: 'GET'
     })
   },
+  // 学习器训练方法描述接口
+  queryAlgorithmTrainMethodsIntroductions (trainName) {
+    return request({
+      url: `/algorithm/queryIntroductions?trainName=${trainName}`,
+      method: 'GET'
+    })
+  },
+  // 查询待处理学习器危险警告信息
+  queryDangerWarnInfo (id) {
+    return request({
+      url: `/learner/action/queryDangerWarnInfo?learner_id=${id}`,
+      method: 'GET'
+    })
+  },
   // 查询待处理学习器信息
   queryActionDetail (id) {
     return request({
