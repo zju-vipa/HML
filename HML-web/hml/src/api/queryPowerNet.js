@@ -22,6 +22,12 @@ export default {
       method: 'GET'
     })
   },
+  queryUnbiasedFeatureImg (id, feature) {
+    return request({
+      url: `/data/powerNetDataset/queryUnbiasedFeature?id=${id}&feature=${feature}`,
+      method: 'GET'
+    })
+  },
   // 根据样例名称查询样例描述
   queryNetDescription (name) {
     return request({
