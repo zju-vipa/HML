@@ -123,7 +123,7 @@ class Learner(db.Model):
     username = db.Column(db.String(32), nullable=False, info='用户名')
     action = db.Column(db.Integer, nullable=True, info='动作')
 
-    start_time = db.Column(db.DateTime, nullable=True, info='创建时间')
+    start_time = db.Column(db.DateTime, nullable=False, info='创建时间')
     @property
     def serialize(self):
         return to_json(self, self.__class__)
