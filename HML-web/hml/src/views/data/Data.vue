@@ -2,8 +2,7 @@
     <div>
 <!--      tab便签区域-->
       <el-card>
-        <div><h3>本地数据集导入与上传</h3></div>
-        <div class="buttons" v-if="false">
+        <div class="buttons">
           <el-button @click="gotoPowerNetDataset" type="primary">电网数据</el-button>
           <el-button @click="queryDataset" type="primary">查看原数据集</el-button>
           <el-button @click="queryDatasetHuFea" type="primary">查看特征处理数据集</el-button>
@@ -49,7 +48,6 @@
       </el-card>
       <!-- 新增的卡片界面 -->
       <el-card>
-        <div><h3>断面算法数据集导入</h3></div>
         <div>
           <el-form label-width="200px" label-position="right">
             <el-form-item label="断面算法训练集">
@@ -99,8 +97,8 @@ export default {
     return {
       crossSectionTrainingSetFolder: '',
       crossSectionTestSetFolder: '',
-      crossSectionTrainingSetUploadURL: 'http://192.168.1.9:8021/api/private/v1/dataset/uploadCrossSectionTrainingSet',
-      crossSectionTestSetUploadURL: 'http://192.168.1.9:8021/api/private/v1/dataset/uploadCrossSectionTestSet',
+      crossSectionTrainingSetUploadURL: 'http://192.168.3.196:8021/api/private/v1/dataset/uploadCrossSectionTrainingSet',
+      crossSectionTestSetUploadURL: 'http://192.168.3.196:8021/api/private/v1/dataset/uploadCrossSectionTestSet',
       publicOption,
       // Tab标签激活的名字
       activeName: 'upload',
@@ -115,7 +113,7 @@ export default {
       },
       // 上传文件地址
       // uploadURL: 'http://192.168.137.8:8021/api/private/v1/dataset/upload',
-      uploadURL: 'http://10.214.211.137:8021/api/private/v1/dataset/upload',
+      uploadURL: 'http://192.168.3.196:8021/api/private/v1/dataset/upload',
       uploadFormRules: {
         dataset_name: [
           { required: true, message: '请输入数据名称', trigger: 'blur' }
