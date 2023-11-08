@@ -52,10 +52,10 @@
         <!-- 任务信息 -->
         <el-row style="font-size: 28px; margin-bottom: 30px">
           <el-col :span="3" align="right">
-            <div class="currerntTask"> 当前任务： </div>
+            <h4 class="currerntTask"> 当前任务： </h4>
           </el-col>
           <el-col :span="20" align="center">
-            <div class="currerntTaskRange"> 在满足安全约束的情况下调整目标断面功率到指定范围内 </div>
+            <h4 class="currerntTaskRange"> 在满足安全约束的情况下调整目标断面功率到指定范围内 </h4>
           </el-col>
         </el-row>
         <el-row style="font-size: 22px; margin-bottom: 30px">
@@ -77,15 +77,15 @@
           </el-col>
         </el-row>
         <el-row style="font-size: 28px; margin-bottom: 30px">
-          危险预警：
+          <h4>危险预警： </h4>
         </el-row>
         <el-row style="font-size: 28px; margin-bottom: 30px">
-          <el-row style="height:200px; border: 2px solid black; text-align: center; list-style: none; overflow-y: auto; z-index: 999;">
+          <el-row style="height:200px; border: 2px solid #ebeef5; text-align: center; list-style: none; overflow-y: auto; z-index: 999;">
             <el-row v-if="netDangerWarnInfo.length!=0" >
-              <el-col :span="8" v-for="(item,id) in netDangerWarnInfo" :key="id">{{ item }}</el-col>
+              <h4 style="font-weight: lighter;" :span="8" v-for="(item,id) in netDangerWarnInfo" :key="id">{{ item }}</h4>
             </el-row>
             <el-row v-else>
-              无危险信息
+              <h4>无危险信息</h4>
             </el-row>
           </el-row>
         </el-row>
@@ -225,16 +225,16 @@ export default {
       netDetailInfo: {
         action_idx: '',
         action_str: '',
-        balance_pair: '',
+        balance_pair: [[], []],
         balance_str: '',
         gen_pair: '',
         gen_str: '',
         line_pair: '',
         line_str: '',
-        sec_pair: '',
+        sec_pair: [[]],
         sec_str: '',
-        target_sec_pair: '',
-        target_sec_str: '',
+        target_sec_pair: [[]],
+        target_sec_str: [[]],
         v_pair: '',
         v_str: ''
       },
@@ -438,28 +438,25 @@ export default {
   h2{
      text-align: center;
   }
-  h3{
-    padding-bottom: 10px;
-    border-bottom: 3px solid rgb(180, 180, 180);
-  }
   h4{
-    padding-bottom: 10px;
-    /* border-bottom: 2px solid rgb(102, 102, 102) */
+    margin: 0;
   }
   .currerntTask{
     height: 60px;
     line-height: 60px;
   }
   .currerntTaskRange{
+    border-radius:4px;
     width: 1000px;
     height: 60px;
     line-height: 60px;
-    border: 2px solid black;
+    border: 2px solid #ebeef5;
   }
   .Power{
+    border-radius:4px;
     margin: 0 20px 0 20px;
     height: 160px;
-    border: 2px solid black;
+    border: 2px solid #ebeef5;
   }
   .sectionPower{
     height: 30px;
