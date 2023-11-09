@@ -1,729 +1,957 @@
 <template>
-  <div>
-      <!-- 面包屑区域 -->
-      <!-- <el-breadcrumb separator-class="el-icon-arrow-right">
-        <el-breadcrumb-item :to="{ path: '/home' }">人在回路</el-breadcrumb-item>
-        <el-breadcrumb-item>决策</el-breadcrumb-item>
-      </el-breadcrumb> -->
-    <!-- 卡片区域 -->
-    <el-card>
-      <el-row>
-        <el-col :span="24" >
-          <el-button class="buttons" @click="gotoQueryDec" type="primary">查询决策</el-button>
-        </el-col>
-      </el-row>
-      <!-- <el-button class="queryBtn" disabled type="primary">应用决策</el-button>
-      <el-button class="queryBtn" @click="gotoDecHumanFea" type="primary">决策特征工程</el-button>
-      <el-button class="queryBtn" @click="gotoLearnDec" type="primary">决策学习器</el-button> -->
-      <el-form class="choosedataset" label-position="right" label-width="150px" :model="chooseDatasetForm" ref="chooseDatasetFormRef">
-        <el-row>
-          <el-col :span="10">
-            <el-form-item prop="dataset_name" label="选择测试集">
-              <el-input clearable  readonly v-model="chooseDatasetForm.dataset_name" style="width: 300px"
-                        @click.native="datasetDialogVisible=true" placeholder="请选择测试集"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="10">
-            <el-form-item label="决策名" prop="learner_name">
-              <el-input clearable  v-model="decideHFAndLeaForm.decision_name" placeholder="请填写决策名" style="width: 300px"></el-input>
-            </el-form-item>
-          </el-col>
-          <!-- <el-col :span="10">
-            <el-form-item label="须知">
-              <el-input style="width:300px" disabled  placeholder="数据集必须是csv格式"></el-input>
-            </el-form-item>
-          </el-col> -->
-        </el-row>
-      </el-form>
-      <!-- 决策类型 -->
-      <el-form label-position="right" label-width="150px" :model="decideHFAndLeaForm" ref="decideHumanFeaFormRef"  class="demo-ruleForm">
-        <el-row>
-          <el-col :span="20">
-            <el-form-item label="决策类型" prop="learner_type">
-              <!-- <el-select disabled  v-model="decideHFAndLeaForm.decision_type" placeholder="决策类型" style="width: 300px">
-                <el-option v-for="(option, index) in decisionTypeOptions" :key="index" :label="option.name" :value="option.type"></el-option>
-              </el-select> -->
-              <el-radio-group v-model="decideHFAndLeaForm.decision_type" @change="handleDecideOption">
-                <el-radio :label="'Manual_D'">应用决策者</el-radio>
-                <el-radio :label="'Manual_FE'">应用特征工程</el-radio>
-                <el-radio :label="'Manual_L'">应用学习器</el-radio>
-                <!--断面算法-->
-                <el-radio :label="'Section_Algorithm'">断面算法</el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-      <el-row>
-          <el-col :span="10">
-            <el-form class="selectHuFea" label-position="right" label-width="150px"  :model="chooseHumanFeaForm">
-              <el-form-item prop="featureEng_name" label="特征工程">
-                <el-input :disabled="chooseFEDisabled" clearable  readonly v-model="chooseHumanFeaForm.featureEng_name" style="width: 300px"
-                          @click.native="humanFeaDialogVisible=true" placeholder="请选择特征工程"></el-input>
-              </el-form-item>
-            </el-form>
-          </el-col>
-          <el-col :span="10">
-            <el-form label-position="right" label-width="150px"  :model="chooseLearnerForm">
-              <el-form-item prop="learner_name" label="学习器">
-                <el-input :disabled="chooseLearnerDisabled" clearable  readonly v-model="chooseLearnerForm.learner_name" style="width: 300px"
-                          @click.native="learnerDialogVisible=true" placeholder="请选择学习器"></el-input>
-              </el-form-item>
-            </el-form>
-          </el-col>
-      </el-row>
-      <!--断面算法：task与case选择栏-->
-      <el-row v-if="decideHFAndLeaForm.decision_type === 'Section_Algorithm'">
-        <el-col :span="10">
-          <el-form class="selectTask" label-position="right" label-width="150px" :model="decideHFAndLeaForm">
-            <el-form-item label="选择Task" prop="task">
-              <el-input clearable readonly v-model="decideHFAndLeaForm.task" @click.native="taskDialogVisible=true" style="width: 300px" placeholder="请选择Task"></el-input>
-            </el-form-item>
-          </el-form>
-        </el-col>
-        <el-col :span="10">
-          <el-form class="selectCase" label-position="right" label-width="150px" :model="decideHFAndLeaForm">
-            <el-form-item label="选择Case" prop="case">
-              <el-input clearable readonly v-model="decideHFAndLeaForm.case" @click.native="caseDialogVisible=true" style="width: 300px" placeholder="请选择Case"></el-input>
-            </el-form-item>
-          </el-form>
-        </el-col>
-      </el-row>
-      <el-dialog title="选择Task" :visible.sync="taskDialogVisible">
-        <el-select v-model="decideHFAndLeaForm.task" placeholder="选择Task">
-          <el-option label="M5" value="M5"></el-option>
-          <el-option label="S4" value="S4"></el-option>
-          <el-option label="S10" value="S10"></el-option>
-        </el-select>
+    <div>
+<!--      <el-button @click="fetchDecisionTree11">查看决策树渲染结果1</el-button>-->
+      <div>
+        <el-dialog title="结果报告" :visible.sync="tree1DialogVisible" width="auto">
+        <img v-if="tree1ImageUrl" :src="tree1ImageUrl" alt="决策树1" :width="imgWidth1 + 'px'" height="auto" @wheel="handleWheel($event, 'tree1')" @load="setInitialSize('tree1')" />
       </el-dialog>
-      <el-dialog title="选择Case" :visible.sync="caseDialogVisible">
-        <el-select v-model="decideHFAndLeaForm.case" placeholder="选择Case">
-          <el-option label="118" value="case118"></el-option>
-          <el-option label="300" value="case300"></el-option>
-          <el-option label="9241" value="case9241"></el-option>
-        </el-select>
+      <el-dialog title="决策树2" :visible.sync="tree2DialogVisible" width="auto">
+        <img v-if="tree2ImageUrl" :src="tree2ImageUrl" alt="决策树2" :width="imgWidth2 + 'px'" height="auto" @wheel="handleWheel($event, 'tree2')" @load="setInitialSize('tree2')" />
       </el-dialog>
-      <!-- 决策应用特征工程加学习器部分 -->
-      <!-- <el-form label-position="right" label-width="150px" :model="decideHFAndLeaForm" ref="decideHumanFeaFormRef"  class="demo-ruleForm">
-        <el-row>
-          <el-col :span="10">
-            <el-form-item label="决策名" prop="learner_name">
-              <el-input clearable  v-model="decideHFAndLeaForm.decision_name" placeholder="请填写决策名" style="width: 300px"></el-input>
-            </el-form-item>
-          </el-col>
-          <el-col :span="10">
-            <el-form-item label="决策类型" prop="learner_type">
-              <el-select disabled  v-model="decideHFAndLeaForm.decision_type" placeholder="决策类型" style="width: 300px">
-                <el-option v-for="(option, index) in decisionTypeOptions" :key="index" :label="option.name" :value="option.type"></el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form> -->
-      <!-- 决策应用特征工程决策参数的表单 -->
-      <el-form label-position="right" label-width="150px" :model="decideHumanFeaParamForm">
-        <el-row>
-          <el-col :span="10">
-            <el-form-item label="选择标签" prop="label">
-              <el-select  v-model="decideHumanFeaParamForm.label" placeholder="选择标签" style="width: 300px">
-                <el-option
-                  v-for="(item,index) in columnsList" :key="index"
-                  :label="item"
-                  :value="item">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-          <el-col :span="10">
-            <el-form-item>
-              <el-button class="submitBtn" type="primary" @click="submitAllDecForm">应用决策</el-button>
-            </el-form-item>
-          </el-col>
-        </el-row>
-      </el-form>
-    </el-card>
-    <el-card>
-      <!-- 断面算法：新建卡片显示断面算法调整结果、图像、表格数据，下载结果、图像、表格数据 -->
-      <!-- 提交所有表单  -->
-      <h3 >断面调整算法数据查看模块</h3>
-      <h4 v-if="imageUrl">Q-table：</h4>
-      <img :src="imageUrl" alt="Q Table" v-if="imageUrl" width="500px" height="500px">
-      <el-input v-model="searchQuery.state" placeholder="输入状态" style="width: 200px; margin-right: 10px;"></el-input>
-      <el-input v-model="searchQuery.action" placeholder="输入动作" style="width: 200px; margin-right: 10px;"></el-input>
-      <el-button type="primary" @click="searchQTable">检索</el-button>
-      <el-button type="primary" @click="toggleSearchForm">{{ isSearchFormVisible ? '隐藏搜索表单' : '显示搜索表单' }}</el-button>
-      <el-button @click="exportTable" type="primary">导出表格</el-button>
-      <el-table :data="filteredQTableData.length > 0 ? filteredQTableData : qTableData" style="width: 100%" v-if="isSearchFormVisible" >
-        <el-table-column prop="state" label="状态" width="180"></el-table-column>
-        <el-table-column prop="action" label="动作" width="180"></el-table-column>
-        <el-table-column prop="qValue" label="Q值"></el-table-column>
-      </el-table>
-      <el-button type="primary" @click="toggleQTable">{{ showQTable ? '隐藏表格' : '显示表格' }}</el-button>
-      <el-table :data="qTableData" style="width: 100%" v-if="showQTable">
-        <el-table-column prop="state" label="状态" width="180"></el-table-column>
-        <el-table-column prop="action" label="动作" width="180"></el-table-column>
-        <el-table-column prop="qValue" label="Q值"></el-table-column>
-      </el-table>
-      <h4 v-if="imageUrl">下载结果：</h4>
-      <a :href="imageUrl" v-if="imageUrl" download style="margin-right: 10px;">
-        <el-button type="primary">下载图像结果</el-button>
-      </a>
-      <a :href="textUrl" v-if="textUrl" download="q_table_evenly_spaced_states.txt" style="margin-right: 10px;">
-        <el-button type="primary">下载文本结果</el-button>
-      </a>
-      <!-- 下载图片按钮 -->
-      <!-- <a :href="imageUrl" v-if="imageUrl" style="margin-right: 10px;">
-        <el-button type="primary" @click="downloadImage">下载图片</el-button>
-      </a> -->
-      <!-- 下载TXT文件按钮 -->
-      <!-- <a :href="imageUrl" v-if="imageUrl" style="margin-right: 10px;">
-        <el-button type="primary" @click="downloadTxt">下载TXT文件</el-button>
-      </a> -->
-    </el-card>
-    <el-card>
-    <!-- 断面算法：新建卡片显示人机交互结果，保存几人交互state、action记录，下载state、action记录 -->
-    <!-- <h3 v-if="imageUrl">断面算法人机交互模块</h3>-->
-    <h3 >断面调整算法人机交互模块</h3>
-    <el-form>
-      <el-form-item label="选择State">
-        <div style="display: flex; align-items: center;">
-          <el-select v-model="selectedState" placeholder="请选择State" @change="findTopActions" style="margin-right: 10px;">
-            <el-option
-              v-for="(state, index) in qTableData.map(item => item.state).filter((value, index, self) => self.indexOf(value) === index)"
-              :key="index"
-              :label="state"
-              :value="state">
-            </el-option>
-          </el-select>
-          <!-- 选择 action -->
-          <el-select v-model="selectedAction" placeholder="请选择Action" @change="updateSelectedQValue" style="margin-right: 10px;">
-            <el-option
-              v-for="(action, index) in topActions"
-              :key="index"
-              :label="`${action.action} (Q值: ${action.qValue}) - ${generateDescription(index)}`"
-              :value="action.action">
-            </el-option>
-  <!--          &lt;!&ndash; 显示 q 值 &ndash;&gt;-->
-  <!--          <el-input v-model="selectedQValue" readonly placeholder="Q 值"></el-input>-->
-            <!-- 继续按钮 -->
-  <!--          <el-button @click="continueInteraction">继续</el-button>-->
-            <!-- 下载交互结果按钮 -->
-  <!--          <el-button @click="downloadInteractions">下载交互结果</el-button>-->
-          </el-select>
-          <div v-if="selectedDescription">
-            所选动作的描述：{{ selectedDescription }}
+      </div>
+<!--      &lt;!&ndash; 卡片区域 &ndash;&gt;-->
+<!--      <el-card >-->
+<!--        &lt;!&ndash; form区域 &ndash;&gt;-->
+<!--          <el-row type="flex" align="middle">-->
+<!--            <el-col :span="2"><h3>创建特征工程</h3></el-col>-->
+<!--            <el-col :span="4">-->
+<!--&lt;!&ndash;              <el-form label-width="0px" label-position="right" :model="chooseDatasetForm" ref="chooseDatasetFormRef" id="chooseDatasetFormID">&ndash;&gt;-->
+<!--&lt;!&ndash;                <el-form-item prop="dataset_name">&ndash;&gt;-->
+<!--                  <el-input clearable readonly v-model="chooseDatasetForm.dataset_name"-->
+<!--                  @click.native="datasetDialogVisible=true" placeholder="请选择数据集" style="width: 90%"></el-input>-->
+<!--&lt;!&ndash;                </el-form-item>&ndash;&gt;-->
+<!--&lt;!&ndash;              </el-form>&ndash;&gt;-->
+<!--            </el-col>-->
+<!--            <el-col :span="4">-->
+<!--              <el-button type="primary" @click="goHumanFea">创建</el-button>-->
+<!--            </el-col>-->
+<!--          </el-row>-->
+<!--            &lt;!&ndash; <el-form-item prop="dataset_name" label="数据集">-->
+<!--              <el-input clearable  readonly v-model="chooseDatasetForm.dataset_name" style="width: 300px"-->
+<!--                        @click.native="datasetDialogVisible=true" placeholder="请选择数据集"></el-input>-->
+<!--            </el-form-item> &ndash;&gt;-->
+<!--            &lt;!&ndash; <el-form-item label="特征工程">-->
+<!--              <el-row>-->
+<!--                <el-col :span="5">-->
+<!--                  <el-button type="primary" @click="goHumanFea">人工特征工程</el-button>-->
+<!--                </el-col>-->
+<!--                <el-col :span="5">-->
+<!--                  <el-button type="primary" >自动化特征工程</el-button>-->
+<!--                </el-col>-->
+<!--                <el-col :span="5">-->
+<!--                  <el-button type="primary" >人在回路的特征工程</el-button>-->
+<!--                </el-col>-->
+<!--              </el-row>-->
+<!--            </el-form-item> &ndash;&gt;-->
+<!--      </el-card>-->
+
+<!--          <el-table :data="datasetDetailList" border stripe  style="width: 100%">-->
+<!--          &lt;!&ndash; <el-table-column  label="序号" type="index" width="120"> </el-table-column> &ndash;&gt;-->
+<!--          <el-table-column width="120" v-for="(item,id) in columnsList" :key="id" :prop="item" :label="item"></el-table-column>-->
+<!--          &lt;!&ndash; <el-table-column prop="age" label="数据集类型"> </el-table-column>-->
+<!--          <el-table-column prop="checking_status" label="数据集介绍"> </el-table-column> &ndash;&gt;-->
+<!--        </el-table>-->
+      <div style="padding: 1%">
+        <el-tabs type="border-card">
+        <el-tab-pane label="最新结果">
+          <div v-if="newResultForm.checkedModules.length==4">
+            <el-col span="16">
+              <el-row v-if="newResultForm.isNewResult==false">
+                <div style="text-align: center">
+                  <el-row>
+                    <img src="./../../assets/img/empty-state.png" style="text-align: center; width: 200px; height: 200px">
+                  </el-row>
+                  <el-row><span style="color: darkgray">暂无记录</span></el-row>
+                </div>
+              </el-row>
+              <el-row v-else-if="newResultForm.isNewResult==true">
+                <el-col span="13">
+                  <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }">
+                    <div slot="header" class="header">
+                      <el-row type="flex" align="middle">
+                        <el-col span="12">
+                          <span class="header-label" style="font-size: 18px; font-weight: bolder">当前任务概况</span>
+                        </el-col>
+  <!--                      <el-col span="12" style="text-align: right">-->
+  <!--                        <el-link type="success">查看详情</el-link>-->
+  <!--                      </el-col>-->
+                      </el-row>
+                    </div>
+                    <div style="margin: 15px; text-align: center">
+                        <el-row  v-for="item in newResultForm.taskDetails" :key="item.type" style="line-height: 5px">
+                          <el-col span="6">
+                            <h3 style="text-align: left">{{item.label}}</h3>
+                          </el-col>
+                          <el-col span="18" style="text-align: left">
+                            <h4 style="font-weight: lighter">{{item.value}}</h4>
+                          </el-col>
+                        </el-row>
+                        <el-row style="line-height: 5px" type="flex" align="middle">
+                          <el-col span="6">
+                           <h3 style="text-align: left">特征输入模块</h3>
+                          </el-col>
+                          <el-col span="18" style="text-align: left">
+                            <el-checkbox-group v-model="newResultForm.checkedModules">
+                              <el-checkbox v-for="(item, index) in moduleOptions" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
+                            </el-checkbox-group>
+                          </el-col>
+                        </el-row>
+                    </div>
+                  </el-card>
+                </el-col>
+                <el-col span="11">
+                  <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }">
+                    <div slot="header" class="header">
+                      <el-row type="flex" align="middle">
+                        <el-col span="12">
+                          <span class="header-label" style="font-size: 18px; font-weight: bolder">初始效果</span>
+                        </el-col>
+                      </el-row>
+                    </div>
+                    <div style="margin: 15px; text-align: center; height: 300px">
+                      <el-row>
+                        <el-col span="12">
+                          <el-row>
+                            <el-progress type="dashboard" :percentage="newResultForm.efficiency" :stroke-width="20" :width="165" style="font-weight: bolder; font-size: 20px;">
+                            </el-progress>
+                          </el-row>
+                          <span style="color: steelblue; font-size: 18px;">人机智能决策识别率</span>
+                        </el-col>
+                        <el-col span="12">
+                          <el-row>
+                            <el-progress type="dashboard" :percentage="newResultForm.accuracy" :stroke-width="20" :width="165" style="font-weight: bolder; font-size: 20px;">
+                            </el-progress>
+                          </el-row>
+                          <span style="color: steelblue; font-size: 18px;">知识决策蒸馏识别率</span>
+                        </el-col>
+                      </el-row>
+                    </div>
+                  </el-card>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 740px">
+                  <div slot="header" class="header">
+                    <el-row type="flex" align="middle">
+                      <el-col span="12">
+                        <span class="header-label" style="font-size: 18px; font-weight: bolder">当前决策案例</span>
+                      </el-col>
+                    </el-row>
+                  </div>
+                  <div style="margin: 15px; text-align: center">
+                    <el-table
+                      border stripe
+                      ref="task_feature_table"
+                      height="250"
+                      solt="append"
+                      style="font-size: 15px"
+                      :data="taskFeatureList">
+                      <el-table-column label="序号" type="index"></el-table-column>
+                      <el-table-column
+                        v-for="(item, index) in taskFeatureColumnsList"
+                        :key="index + 'i'"
+                        :label="item.label"
+                        :prop="item.prop"
+                        show-overflow-tooltip/>
+                    </el-table>
+                  </div>
+                </el-card>
+              </el-row>
+<!--              <el-row>-->
+<!--                <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 370px">-->
+<!--                  <div slot="header" class="header">-->
+<!--                    <el-row type="flex" align="middle">-->
+<!--                      <el-col span="12">-->
+<!--                        <span class="header-label" style="font-size: 18px; font-weight: bolder">人机协同</span>-->
+<!--                      </el-col>-->
+<!--                    </el-row>-->
+<!--                  </div>-->
+<!--                  <div style="margin: 15px; text-align: center">-->
+<!--                    <el-row type="flex" align="middle">-->
+<!--                      <el-col span="3"><span style="font-size: 17px; font-weight: bolder">优化建议:</span></el-col>-->
+<!--                      <el-col span="4">-->
+<!--                        <el-input v-model="HumanInLoopForm.node" placeholder="请输入1-300节点"></el-input>-->
+<!--                      </el-col>-->
+<!--                      <el-col span="2">-->
+<!--                        <el-button size="mini">查看</el-button>-->
+<!--                      </el-col>-->
+<!--                      <el-col span="5">-->
+<!--                        <span style="text-align: left; font-size: 15px; color: #373d41;padding-top: 20px">{{HumanInLoopForm.node}}号节点的特征有效率:</span>-->
+<!--                      </el-col>-->
+<!--                    </el-row>-->
+<!--                    <el-row type="flex" align="middle" style="padding-top: 10px">-->
+<!--                      <el-col span="3"><div style="font-size: 17px; font-weight: bolder"></div></el-col>-->
+<!--                      <el-col span="4">-->
+<!--                        <el-select v-model="HumanInLoopForm.operator" placeholder="请选择">-->
+<!--                          <el-option-->
+<!--                            v-for="item in operator_options"-->
+<!--                            :key="item.value"-->
+<!--                            :label="item.label"-->
+<!--                            :value="item.value">-->
+<!--                          </el-option>-->
+<!--                        </el-select>-->
+<!--                      </el-col>-->
+<!--                      <el-col span="2"><el-button size="mini">查看</el-button></el-col>-->
+<!--                      <el-col span="5">-->
+<!--                        <span style="text-align: left; font-size: 15px; color: #373d41;padding-top: 10px">{{HumanInLoopForm.operator}}算子的特征有效率:</span>-->
+<!--                      </el-col>-->
+<!--                    </el-row>-->
+<!--                    <el-row type="flex" align="middle" style="margin-top: 20px">-->
+<!--                      <el-col span="3"><span style="font-size: 17px; font-weight: bolder">专家干预:</span></el-col>-->
+<!--                      <el-col span="20">-->
+<!--                        <el-row type="flex" align="middle" >-->
+<!--                          <el-col span="3" style="text-align: left"><span style="font-size: 13px;">删除节点:</span></el-col>-->
+<!--                          <el-col style="text-align: left">-->
+<!--                            <el-input v-model="HumanInLoopForm.nodesForDelete" placeholder="请输入删除节点列表" style="width: 200px"></el-input>-->
+<!--                          </el-col>-->
+<!--                        </el-row>-->
+<!--                      </el-col>-->
+<!--                    </el-row>-->
+<!--                    <el-row type="flex" align="center" style="padding-top: 20px">-->
+<!--                      <el-col span="3"><div style="font-size: 17px; font-weight: bolder"></div></el-col>-->
+<!--                      <el-col span="20">-->
+<!--                        <el-row>-->
+<!--                          <el-col span="3" style="text-align: left">-->
+<!--                            <span style="font-size: 13px;">添加算子:</span>-->
+<!--                          </el-col>-->
+<!--                          <el-col span="21" style="text-align: left;">-->
+<!--                            <el-checkbox-group v-model="HumanInLoopForm.operatorForAdd">-->
+<!--                              <el-checkbox label="sum"></el-checkbox>-->
+<!--                              <el-checkbox label="log"></el-checkbox>-->
+<!--                              <el-checkbox label="mean"></el-checkbox>-->
+<!--                            </el-checkbox-group>-->
+<!--                          </el-col>-->
+<!--                        </el-row>-->
+<!--                      </el-col>-->
+<!--                    </el-row>-->
+<!--                    <el-row type="flex" align="middle" style="padding-top: 20px">-->
+<!--                      <el-col span="3"><div style="font-size: 17px; font-weight: bolder"></div></el-col>-->
+<!--                      <el-col span="20">-->
+<!--                        <el-row>-->
+<!--                          <el-col span="3" style="text-align: left">-->
+<!--                            <span style="font-size: 13px;">删除算子:</span>-->
+<!--                          </el-col>-->
+<!--                          <el-col span="21" style="text-align: left;">-->
+<!--                            <el-checkbox-group v-model="HumanInLoopForm.operatorForDelete">-->
+<!--                              <el-checkbox label="sum"></el-checkbox>-->
+<!--                              <el-checkbox label="log"></el-checkbox>-->
+<!--                              <el-checkbox label="mean"></el-checkbox>-->
+<!--                            </el-checkbox-group>-->
+<!--                          </el-col>-->
+<!--                        </el-row>-->
+<!--                      </el-col>-->
+<!--                    </el-row>-->
+<!--                  </div>-->
+<!--                  <el-row>-->
+<!--                    <el-col span="3"><div style="border-radius: 4px;min-height: 36px;"></div></el-col>-->
+<!--                    <el-button type="primary">继续学习</el-button>-->
+<!--                  </el-row>-->
+<!--                </el-card>-->
+<!--              </el-row>-->
+            </el-col>
+            <el-col span="8">
+              <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 530px">
+                <div slot="header" class="header">
+                  <el-row type="flex" align="middle">
+                    <el-col span="12">
+                      <span class="header-label" style="font-size: 18px; font-weight: bolder">交互记录</span>
+                    </el-col>
+                  </el-row>
+                </div>
+                <div style="margin: 15px; text-align: center;">
+                  <el-table
+                    :data="IteractionRecord"
+                    border stripe
+                    ref="iteraction_record_table">
+                    <el-table-column label="交互次数" type="index" :index="indexMethod"> </el-table-column>
+                    <el-table-column prop="record_efficiency" label="人机智能决策识别率"></el-table-column>
+                    <el-table-column prop="record_accuracy" label="知识决策蒸馏识别率"></el-table-column>
+                  </el-table>
+                </div>
+              </el-card>
+              <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 550px">
+                <div slot="header" class="header">
+                  <el-row type="flex" align="middle">
+                    <el-col span="12">
+                      <span class="header-label" style="font-size: 18px; font-weight: bolder">决策路径</span>
+                    </el-col>
+                  </el-row>
+                </div>
+                <div style="margin: 15px; text-align: center;">
+<!--                  <div id="featureCharts" style="width: 400px; height: 500px; margin: 0 auto"></div>-->
+                    当前路径：节点4小于等于0.986，节点75小于等于0.330，节点40小于等于-2.582，节点76小于等于-5.498366117477417
+                </div>
+              </el-card>
+            </el-col>
           </div>
-          <!-- 显示 q 值 -->
-          <el-input v-model="selectedQValue" readonly placeholder="Q 值" style="margin-right: 10px; width: 400px;"></el-input>
-        </div>
-        <!-- 继续按钮 -->
-        <el-button @click="continueInteraction">继续</el-button>
-        <!-- 下载交互结果按钮 -->
-        <el-button @click="downloadInteractions">下载交互结果</el-button>
-      </el-form-item>
-      <el-form-item v-if="topActions.length > 0" label="Top 3 Actions">
-        <el-select v-model="selectedAction" placeholder="请选择一个Action">
-          <el-option v-for="(action, index) in topActions" :key="index" :label="'Action: ' + action.action + ', Q-value: ' + action.qValue" :value="action.action"></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item v-if="selectedAction !== ''" label="Selected Action">
-        <el-input v-model="selectedAction" readonly></el-input>
-      </el-form-item>
-    </el-form>
-  </el-card>
-  <el-card>
-    <h3 v-if="imageUrl">人机交互模块2</h3>
-    <el-form>
-      <el-form-item label="选择State">
-        <el-select v-model="selectedState" placeholder="请选择State" @change="findTopActions">
-<!--          <el-option v-for="(item, index) in qTableData" :key="index" :label="item.state" :value="item.state"></el-option>-->
-          <el-option
-            v-for="(state, index) in qTableData.map(item => item.state).filter((value, index, self) => self.indexOf(value) === index)"
-            :key="index"
-            :label="state"
-            :value="state">
-          </el-option>
-        </el-select>
-        <!-- 选择 action -->
-        <el-select v-model="selectedAction" placeholder="请选择Action" @change="updateSelectedQValue">
-          <el-option
-            v-for="(action, index) in topActions"
-            :key="index"
-            :label="action.action"
-            :value="action.action">
-          </el-option>
-          <!-- 显示 q 值 -->
-          <el-input v-model="selectedQValue" readonly placeholder="Q 值"></el-input>
-          <!-- 继续按钮 -->
-<!--          <el-button @click="continueInteraction">继续</el-button>-->
-          <!-- 下载交互结果按钮 -->
-<!--          <el-button @click="downloadInteractions">下载交互结果</el-button>-->
-        </el-select>
-        <!-- 继续按钮 -->
-        <el-button @click="continueInteraction">继续</el-button>
-        <!-- 下载交互结果按钮 -->
-        <el-button @click="downloadInteractions">下载交互结果</el-button>
-        <el-button @click="downloadInteractionsHistory" type="primary">下载交互历史</el-button>
-      </el-form-item>
-      <el-form-item v-if="topActions.length > 0" label="Top 3 Actions">
-        <el-select v-model="selectedAction" placeholder="请选择一个Action">
-          <el-option v-for="(action, index) in topActions" :key="index" :label="'Action: ' + action.action + ', Q-value: ' + action.qValue" :value="action.action"></el-option>
-        </el-select>
-      </el-form-item>
-      <el-form-item v-if="selectedAction !== ''" label="Selected Action">
-        <el-input v-model="selectedAction" readonly></el-input>
-      </el-form-item>
-    </el-form>
-  </el-card>
-      <!--      选择数据集，弹出的窗口-->
-    <el-dialog title="选择数据集" :visible.sync="datasetDialogVisible" @close="getColumns">
-      <dataset :isDialog="true" @dataset-choose = chooseDataset></dataset>
-    </el-dialog>
-      <!--      选择特征工程，弹出的窗口-->
-    <el-dialog title="选择特征工程" :visible.sync="humanFeaDialogVisible" @close="getColumns">
-      <query-human-feature :isHFeaDialog="true" @choose-HumanFea="chooseHumanFea"></query-human-feature>
-    </el-dialog>
-      <!--      选择学习器，弹出的窗口-->
-    <el-dialog title="选择学习器" :visible.sync="learnerDialogVisible">
-      <query-learner :isLearnDialog="true" @learner-choose="chooseLearner"></query-learner>
-    </el-dialog>
-  </div>
+          <div v-else>
+            <el-col span="16">
+              <el-row v-if="newResultForm.isNewResult==false">
+                <div style="text-align: center">
+                  <el-row>
+                    <img src="./../../assets/img/empty-state.png" style="text-align: center; width: 200px; height: 200px">
+                  </el-row>
+                  <el-row><span style="color: darkgray">暂无记录</span></el-row>
+                </div>
+              </el-row>
+              <el-row v-else-if="newResultForm.isNewResult==true">
+                <el-col span="13">
+                  <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }">
+                    <div slot="header" class="header">
+                      <el-row type="flex" align="middle">
+                        <el-col span="12">
+                          <span class="header-label" style="font-size: 18px; font-weight: bolder">当前任务概况</span>
+                        </el-col>
+                        <!--                      <el-col span="12" style="text-align: right">-->
+                        <!--                        <el-link type="success">查看详情</el-link>-->
+                        <!--                      </el-col>-->
+                      </el-row>
+                    </div>
+                    <div style="margin: 15px; text-align: center">
+                      <el-row  v-for="item in newResultForm.taskDetails" :key="item.type" style="line-height: 5px">
+                        <el-col span="6">
+                          <h3 style="text-align: left">{{item.label}}</h3>
+                        </el-col>
+                        <el-col span="18" style="text-align: left">
+                          <h4 style="font-weight: lighter">{{item.value}}</h4>
+                        </el-col>
+                      </el-row>
+                      <el-row style="line-height: 5px" type="flex" align="middle">
+                        <el-col span="6">
+                          <h3 style="text-align: left">特征输入模块</h3>
+                        </el-col>
+                        <el-col span="18" style="text-align: left">
+                          <el-checkbox-group v-model="newResultForm.checkedModules">
+                            <el-checkbox v-for="(item, index) in moduleOptions" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
+                          </el-checkbox-group>
+                        </el-col>
+                      </el-row>
+                    </div>
+                  </el-card>
+                </el-col>
+                <el-col span="11">
+                  <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }">
+                    <div slot="header" class="header">
+                      <el-row type="flex" align="middle">
+                        <el-col span="12">
+                          <span class="header-label" style="font-size: 18px; font-weight: bolder">初始效果</span>
+                        </el-col>
+                      </el-row>
+                    </div>
+                    <div style="margin: 15px; text-align: center; height: 300px">
+                      <el-row>
+                        <el-col span="12">
+                          <el-row>
+                            <el-progress type="dashboard" :percentage="newResultForm.efficiency" :stroke-width="20" :width="165" style="font-weight: bolder; font-size: 20px;">
+                            </el-progress>
+                          </el-row>
+                          <span style="color: steelblue; font-size: 18px;">人机智能决策识别率</span>
+                        </el-col>
+                        <el-col span="12">
+                          <el-row>
+                            <el-progress type="dashboard" :percentage="newResultForm.accuracy" :stroke-width="20" :width="165" style="font-weight: bolder; font-size: 20px;">
+                            </el-progress>
+                          </el-row>
+                          <span style="color: steelblue; font-size: 18px;">知识决策蒸馏识别率</span>
+                        </el-col>
+                      </el-row>
+                    </div>
+                  </el-card>
+                </el-col>
+              </el-row>
+              <el-row>
+                <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 370px">
+                  <div slot="header" class="header">
+                    <el-row type="flex" align="middle">
+                      <el-col span="12">
+                        <span class="header-label" style="font-size: 18px; font-weight: bolder">当前决策案例</span>
+                      </el-col>
+                    </el-row>
+                  </div>
+                  <div style="margin: 15px; text-align: center">
+                    <el-table
+                      border stripe
+                      ref="task_feature_table"
+                      height="250"
+                      solt="append"
+                      style="font-size: 15px"
+                      :data="taskFeatureList">
+                      <el-table-column label="序号" type="index"></el-table-column>
+                      <el-table-column
+                        v-for="(item, index) in taskFeatureColumnsList"
+                        :key="index + 'i'"
+                        :label="item.label"
+                        :prop="item.prop"
+                        show-overflow-tooltip/>
+                    </el-table>
+                  </div>
+                </el-card>
+              </el-row>
+            </el-col>
+            <el-col span="8">
+              <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 710px">
+                <div slot="header" class="header">
+                  <el-row type="flex" align="middle">
+                    <el-col span="12">
+                      <span class="header-label" style="font-size: 18px; font-weight: bolder">前100重要特征</span>
+                    </el-col>
+                  </el-row>
+                </div>
+                <div id="featureCharts" style="width: 400px; height: 500px; margin: 0 auto"></div>
+              </el-card>
+            </el-col>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="已有案例">
+          <el-card>
+            <div class="table_box2">
+              <el-row>
+                <el-col :span="24">
+                  <el-table
+                    :data="HumanFeaData"
+                    border stripe
+                    ref="featureEng_list_table"
+                    height="550"
+                    style="font-size: 15px"
+                    solt="append">
+                    <el-table-column  label="序号" type="index" style="font-weight: bolder"> </el-table-column>
+                    <el-table-column prop="featureEng_name" label="样本" style="font-weight: bolder"> </el-table-column>
+                    <el-table-column prop="featureEng_type" label="决策方式" style="font-weight: bolder"> </el-table-column>
+                    <el-table-column prop="featureEng_result" label="真实标签" style="font-weight: bolder">
+<!--                      <template slot-scope="scope">-->
+<!--                        <el-progress-->
+<!--                          type="line"-->
+<!--                          :stroke-width="10"-->
+<!--                          :percentage="scope.row.featureEng_result"-->
+<!--                          color="green">-->
+<!--                        </el-progress>-->
+<!--                      </template>-->
+                    </el-table-column>
+                    <el-table-column prop="featureEng_efficiency1" label="决策标签">
+<!--                      <template slot-scope="scope">-->
+<!--                        <el-progress-->
+<!--                          type="line"-->
+<!--                          :stroke-width="10"-->
+<!--                          :percentage="scope.row.featureEng_efficiency1"-->
+<!--                          :color="blue">-->
+<!--                        </el-progress>-->
+<!--                      </template>-->
+                    </el-table-column>
+                    <el-table-column prop="featureEng_efficiency" label="蒸馏标签">
+<!--                      <template slot-scope="scope">-->
+<!--                        <el-progress-->
+<!--                          type="line"-->
+<!--                          :stroke-width="10"-->
+<!--                          :percentage="scope.row.featureEng_efficiency"-->
+<!--                          :color="blue">-->
+<!--                        </el-progress>-->
+<!--                      </template>-->
+                    </el-table-column>
+                    <el-table-column prop="operate_state" label="状态" style="text-align: center">
+                      <template slot-scope="scope">
+                        <span v-if="scope.row.operate_state==='已完成'" style="color: green">已完成</span>
+                        <span v-else-if="scope.row.operate_state==='交互中'"  style="color: orange">交互中</span>
+                      </template>
+                    </el-table-column>
+                    <el-table-column label="结果">
+                      <template>
+                        <span>
+                          <el-button size="mini" @click="fetchDecisionTree11">结果报告</el-button>
+                        </span>
+<!--                         弹窗部分 -->
+                            <!-- 决策树1的弹窗 -->
+<!--                        <el-dialog title="决策树1" :visible.sync="tree1DialogVisible" width="auto">-->
+<!--                          <img v-if="tree1ImageUrl" :src="tree1ImageUrl" alt="决策树1" :width="imgWidth1 + 'px'" height="auto" @wheel="handleWheel($event, 'tree1')" @load="setInitialSize('tree1')" />-->
+<!--                        </el-dialog>-->
+<!--                        <el-dialog :visible.sync="resultReportDialogVisible" title="结果报告" width="80%" :style="{minHeight: '400px'}">-->
+<!--                          <img :src="resultReportImage" alt="结果报告">-->
+<!--                        </el-dialog>-->
+                      </template>
+                    </el-table-column>
+                    <!--新操作栏-->
+                    <el-table-column label="操作">
+                      <template>
+                        <el-row>
+                          <el-button size="mini" type="primary">停止任务</el-button>
+                          <el-button size="mini" type="danger" icon="el-icon-delete" style="margin-top: 5px">删除</el-button>
+                        </el-row>
+                      </template>
+                    </el-table-column>
+                  </el-table>
+                </el-col>
+              </el-row>
+            </div>
+          </el-card>
+        </el-tab-pane>
+<!--        <el-tab-pane label="特征库">-->
+<!--          <el-card>-->
+<!--            <div class="table_box2">-->
+<!--              <el-row>-->
+<!--                <el-col :span="24">-->
+<!--                  <el-table-->
+<!--                    border stripe-->
+<!--                    ref="feature_library_table"-->
+<!--                    height="550"-->
+<!--                    solt="append"-->
+<!--                    style="font-size: 15px"-->
+<!--                    :data="featureLibraryList">-->
+<!--                    <el-table-column label="序号" type="index"></el-table-column>-->
+<!--                    <el-table-column-->
+<!--                      v-for="(item, index) in featureLibraryColumnsList"-->
+<!--                      :key="index + 'i'"-->
+<!--                      :label="item.label"-->
+<!--                      :prop="item.prop"-->
+<!--                      show-overflow-tooltip/>-->
+<!--                  </el-table>-->
+<!--                </el-col>-->
+<!--              </el-row>-->
+<!--            </div>-->
+<!--          </el-card>-->
+<!--        </el-tab-pane>-->
+      </el-tabs>
+      </div>
+<!--      选择数据集，弹出的窗口-->
+      <el-dialog title="选择数据集" :visible.sync="datasetDialogVisible" @close="getColumns">
+        <dataset :isDialog="true" @dataset-choose = chooseDataset></dataset>
+          <!-- <supplier :isDialog="true" @supplier-choose="supplierChoose"></supplier> -->
+      </el-dialog>
+    </div>
 </template>
 
 <script>
-import Dataset from '../data/OriginDataset'
-import QueryHumanFeature from './../feature/QueryHumanFeature'
-import QueryLearner from './../learn/QueryLearner'
+// import Dataset from '../data/OriginDataset'
+// import featureApi from '../../api/feature'
+import * as echarts from 'echarts'
+// import Dataset from '../data/OriginDataset'
+// import QueryHumanFeature from './../feature/QueryHumanFeature'
+// import QueryLearner from './../learn/QueryLearner'
 import featureApi from './../../api/feature'
+// import decisionApi from './../../api/decision'
+// import axios from 'axios'
+// import * as d3 from 'd3'
+import Dataset from '../data/OriginDataset'
+// import QueryHumanFeature from './../feature/QueryHumanFeature'
+// import QueryLearner from './../learn/QueryLearner'
+// import featureApi from './../../api/feature'
 import decisionApi from './../../api/decision'
-import axios from 'axios'
-// 学习器类型
-const decisionTypeOptions = [
-  { type: 'Manual_FE', name: '应用特征工程' },
-  { type: 'Manual_L', name: '应用学习器' },
-  { type: 'Manual_D', name: '应用决策者' },
-  { type: 'Section_Algorithm', name: '断面算法' }
+// import axios from 'axios'
+// import * as d3 from 'd3'
+
+const moduleOptions = [
+  { value: '1', label: '原始特征' },
+  { value: '2', label: '特征工程' },
+  { value: '3', label: '人机协同' }
+  // { value: '4', label: '特征选择' }
 ]
 export default {
   name: 'Decision',
+  // props: {
+  //   // 这里接受父组件传过来的数据，如果isDialog为true，则为弹窗
+  //   isHuman: Boolean
+  // },
   components: {
-    Dataset,
-    QueryHumanFeature,
-    QueryLearner
+    Dataset
+    // QueryHumanFeature,
+    // QueryLearner
   },
+
   data () {
     return {
-      selectedDescription: '',
-      nGen: 53,
-      nAdjustStep: 2,
-      adjustRatios: [0.8, 1.2],
-      allActions: [],
-      interactionsHistory: [],
-      interactions: [], // 新增属性，用于存储用户的交互
-      selectedState: '', // 用于存储选中的state
-      topActions: [], // 用于存储给定state的top 3 actions
-      selectedAction: '', // 用于存储选中的action
-      selectedQValue: '', // 用于存储选定的Q值
-      isSearchFormVisible: false,
-      taskDialogVisible: false,
-      caseDialogVisible: false,
-      qTableData: [],
-      showQTable: false,
-      searchQuery: {
-        state: '',
-        action: ''
-      },
-      filteredQTableData: [],
-      imageUrl: '',
+      imgWidth1: null, // 1023决策树1的图片宽度
+      imgWidth2: null, // 1023决策树2的图片宽度
+      tree1DialogVisible: false, // 1023控制决策树1的弹窗可见性
+      tree2DialogVisible: false, // 1023控制决策树2的弹窗可见性
+      tree1ImageUrl: '', // 1023决策树
+      tree2ImageUrl: '', // 1023决策树
+      resultReportDialogVisible: false,
+      resultReportImage: './../../assets/img/pic1108.png',
+      zoomScale: 1, // 图片的缩放比例
       // 选择数据集form
       chooseDatasetForm: {
         dataset_name: '',
         dataset_id: ''
       },
-      datasetDialogVisible: false,
-      // 决策类型
-      decisionTypeOptions,
-      // 选择特征工程的
-      chooseHumanFeaForm: {
-        featureEng_name: '',
-        original_dataset_id: '',
-        featureEng_id: ''
+      moduleOptions,
+      newResultForm: {
+        efficiency: 99.26,
+        accuracy: 95.79,
+        isNewResult: true,
+        isFeatureVisual: true,
+        checkedModules: ['1', '2', '3', '4'],
+        taskDetails: [
+          { type: 'name', label: '任务名称', value: '人机协同智能决策与知识增强' },
+          { type: 'type', label: '决策方式', value: '人机智能决策' },
+          { type: 'network', label: '网络拓扑', value: '300节点电网' },
+          // { type: 'mode', label: '运行方式', value: '001夏平初始' },
+          { type: 'dataset', label: '数据集', value: '暂稳判别数据集' }
+        ]
       },
-      // 选择学习器的
-      chooseLearnerForm: {
-        learner_id: '',
-        learner_name: ''
+      HumanInLoopForm: {
+        node: '',
+        operator: '',
+        nodesForDelete: '',
+        operatorForAdd: '',
+        operatorForDelete: ''
       },
       datasetId: '',
-      // 决策于特征的表单
-      decideHFAndLeaForm: {
-        decision_name: '',
-        decision_type: 'Manual_D',
-        decision_parameters: {},
-        featureEng_id: '',
-        dataset_id: '',
-        task: '',
-        case: ''
+      datasetName: '',
+      // 弹出数据集对话框
+      datasetDialogVisible: false,
+      // 用来接收数据集的列名
+      featureLibraryColumnsList: [{ label: '样本', prop: 'name' },
+        { label: '所属数据集', prop: 'dataset' },
+        { label: '针对任务', prop: 'task' },
+        { label: '决策方式', prop: 'featureDecoupling' },
+        { label: '真实标签', prop: 'featureLearning' },
+        { label: '决策标签', prop: 'featureDerivation' },
+        { label: '蒸馏标签', prop: 'featureSelection' }],
+      taskFeatureColumnsList: [{ label: '样本', prop: 'name' },
+        { label: '所属数据集', prop: 'dataset' },
+        { label: '针对任务', prop: 'task' },
+        { label: '决策方式', prop: 'featureDecoupling' },
+        { label: '真实标签', prop: 'featureLearning' },
+        { label: '决策标签', prop: 'featureDerivation' },
+        { label: '蒸馏标签', prop: 'featureSelection' }],
+      // 已有特征工程具体数据
+      HumanFeaData: [],
+      // 用来接受特征库的具体数据
+      featureLibraryList: [],
+      taskFeatureList: [],
+      loading: false,
+      pagination_featureLibrary: {
+        page: 1,
+        pageSize: 20,
+        total: 0
       },
-      decideHumanFeaParamForm: {
-        label: []
+      pagination_featureEngList: {
+        page: 1,
+        pageSize: 20,
+        total: 0
       },
-      // 特征工程对话框
-      humanFeaDialogVisible: false,
-      // 学习器对话框
-      learnerDialogVisible: false,
-      columnsList: [],
-      // 是否禁用 选择特征工程 选择学习器
-      chooseFEDisabled: false,
-      chooseLearnerDisabled: false
+      pagination_taskFeatureList: {
+        page: 1,
+        pageSize: 20,
+        total: 0
+      },
+      totalPage_featureLibrary: 5,
+      totalPage_featureEngList: 5,
+      totalPage_taskFeatureList: 5,
+      countTotal_featureLibrary: 15,
+      countTotal_featureEngList: 15,
+      countTotal_taskFeature: 15,
+      selectedIds: [],
+      checked: false,
+      otherHeight: 0,
+      pageHeight: 0,
+      operator_options: [{ value: '0', label: '求和' }],
+      IteractionRecord: [{ record_efficiency: '99.26%', record_accuracy: '95.79%' }]
     }
   },
-  computed: {
-    enrichedTopActions () {
-      return this.topActions.map((action, index) => {
-        const genIdx = Math.floor(index / this.nAdjustStep)
-        const ratioIdx = index % this.nAdjustStep
-        const description = `对第 ${genIdx + 1} 个电力生成单元进行${this.adjustRatios[ratioIdx] === 0.8 ? '减少到' : '增加到'} ${this.adjustRatios[ratioIdx] * 100}% 的输出电量`
-        return {
-          ...action,
-          description
-        }
-      })
+  created () {
+    // 用假数据暂时替代
+    this.featureLibraryList = []
+    this.HumanFeaData = []
+    this.taskFeatureList = []
+    for (let i = 1; i <= this.countTotal_featureLibrary; i = i + 1) {
+      const nameString = String.fromCharCode(i / 4 + 65) + '_' + i % 4
+      this.featureLibraryList.push({ name: nameString, dataset: '暂稳数据集', task: '暂态判稳任务', featureDecoupling: '人机智能决策', featureLearning: '暂态稳定', featureDerivation: '人机协同特征生成', featureSelection: '基于模型的特征选择' })
     }
+    for (let i = 0; i < this.countTotal_featureEngList; i++) {
+      this.HumanFeaData.push({ featureEng_name: '决策样本' + i, featureEng_type: '人机智能决策', featureEng_result: '暂态稳定', featureEng_efficiency: '暂态稳定', featureEng_efficiency1: '暂态稳定', operate_state: '已完成' })
+    }
+    for (let i = 0; i < this.countTotal_taskFeature; i++) {
+      // const nameString = String.fromCharCode(i / 4 + 65) + '决策树' + '_' + i % 4
+      const nameString = '决策树' + String.fromCharCode(i / 4 + 65) + '_' + i % 4
+      this.taskFeatureList.push({ name: nameString, dataset: '暂稳数据集', task: '暂态判稳任务', featureDecoupling: '人机智能决策', featureLearning: '暂态稳定', featureDerivation: '暂态稳定', featureSelection: '暂态稳定' })
+    }
+  },
+
+  mounted () {
+    this.lazyLoading_featureLibrary()
+    this.lazyLoading_featureEngList()
+    this.lazyLoading_taskFeatureList()
+    this.drawChart()
   },
   methods: {
-    // 接受数据集组件传来的数据
+    drawChart () {
+      // 基于准备好的dom，初始化echarts实例  这个和上面的main对应
+      const myChart = echarts.init(document.getElementById('featureCharts'))
+      // 用于生成假数据
+      let countNum = 0
+      const yaxis = []
+      const value = []
+      for (let i = 0; i < 25; i = i + 1) {
+        for (let j = 0; j < 4; j = j + 1) {
+          yaxis.push(String.fromCharCode(i + 65) + '_' + j)
+          value.push(100 - countNum)
+          countNum = countNum + 1
+        }
+      }
+      // 指定图表的配置项和数据
+      const option = {
+        tooltip: {},
+        dataZoom: [
+          {
+            yAxisIndex: [0],
+            show: true,
+            realtime: true,
+            type: 'inside',
+            startValue: 0,
+            endValue: 10,
+            zoomLock: true
+            // handleSize: 100
+          }
+        ],
+        xAxis: { type: 'value' },
+        yAxis: {
+          data: yaxis,
+          inverse: true
+        },
+        series: [
+          {
+            name: '特征重要性',
+            type: 'bar',
+            data: value,
+            itemStyle: {
+              color: {
+                type: 'linear', // 线性渐变
+                x: 0,
+                y: 0,
+                x2: 1,
+                y2: 0,
+                colorStops: [{
+                  offset: 0,
+                  color: '#58F3E1'
+                }, {
+                  offset: 1,
+                  color: '#4EAACC' // 100%处的颜色为蓝
+                }]
+              }
+            }
+          }
+        ]
+      }
+      myChart.setOption(option)
+    },
+    indexMethod (index) {
+      return index
+    },
+    lazyLoading_taskFeatureList () {
+      // const dom = document.querySelector('.el-table__body-wrapper')
+      const dom = this.$refs.task_feature_table.bodyWrapper
+      console.log(dom)
+      dom.addEventListener('scroll', (v) => {
+        const scrollDistance = dom.scrollHeight - dom.scrollTop - dom.clientHeight
+        console.log('鼠标滑动-scrollDistance', scrollDistance)
+        if (scrollDistance <= 1) {
+          if (this.pagination_taskFeatureList.page >= this.totalPage_taskFeatureList) {
+            this.$message.warning('特征库数据已全部加载')
+          }
+          if (this.pagination_taskFeatureList.page < this.totalPage_taskFeatureList) {
+            this.pagination_taskFeatureList.page = this.pagination_taskFeatureList.page + 1
+            console.log('页面已经到达底部,可以请求接口,请求第' + this.pagination_taskFeatureList.page + '页数据')
+            var cIndex = this.countTotal_taskFeature + 10
+            for (let i = (this.countTotal_taskFeature + 1); i <= cIndex; i = i + 1) {
+              this.taskFeatureList.push({ name: 'feature' + i, dataset: '暂稳数据集', task: '---', featureDecoupling: '---', featureLearning: '---', featureDerivation: '---', featureSelection: '---' })
+            }
+            this.countTotal_taskFeature += 10
+          }
+        }
+      })
+    },
+    lazyLoading_featureLibrary () {
+      // const dom = document.querySelector('.el-table__body-wrapper')
+      const dom = this.$refs.feature_library_table.bodyWrapper
+      console.log(dom)
+      dom.addEventListener('scroll', (v) => {
+        const scrollDistance = dom.scrollHeight - dom.scrollTop - dom.clientHeight
+        console.log('鼠标滑动-scrollDistance', scrollDistance)
+        if (scrollDistance <= 1) {
+          if (this.pagination_featureLibrary.page >= this.totalPage_featureLibrary) {
+            this.$message.warning('特征库数据已全部加载')
+          }
+          if (this.pagination_featureLibrary.page < this.totalPage_featureLibrary) {
+            this.pagination_featureLibrary.page = this.pagination_featureLibrary.page + 1
+            console.log('页面已经到达底部,可以请求接口,请求第' + this.pagination_featureLibrary.page + '页数据')
+            var cIndex = this.countTotal_featureLibrary + 10
+            for (let i = (this.countTotal_featureLibrary + 1); i <= cIndex; i = i + 1) {
+              this.featureLibraryList.push({ name: 'feature' + i, dataset: '暂稳数据集', task: '---', featureDecoupling: '---', featureLearning: '---', featureDerivation: '---', featureSelection: '---' })
+            }
+            this.countTotal_featureLibrary += 10
+          }
+        }
+      })
+    },
+    lazyLoading_featureEngList () {
+      // const dom = document.querySelector('.el-table__body-wrapper')
+      const dom = this.$refs.featureEng_list_table.bodyWrapper
+      console.log(dom)
+      dom.addEventListener('scroll', (v) => {
+        const scrollDistance = dom.scrollHeight - dom.scrollTop - dom.clientHeight
+        console.log('鼠标滑动-scrollDistance', scrollDistance)
+        if (scrollDistance <= 1) {
+          if (this.pagination_featureEngList.page >= this.totalPage_featureEngList) {
+            this.$message.warning('已有特征工程数据已全部加载')
+          }
+          if (this.pagination_featureEngList.page < this.totalPage_featureEngList) {
+            this.pagination_featureEngList.page = this.pagination_featureEngList.page + 1
+            console.log('页面已经到达底部,可以请求接口,请求第' + this.pagination_featureEngList.page + '页数据')
+            var cIndex = this.countTotal_featureEngList + 10
+            for (let i = (this.countTotal_featureEngList + 1); i <= cIndex; i = i + 1) {
+              this.HumanFeaData.push({ featureEng_name: '特征工程' + i, featureEng_type: '暂稳数据集', featureEng_result: '10', featureEng_efficiency: '20', operate_state: '交互中' })
+            }
+            this.countTotal_featureEngList += 10
+          }
+        }
+      })
+    },
     chooseDataset (currentRow) {
       this.chooseDatasetForm.dataset_name = currentRow.dataset_name
       this.chooseDatasetForm.dataset_id = currentRow.dataset_id
       this.datasetId = currentRow.dataset_id
+      this.datasetName = currentRow.dataset_name
+      console.log(this.datasetId)
       this.datasetDialogVisible = false
+      console.log(currentRow)
     },
-    // 从人工特征工程传来的选中的特征工程
-    chooseHumanFea (currentRow) {
-      // console.log(currentRow)
-      this.chooseHumanFeaForm.featureEng_name = currentRow.featureEng_name
-      // this.chooseHumanFeaForm.original_dataset_id = currentRow.original_dataset_id
-      this.chooseHumanFeaForm.featureEng_id = currentRow.featureEng_id
-      // this.datasetId = this.chooseHumanFeaForm.original_dataset_id
-      this.humanFeaDialogVisible = false
-    },
-    // 从学习器传来的选中的学习器
-    chooseLearner (currentRow) {
-      this.chooseLearnerForm.learner_id = currentRow.learner_id
-      this.chooseLearnerForm.learner_name = currentRow.learner_name
-      this.learnerDialogVisible = false
+    queryResult () {
+      this.$router.push('/feature/result')
     },
     // 获取数据集列名
     getColumns () {
+      // console.log(this.datasetId)
       if (this.datasetId !== '') {
+        localStorage.setItem('datasetId', this.datasetId)
+        localStorage.setItem('datasetName', this.datasetName)
         featureApi.getDatasetColumns(this.datasetId).then(response => {
+          console.log(response)
           const resp = response.data
+          // if (resp.meta.code === 200) {
+          //   this.$message.success('获取数据集成功')
+          // }
           this.columnsList = resp.data
-        // console.log(this.columnsList)
+          console.log(this.columnsList)
+        })
+        featureApi.getData(this.datasetId).then(response => {
+          console.log(response)
+          const resp = response.data
+          if (resp.meta.code === 200) {
+            this.$message.success('获取数据成功')
+          }
+          // this.datasetDetailList = resp.data
+          // console.log(this.datasetDetailList)
         })
       }
     },
-    // 提交决策
-    submitAllDecForm () {
-      this.decideHFAndLeaForm.dataset_id = this.datasetId
-      this.decideHFAndLeaForm.decision_parameters = this.decideHumanFeaParamForm
-      this.decideHFAndLeaForm.featureEng_id = this.chooseHumanFeaForm.featureEng_id
-      this.decideHFAndLeaForm.learner_id = this.chooseLearnerForm.learner_id
-      if (this.decideHFAndLeaForm.decision_type === 'Section_Algorithm') {
-        // 应用特征工程
-        decisionApi.addMam(this.decideHFAndLeaForm).then(response => {
-          // console.log(response)
-          const resp = response.data
-          if (resp.meta.code === 204) {
-            this.$message.success('添加决策成功')
-            if (resp.data && resp.data.imageData) {
-              this.imageUrl = resp.data.imageData
-              // 解析文本数据
-              const decodedText = atob(resp.data.textData.split('base64,')[1])
-              const lines = decodedText.split('\n')
-              let currentState = ''
-              lines.forEach(line => {
-                if (line.startsWith('State')) {
-                  currentState = line
-                } else if (line.startsWith('Action')) {
-                  const actionDetails = line.split(': Q-value = ')
-                  this.qTableData.push({
-                    state: currentState,
-                    action: actionDetails[0],
-                    qValue: actionDetails[1]
-                  })
-                }
-              })
-            }
-            if (resp.data && resp.data.textData) {
-              this.textUrl = resp.data.textData
-            } else {
-              this.$message.error('添加决策失败')
-            }
-          }
-        })
-      } else if (this.decideHFAndLeaForm.decision_type === 'Manual_FE') {
-        // 应用特征工程
-        decisionApi.addHumanFea(this.decideHFAndLeaForm).then(response => {
-          // console.log(response)
-          const resp = response.data
-          if (resp.meta.code === 204) {
-            this.$message.success('添加决策成功')
-          } else {
-            this.$message.error('添加决策失败')
-          }
-        })
-      } else if (this.decideHFAndLeaForm.decision_type === 'Manual_L') {
-        // 应用学习器
-        decisionApi.addLearner(this.decideLearnerForm).then(response => {
-          // console.log(response)
-          const resp = response.data
-          if (resp.meta.code === 204) {
-            this.$message.success('添加决策成功')
-          } else {
-            this.$message.error('添加决策失败')
-          }
-        })
+    // 跳转到人工特征工程页面
+    goHumanFea () {
+      this.$emit('columns-get', this.columnsList)
+      this.$router.push('/feature/humanfea')
+    },
+    // 点击查看特征工程按钮
+    queryFeatureEng () {
+      this.$router.push('/feature/queryFea')
+    },
+    showResultReport () {
+      this.resultReportDialogVisible = true
+    },
+    handleImageZoom (event) {
+      const zoomStep = 0.1
+      if (event.deltaY > 0) {
+        this.zoomScale = Math.max(this.zoomScale - zoomStep, 0.5) // 最小缩放比例为 0.5
       } else {
-        // 应用决策者
-        decisionApi.addAllDec(this.decideHFAndLeaForm).then(response => {
-          // console.log(response)
-          const resp = response.data
-          if (resp.meta.code === 204) {
-            this.$message.success('添加决策成功')
-          } else {
-            this.$message.error('添加决策失败')
+        this.zoomScale = Math.min(this.zoomScale + zoomStep, 3) // 最大缩放比例为 3
+      }
+      this.applyZoom()
+    },
+    applyZoom () {
+      const image = this.$el.querySelector('.result-image')
+      if (image) {
+        image.style.transform = `scale(${this.zoomScale})`
+      }
+    },
+    // 1023：决策树
+    fetchDecisionTree11 () {
+      // 先清除两张图片
+      this.tree1ImageUrl = ''
+      this.tree2ImageUrl = ''
+      decisionApi.fetchDecisionTree1({ treeType: 'tree1' }).then(response => {
+        const resp = response.data
+        if (resp.meta.code === 204) {
+          this.$message.success('获取决策树1成功')
+          if (resp.data && resp.data.imageData) {
+            this.tree1ImageUrl = ''
+            this.tree1ImageUrl = resp.data.imageData
+            // 集成的下载图片代码
+            const link = document.createElement('a')
+            link.href = resp.data.imageData
+            this.tree1DialogVisible = true // 显示决策树1的弹窗
+            link.download = '决策树1.png'
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
           }
-        })
-      }
-    },
-    // 断面算法：优化选择界面
-    handleDecideOption () {
-      if (this.decideHFAndLeaForm.decision_type === 'Section_Algorithm') {
-        // 禁用"特征工程"和"学习器"当选择"断面算法"
-        this.chooseFEDisabled = true
-        this.chooseLearnerDisabled = true
-      } else if (this.decideHFAndLeaForm.decision_type === 'Manual_FE') {
-        // 应用特征工程 禁用选择学习器
-        console.log('handleDecideOption: Manual_FE')
-        this.chooseFEDisabled = false
-        this.chooseLearnerDisabled = true
-      } else if (this.decideHFAndLeaForm.decision_type === 'Manual_L') {
-        // 应用学习器 禁用选择特征工程
-        console.log('handleDecideOption: Manual_L')
-        this.chooseFEDisabled = true
-        this.chooseLearnerDisabled = false
-      } else {
-        // 应用决策者
-        console.log('handleDecideOption: Manual_D')
-        this.chooseFEDisabled = false
-        this.chooseLearnerDisabled = false
-      }
-    },
-    gotoQueryDec () {
-      this.$router.push('/decision/queryDecision')
-    },
-    toggleQTable () {
-      this.showQTable = !this.showQTable
-    },
-    searchQTable () {
-      this.filteredQTableData = this.qTableData.filter(item => {
-        return (this.searchQuery.state === '' || item.state.includes(this.searchQuery.state)) && (this.searchQuery.action === '' || item.action.includes(this.searchQuery.action))
-      })
-    },
-    // 断面算法：下载结果图片
-    downloadImage () {
-      // axios.get('/download/image', { responseType: 'blob' })
-      axios.get('/download/image', { responseType: 'arraybuffer' })
-        .then(response => {
-          // 使用blob创建一个URL，并使用a标签来下载
-          console.log('响应数据:', response)
-          const blob = new Blob([response.data], { type: 'image/png' })
-          const url = window.URL.createObjectURL(blob)
-          // const url = window.URL.createObjectURL(new Blob([response.data]))
-          const link = document.createElement('a')
-          link.href = url
-          link.setAttribute('download', 'q_table.png')
-          document.body.appendChild(link)
-          link.click()
-        })
-        .catch(error => {
-          // 错误处理，例如提示用户登录
-          console.error('下载失败:', error)
-        })
-    },
-    // 断面算法：下载结果数据文件
-    downloadTxt () {
-      // 调用后端端点下载TXT文件
-      window.location.href = '/download/txt'
-    },
-    toggleSearchForm () {
-      this.isSearchFormVisible = !this.isSearchFormVisible
-    },
-    // 断面算法：寻找最优action
-    findTopActions () {
-      if (this.selectedState !== '') {
-        const actions = this.qTableData.filter(item => item.state === this.selectedState)
-        // actions.sort((a, b) => b.qValue - a.qValue)
-        // this.topActions = actions.slice(0, 3)
-        this.topActions = actions
-      }
-    },
-    // 断面算法：选择action
-    selectAction (action) {
-      this.selectedAction = action
-    },
-    // 断面算法：保存交互结果并继续
-    continueInteraction () {
-      if (this.selectedState && this.selectedAction && this.selectedQValue) {
-        this.interactions.push({
-          state: this.selectedState,
-          action: this.selectedAction,
-          qValue: this.selectedQValue
-        })
-        // 将当前交互添加到历史数组中
-        this.interactionsHistory.push({
-          state: this.selectedState,
-          action: this.selectedAction,
-          qValue: this.selectedQValue,
-          timestamp: new Date().toISOString() // 记录交互的时间戳
-        })
-        // 清除当前选择
-        this.selectedState = ''
-        this.selectedAction = ''
-        this.selectedQValue = ''
-      }
-    },
-    // 断面算法：下载当前交互记录
-    downloadInteractions () {
-      const lines = this.interactions.map((item, index) => {
-        let description = ''
-        if (item.action !== '') {
-          const selectedActionDetails = this.topActions.find(actionItem => actionItem.action === item.action)
-          if (selectedActionDetails) {
-            const selectedIndex = this.topActions.findIndex(action => action.action === item.action)
-            if (selectedIndex !== -1) {
-              const genIdx = Math.floor(selectedIndex / this.nAdjustStep)
-              const ratioIdx = selectedIndex % this.nAdjustStep
-              description = `对第 ${genIdx + 1} 个电力生成单元进行${this.adjustRatios[ratioIdx] === 0.8 ? '减少到' : '增加到'} ${this.adjustRatios[ratioIdx] * 100}% 的输出电量`
-            }
-          }
-        }
-        return `${item.state},${item.action},${item.qValue},${description}` // 添加描述到每一行
-      })
-      const blob = new Blob([lines.join('\n')], { type: 'text/plain' })
-      const link = document.createElement('a')
-      link.href = URL.createObjectURL(blob)
-      link.download = '断面调整人机交互记录.txt'
-      document.body.appendChild(link)
-      link.click()
-    },
-    // 断面算法：更新q值
-    updateSelectedQValue () {
-      // if (this.selectedAction !== '') {
-      //   const selectedActionDetails = this.topActions.find(item => item.action === this.selectedAction)
-      //   if (selectedActionDetails) {
-      //     this.selectedQValue = selectedActionDetails.qValue
-      //   }
-      // }
-      // if (this.selectedAction !== '') {
-      //   const selectedActionDetails = this.topActions.find(item => item.action === this.selectedAction)
-      //   if (selectedActionDetails) {
-      //     // 更新 selectedQValue
-      //     this.selectedQValue = selectedActionDetails.qValue
-      //     // 计算该动作的索引
-      //     const selectedIndex = this.topActions.findIndex(action => action.action === this.selectedAction)
-      //     // 根据索引计算动作描述
-      //     if (selectedIndex !== -1) {
-      //       const genIdx = Math.floor(selectedIndex / this.nAdjustStep)
-      //       const ratioIdx = selectedIndex % this.nAdjustStep
-      //       const description = `对第 ${genIdx + 1} 个电力生成单元进行${this.adjustRatios[ratioIdx] === 0.8 ? '减少到' : '增加到'} ${this.adjustRatios[ratioIdx] * 100}% 的输出电量`
-      //       // 更新动作的描述
-      //       selectedActionDetails.description = description
-      //     }
-      //   }
-      // }
-      if (this.selectedAction !== '') {
-        const selectedActionDetails = this.topActions.find(item => item.action === this.selectedAction)
-        if (selectedActionDetails) {
-          this.selectedQValue = selectedActionDetails.qValue
-          const selectedIndex = this.topActions.findIndex(action => action.action === this.selectedAction)
-          if (selectedIndex !== -1) {
-            const genIdx = Math.floor(selectedIndex / this.nAdjustStep)
-            const ratioIdx = selectedIndex % this.nAdjustStep
-            const description = `对第 ${genIdx + 1} 个电力生成单元进行${this.adjustRatios[ratioIdx] === 0.8 ? '减少到' : '增加到'} ${this.adjustRatios[ratioIdx] * 100}% 的输出电量`
-            this.selectedDescription = description
-          }
-        }
-      }
-    },
-    // 断面算法：添加action描述
-    generateDescription (index) {
-      const genIdx = Math.floor(index / this.nAdjustStep)
-      const ratioIdx = index % this.nAdjustStep
-      return `对第 ${genIdx + 1} 个电力生成单元进行${this.adjustRatios[ratioIdx] === 0.8 ? '减少到' : '增加到'} ${this.adjustRatios[ratioIdx] * 100}% 的输出电量`
-    },
-    // downloadInteractionsHistory () {
-    //   if (this.selectedState !== '') {
-    //     const actions = this.qTableData.filter(item => item.state === this.selectedState)
-    //     this.allActions = actions.map(action => ({
-    //       action: action.action,
-    //       qValue: action.qValue
-    //     }))
-    //     const existingHistoryIndex = this.interactionsHistory.findIndex(item => item.state === this.selectedState)
-    //     if (existingHistoryIndex !== -1) {
-    //       this.interactionsHistory[existingHistoryIndex].actions = this.allActions
-    //       this.interactionsHistory[existingHistoryIndex].timestamp = new Date().toISOString()
-    //     } else {
-    //       this.interactionsHistory.push({
-    //         state: this.selectedState,
-    //         actions: this.allActions,
-    //         timestamp: new Date().toISOString()
-    //       })
-    //     }
-    //     const jsonBlob = new Blob([JSON.stringify(this.interactionsHistory, null, 2)], { type: 'application/json' })
-    //     const jsonLink = document.createElement('a')
-    //     jsonLink.href = URL.createObjectURL(jsonBlob)
-    //     jsonLink.download = 'interactions_history.json'
-    //     document.body.appendChild(jsonLink)
-    //     jsonLink.click()
-    //     const txtBlob = new Blob([this.interactionsHistory.map(item => `${item.timestamp}, ${item.state}, ${JSON.stringify(item.actions)}`).join('\n')], { type: 'text/plain' })
-    //     const txtLink = document.createElement('a')
-    //     txtLink.href = URL.createObjectURL(txtBlob)
-    //     txtLink.download = 'interactions_history.txt'
-    //     document.body.appendChild(txtLink)
-    //     txtLink.click()
-    //   }
-    // }
-    // 断面算法：下载历史记录（json格式）
-    downloadInteractionsHistory () {
-      if (this.selectedState !== '') {
-        const actions = this.qTableData.filter(item => item.state === this.selectedState)
-        this.allActions = actions.map(action => `${action.action}, Q-value: ${action.qValue}`).join('; ')
-        const existingHistoryIndex = this.interactionsHistory.findIndex(item => item.state === this.selectedState)
-        if (existingHistoryIndex !== -1) {
-          this.interactionsHistory[existingHistoryIndex].actions = this.allActions
-          this.interactionsHistory[existingHistoryIndex].timestamp = new Date().toISOString()
         } else {
-          this.interactionsHistory.push({
-            state: this.selectedState,
-            actions: this.allActions,
-            timestamp: new Date().toISOString()
-          })
+          this.$message.error('获取决策树1失败')
         }
-        const jsonBlob = new Blob([JSON.stringify(this.interactionsHistory, null, 2)], { type: 'application/json' })
-        const jsonLink = document.createElement('a')
-        jsonLink.href = URL.createObjectURL(jsonBlob)
-        jsonLink.download = 'interactions_history.json'
-        document.body.appendChild(jsonLink)
-        jsonLink.click()
-        const txtBlob = new Blob([this.interactionsHistory.map(item => `${item.timestamp}, State ${item.state}:, ${item.actions}`).join('\n')], { type: 'text/plain' })
-        const txtLink = document.createElement('a')
-        txtLink.href = URL.createObjectURL(txtBlob)
-        txtLink.download = 'interactions_history.txt'
-        document.body.appendChild(txtLink)
-        txtLink.click()
+      }).catch(error => {
+        console.error('Fetch Decision Tree 1 failed:', error)
+        this.$message.error('获取决策树11失败')
+      })
+    },
+    // 1023：决策树
+    fetchDecisionTree22 () {
+      // 先清除两张图片
+      this.tree1ImageUrl = ''
+      this.tree2ImageUrl = ''
+      decisionApi.fetchDecisionTree2({ treeType: 'tree2' }).then(response => {
+        const resp = response.data
+        if (resp.meta.code === 204) {
+          this.$message.success('获取决策树2成功')
+          if (resp.data && resp.data.imageData) {
+            this.tree2ImageUrl = ''
+            this.tree2ImageUrl = resp.data.imageData
+            // 集成的下载图片代码
+            const link = document.createElement('a')
+            link.href = resp.data.imageData
+            this.tree2DialogVisible = true // 显示决策树2的弹窗
+            link.download = '决策树2.png'
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+          }
+        } else {
+          this.$message.error('获取决策树2失败')
+        }
+      }).catch(error => {
+        console.error('Fetch Decision Tree 2 failed:', error)
+        this.$message.error('获取决策树2失败')
+      })
+    },
+    // // 1023：决策树
+    // showTree1Dialog () {
+    //   this.fetchDecisionTree1() // 获取决策树1的数据
+    //   this.tree1DialogVisible = true // 显示决策树1的弹窗
+    // },
+    // // 1023：决策树
+    // showTree2Dialog () {
+    //   this.fetchDecisionTree2() // 获取决策树2的数据
+    //   this.tree2DialogVisible = true // 显示决策树2的弹窗
+    // },
+    // 1023：决策树
+    handleWheel (event, treeType) {
+      const delta = event.deltaY > 0 ? 200 : -200
+      if (treeType === 'tree1') {
+        this.imgWidth1 = Math.max(1000, this.imgWidth1 + delta) // 更新决策树1的图片宽度
+      } else if (treeType === 'tree2') {
+        this.imgWidth2 = Math.max(1000, this.imgWidth2 + delta) // 更新决策树2的图片宽度
+      }
+    },
+    setInitialSize (treeType) {
+      if (treeType === 'tree1') {
+        this.imgWidth1 = 1000 // 设置决策树1的初始宽度
+      } else if (treeType === 'tree2') {
+        this.imgWidth2 = 800 // 设置决策树2的初始宽度
       }
     }
   }
@@ -731,30 +959,56 @@ export default {
 </script>
 
 <style scoped>
-/* .selectHuFea {
-  margin-top: 20px;
-} */
-.choosedataset {
-  margin-top: 20px;
-}
-.el-form-item{
-  margin-bottom: 30px;
-}
-.buttons{
+  .result-image {
+    width: 100%;
+    transition: transform 0.2s;
+    /* 保持图片居中显示 */
+    display: block;
+    margin: 0 auto;
+  }
+  .el-form {
+    margin: 10px auto;
+    /* width: 1000px; */
+  }
+  .buttons {
     float: right;
-}
-/* .queryBtn{
-    width: 120px;
-}
-.queryBtn {
-  margin-bottom: 20px;
-  float: left;
-} */
-/* .buttons{
-  /* margin-bottom: 15px; */
-  /* float: right;
-} */
-  /* .el-form {
-    margin-top: 80px;
+  }
+  /* .el-button{
+    width: 150px;
   } */
+
+  #selectForm >>> .el-form-item__label {
+    font-size: 12px;
+  }
+  .box-card {
+    height: 320px;
+    .header {
+      position: relative;
+      .header-label {
+        padding-left: 10px;
+      }
+    }
+    .footer {
+      font-size: 18px !important;
+      background-color: rgb(245, 247, 251);
+      display: flex;
+      height: 50px;
+      justify-content: space-evenly;
+    }
+    .card-label {
+      color: rgb(197, 197, 197);
+      margin-right: 8px;
+      width: 70px;
+      display: inline-block;
+      margin-bottom: 5px;
+    }
+  }
+  /deep/.el-tabs__item {
+    /* 修改为您想要的文字大小 */
+    font-size: 16px!important;
+    height: 50px;
+  }
+  .el-card{
+    margin: 5px;
+  }
 </style>

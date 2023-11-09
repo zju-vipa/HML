@@ -2,8 +2,7 @@
     <div>
 <!--      tab便签区域-->
       <el-card>
-        <div><h3>本地数据集导入与上传</h3></div>
-        <div class="buttons" v-if="false">
+        <div class="buttons">
           <el-button @click="gotoPowerNetDataset" type="primary">电网数据</el-button>
           <el-button @click="queryDataset" type="primary">查看原数据集</el-button>
           <el-button @click="queryDatasetHuFea" type="primary">查看特征处理数据集</el-button>
@@ -49,7 +48,6 @@
       </el-card>
       <!-- 新增的卡片界面 -->
       <el-card>
-        <div><h3>断面算法数据集导入</h3></div>
         <div>
           <el-form label-width="200px" label-position="right">
             <el-form-item label="断面算法训练集">
@@ -99,8 +97,8 @@ export default {
     return {
       crossSectionTrainingSetFolder: '',
       crossSectionTestSetFolder: '',
-      crossSectionTrainingSetUploadURL: 'http://192.168.1.9:8021/api/private/v1/dataset/uploadCrossSectionTrainingSet',
-      crossSectionTestSetUploadURL: 'http://192.168.1.9:8021/api/private/v1/dataset/uploadCrossSectionTestSet',
+      crossSectionTrainingSetUploadURL: 'http://192.168.160.192:8021/api/private/v1/dataset/uploadCrossSectionTrainingSet',
+      crossSectionTestSetUploadURL: 'http://192.168.160.192:8021/api/private/v1/dataset/uploadCrossSectionTestSet',
       publicOption,
       // Tab标签激活的名字
       activeName: 'upload',
@@ -109,13 +107,13 @@ export default {
         dataset_name: '',
         if_public: false,
         introduction: '',
-        tmp_file_path: [],
-        dataset_id: [],
+        tmp_file_path: '',
+        dataset_id: '',
         if_profile: false
       },
       // 上传文件地址
       // uploadURL: 'http://192.168.137.8:8021/api/private/v1/dataset/upload',
-      uploadURL: 'http://10.214.211.137:8021/api/private/v1/dataset/upload',
+      uploadURL: 'http://192.168.160.192:8021/api/private/v1/dataset/upload',
       uploadFormRules: {
         dataset_name: [
           { required: true, message: '请输入数据名称', trigger: 'blur' }
@@ -183,6 +181,7 @@ export default {
     handleCrossSectionTestSetSuccess (response) {
       console.log('测试集上传成功:', response)
     },
+    // 点击确定按钮，提交上传数据表单
     submitDataForm () {
       this.$refs.uploadFormRef.validate(valid => {
         if (valid) {
@@ -207,12 +206,8 @@ export default {
       } else {
         this.$message.error('导入数据集失败')
       }
-      // this.uploadForm.dataset_id = resp.dataset_id
-      this.uploadForm.dataset_id.push(resp.dataset_id)
-      // this.uploadForm.tmp_file_path = resp.tmp_file_path
-      this.uploadForm.tmp_file_path.push(resp.tmp_file_path)
-    },
-    handleRemove () {
+      this.uploadForm.dataset_id = resp.dataset_id
+      this.uploadForm.tmp_file_path = resp.tmp_file_path
     },
     // 查询数据集按钮
     queryDataset () {
