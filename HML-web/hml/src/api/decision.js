@@ -1,6 +1,31 @@
 import request from '../utils/request'
 
 export default {
+  // 1023 决策树
+  fetchDecisionTree1 (form) {
+    return request({
+      url: '/decision//apply/mam1',
+      method: 'POST',
+      data: {
+        treeType: 'tree1'
+      },
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+  },
+  fetchDecisionTree2 (form) {
+    return request({
+      url: '/decision//apply/mam1',
+      method: 'POST',
+      data: {
+        treeType: 'tree2'
+      },
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+  },
   // 断面算法
   addMam (form) {
     return request({

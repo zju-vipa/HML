@@ -123,42 +123,35 @@ def add_dataset():
             return get_error(RET.PARAMERR, 'Error: request lacks dataset_name')
         if not tmp_file_path:
             return get_error(RET.PARAMERR, 'Error: request lacks tmp_file_path')
-        if not tmp_file_path or not os.path.exists(tmp_file_path[0]):
+        if not os.path.exists(tmp_file_path):
             return get_error(RET.FILEERR, 'Error: file not exists')
 
-        file_type_lis = []
-        for index, file_path in enumerate(tmp_file_path):
-            file_name = os.path.split(file_path)[-1]
-            file_id = os.path.splitext(file_name)[0]
-            file_type = os.path.splitext(file_name)[-1][1:]
-            file_type_lis.append(file_type)
+        file_name = os.path.split(tmp_file_path)[-1]
+        file_id = os.path.splitext(file_name)[0]
+        file_type = os.path.splitext(file_name)[-1][1:]
 
-            # if file_id != dataset_id[index]:
-            #     return get_error(RET.PARAMERR, 'Error: dataset_id or tmp_file_path wrong')
+        if file_id != dataset_id:
+            return get_error(RET.PARAMERR, 'Error: dataset_id or tmp_file_path wrong')
 
-        try:
-            dataset_bean = Dataset()
-            dataset_bean.dataset_id = dataset_id[0]
-            dataset_bean.dataset_name = dataset_name
-            dataset_bean.file_type = file_type_lis[0]
-            dataset_bean.if_profile = (str(if_profile) == "true")
-            dataset_bean.if_public = (str(if_public) == "true")
-            dataset_bean.introduction = introduction
-            dataset_bean.if_featureEng = (str(if_featureEng) == "true")
-            dataset_bean.featureEng_id = featureEng_id
-            dataset_bean.original_dataset_id = original_dataset_id
-            dataset_bean.user_id = user_id
-            dataset_bean.username = username
+        dataset_bean = Dataset()
+        dataset_bean.dataset_id = dataset_id
+        dataset_bean.dataset_name = dataset_name
+        dataset_bean.file_type = file_type
+        dataset_bean.if_profile = (str(if_profile) == "true")
+        dataset_bean.if_public = (str(if_public) == "true")
+        dataset_bean.introduction = introduction
+        dataset_bean.if_featureEng = (str(if_featureEng) == "true")
+        dataset_bean.featureEng_id = featureEng_id
+        dataset_bean.original_dataset_id = original_dataset_id
+        dataset_bean.user_id = user_id
+        dataset_bean.username = username
 
-            dataset = datasetService.addDataset(dataset_bean, tmp_file_path).serialize
+        dataset = datasetService.addDataset(dataset_bean, tmp_file_path).serialize
 
-            msg = 'add dataset success'
+        msg = 'add dataset success'
 
-            if dataset['task_id']:
-                msg = 'add dataset success and generate profile immediately'
-        except Exception as e:
-            # return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
-            return get_error(RET.FILEERR, f'{e}')
+        if dataset['task_id']:
+            msg = 'add dataset success and generate profile immediately'
 
         return {'meta': {'msg': msg, 'code': 200}, 'data': dataset}, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
