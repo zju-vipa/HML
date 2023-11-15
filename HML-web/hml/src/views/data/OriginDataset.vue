@@ -8,7 +8,7 @@
         :highlight-current-row="isDialog" @current-change="clickCurrentChange">
           <el-table-column type="expand" v-if="!isDialog">
             <template slot-scope="scope">
-              <el-button class="opbtn" size="mini" plain @click="handleDownLoadFile(scope.row.dataset_id)">数据下载</el-button>
+              <el-button class="opbtn" size="mini" plain @click="handleDownLoadFile(scope.row)">数据下载</el-button>
               <el-button class="opbtn" size="mini" plain @click="handleDownLoadProfile(scope.row)">分析下载</el-button>
               <el-button class="opbtn" size="mini" plain  @click="taskProgress(scope.row.task_id)">分析进度</el-button>
               <el-button class="opbtn" size="mini" plain type="danger" @click="handleDelete(scope.row.dataset_id)">删除数据</el-button>
@@ -142,24 +142,26 @@ export default {
     //   })
     // },
     // 根据id下载数据集
-    handleDownLoadFile (rowId) {
-      console.log(rowId)
-      datasetApi.downloadFile(rowId).then(response => {
+    handleDownLoadFile (row) {
+      console.log(row)
+      datasetApi.downloadFile(row.dataset_id).then(response => {
         console.log(response)
-        // const url = window.URL.createObjectURL(new Blob([response.data], { type: response.headers['content-type'] }))
-        // const link = document.createElement('a')
-        // link.style.display = 'none'
-        // link.href = url
-        // link.setAttribute('download', rowId + '.csv')
-        // document.body.appendChild(link)
-        // link.click()
+        const url = window.URL.createObjectURL(new Blob([response.data], { type: response.headers['content-type'] }))
+        const link = document.createElement('a')
+        link.style.display = 'none'
+        link.href = url
+        link.setAttribute('download', row.dataset_id + '.' + row.file_type)
+        document.body.appendChild(link)
+        link.click()
         // const resp = response.data
       })
     },
     // 下载分析文件
     handleDownLoadProfile (row) {
       console.log(row)
-      if (row.profile_state === '2') {
+      if (row.file_type !== 'csv') {
+        return this.$message.error('非csv格式文件无分析文件')
+      } else if (row.profile_state === '2') {
         datasetApi.downloadProfile(row.dataset_id).then(response => {
           console.log(response)
           const url = window.URL.createObjectURL(new Blob([response.data], { type: response.headers['content-type'] }))
