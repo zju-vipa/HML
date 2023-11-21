@@ -26,7 +26,7 @@
                 <el-card shadow="hover" :body-style="{padding:'0'}" style="border: 0px; min-height:200px; background-color: rgb(234, 235, 235);">
                   <el-row style="margin-top: 30px;margin-bottom: 0px; height: 100px;" :gutter="2">
                     <el-col :span="5"></el-col>
-                    <el-col align="center" :span="10" style="margin-top: 10px;font-size: 50px;">100</el-col>
+                    <el-col align="center" :span="10" style="margin-top: 10px;font-size: 50px;">{{ datasetCnt }}</el-col>
                     <el-col align="start" :span="9" style="margin-top: 40px;font-size: 20px;">个</el-col>
                   </el-row>
                   <el-row align="center" style="height: 50px;">
@@ -38,7 +38,7 @@
                 <el-card shadow="hover" :body-style="{padding:'0'}" style="border: 0px; min-height:200px; background-color: rgb(234, 235, 235);">
                   <el-row style="margin-top: 30px;margin-bottom: 0px; height: 100px;" :gutter="2">
                     <el-col :span="5"></el-col>
-                    <el-col align="center" :span="10" style="margin-top: 10px;font-size: 50px;">60</el-col>
+                    <el-col align="center" :span="10" style="margin-top: 10px;font-size: 50px;">{{ originDatasetCnt }}</el-col>
                     <el-col align="start" :span="9" style="margin-top: 40px;font-size: 20px;">个</el-col>
                   </el-row>
                   <el-row align="center" style="height: 50px;">
@@ -50,7 +50,7 @@
                 <el-card shadow="hover" :body-style="{padding:'0'}" style="border: 0px; min-height:200px; background-color: rgb(234, 235, 235);">
                   <el-row style="margin-top: 30px;margin-bottom: 0px; height: 100px;" :gutter="2">
                     <el-col :span="5"></el-col>
-                    <el-col align="center" :span="10" style="margin-top: 10px;font-size: 50px;">40</el-col>
+                    <el-col align="center" :span="10" style="margin-top: 10px;font-size: 50px;">{{ featureDatasetCnt }}</el-col>
                     <el-col align="start" :span="9" style="margin-top: 40px;font-size: 20px;">个</el-col>
                   </el-row>
                   <el-row align="center" style="height: 50px;">
@@ -64,7 +64,7 @@
                 <el-card shadow="hover" :body-style="{padding:'0'}" style="border: 0px; min-height:200px; background-color: rgb(234, 235, 235);">
                   <el-row style="margin-top: 30px;margin-bottom: 0px; height: 100px;" :gutter="2">
                     <el-col :span="5"></el-col>
-                    <el-col align="center" :span="10" style="margin-top: 10px;font-size: 50px;">9</el-col>
+                    <el-col align="center" :span="10" style="margin-top: 10px;font-size: 50px;">{{ powerNetCnt }}</el-col>
                     <el-col align="start" :span="9" style="margin-top: 40px;font-size: 20px;">个</el-col>
                   </el-row>
                   <el-row align="center" style="height: 50px;">
@@ -76,7 +76,7 @@
                 <el-card shadow="hover" :body-style="{padding:'0'}" style="border: 0px; min-height:200px; background-color: rgb(234, 235, 235);">
                   <el-row style="margin-top: 30px;margin-bottom: 0px; height: 100px;" :gutter="2">
                     <el-col :span="5"></el-col>
-                    <el-col align="center" :span="10" style="margin-top: 10px;font-size: 50px;">0</el-col>
+                    <el-col align="center" :span="10" style="margin-top: 10px;font-size: 50px;">{{ powerNetJobUndoneCnt }}</el-col>
                     <el-col align="start" :span="9" style="margin-top: 40px;font-size: 20px;">个</el-col>
                   </el-row>
                   <el-row align="center" style="height: 50px;">
@@ -88,7 +88,7 @@
                 <el-card shadow="hover" :body-style="{padding:'0'}" style="border: 0px; min-height:200px; background-color: rgb(234, 235, 235);">
                   <el-row style="margin-top: 30px;margin-bottom: 0px; height: 100px;" :gutter="2">
                     <el-col :span="5"></el-col>
-                    <el-col align="center" :span="10" style="margin-top: 10px;font-size: 50px;">80</el-col>
+                    <el-col align="center" :span="10" style="margin-top: 10px;font-size: 50px;">{{ recentUnstablePercent }}</el-col>
                     <el-col align="start" :span="9" style="margin-top: 40px;font-size: 20px;">%</el-col>
                   </el-row>
                   <el-row align="center" style="height: 50px;">
@@ -105,6 +105,7 @@
 </template>
 <script>
 import queryPowerNetApi from './../../api/queryPowerNet'
+import datasetApi from '../../api/dataset'
 // 任务状态
 const generateStateOptions = [
   { type: '0', name: '未开始' },
@@ -130,6 +131,12 @@ export default {
   },
   data () {
     return {
+      // 数据集总数，原始数据集数，特征工程数据集数，电网拓扑数，上次任务失稳样本有效率
+      datasetCnt: 0,
+      originDatasetCnt: 0,
+      featureDatasetCnt: 0,
+      powerNetCnt: 9,
+      recentUnstablePercent: 0,
       // 电网数据生成任务列表
       value1: 5,
       powerNetData: [],
@@ -142,9 +149,11 @@ export default {
   },
   created () {
     this.getPowerNetInfo()
+    this.getDatasetInfo()
     this.timer = setInterval(() => {
       this.getPowerNetInfo()
-    }, 1000)
+      this.getDatasetInfo()
+    }, 10000)
   },
   // mounted () {
   //   if (this.timer) {
@@ -159,6 +168,31 @@ export default {
     clearInterval(this.timer)
   },
   methods: {
+    // 获取数据集信息
+    getDatasetInfo () {
+      datasetApi.query().then(response => {
+        const resp = response.data
+        if (resp.meta.code === 200) {
+          // this.$message.success('加载数据集成功')
+          this.datasetData = resp.data
+          // 统计数量：数据集总数，特征工程数据集数，原始数据集数
+          this.datasetCnt = resp.data.length
+          this.featureDatasetCnt = resp.data.filter(item => {
+            return item.if_featureEng
+          }).length
+          this.originDatasetCnt = this.datasetCnt - this.featureDatasetCnt
+        }
+        // console.log(this.datasetData)
+      })
+      // datasetApi.queryHuFea(this.huFea).then(response => {
+      //   const resp = response.data
+      //   if (resp.meta.code === 200) {
+      //     this.$message.success('加载数据集成功')
+      //     this.datasetData = resp.data
+      //   }
+      //   console.log(this.datasetData)
+      // })
+    },
     // 获取电网数据生成任务所有信息
     getPowerNetInfo () {
       queryPowerNetApi.query().then(response => {
@@ -173,6 +207,19 @@ export default {
             return item.generate_state === '2'
           }).length
           this.powerNetJobUndoneCnt = this.powerNetJobCnt - this.powerNetJobDoneCnt
+          // 上次任务失稳样本有效率
+          for (var i = this.powerNetJobCnt - 1; i >= 0; i++) {
+            if (resp.data[i].generate_state === '2' && resp.data[i].power_net_dataset_type === 'D') {
+              var pnid = resp.data[i].power_net_dataset_id
+              queryPowerNetApi.queryJob(pnid).then(response => {
+                const resp = response.data
+                if (resp.meta.code === 200) {
+                  this.recentUnstablePercent = resp.data.unstable_percent
+                }
+              })
+              break
+            }
+          }
           // console.log(this.powerNetJobCnt)
           // console.log(this.powerNetJobDoneCnt)
         }
