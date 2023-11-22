@@ -33,3 +33,12 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+
+# lwd
+HML-web/hml/package-lock.json
+HML/Data/dataset/
+HML/Decision/learner/
+HML/celery_tasks/algorithms/_Reinforcementlearning_utils/adjustflow/askrl/
+HML/log/
+

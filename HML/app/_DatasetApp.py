@@ -233,13 +233,12 @@ def get_dataset_data():
             return get_error(RET.PARAMERR, 'Error: request lacks dataset_id')
 
         dataset = datasetService.queryDatasetById(dataset_id)
-        print('get_dataset_data dataset:',dataset)
 
         if not dataset:
             return get_error(RET.PARAMERR, 'Error: dataset_id not exists')
 
         file_path = datasetService.getDatasetFilePath(dataset)
-        print('get_dataset_data file_path:',file_path)
+
         if not file_path:
             return get_error(RET.FILEERR, 'Error: dataset file not exists')
 
@@ -255,11 +254,9 @@ def get_dataset_data():
 @bp.route('/columns', methods=('GET', 'POST'))
 @login_required
 def get_dataset_columns():
-    print('get_dataset_columns')
     if request.method == 'GET':
         try:
             dataset_id = request.args.get('dataset_id')
-            print('get_dataset_columns dataset_id:',dataset_id)
         except Exception:
             return get_error(RET.PARAMERR, 'Error: no request')
 
@@ -267,13 +264,11 @@ def get_dataset_columns():
             return get_error(RET.PARAMERR, 'Error: request lacks dataset_id')
 
         dataset = datasetService.queryDatasetById(dataset_id)
-        print('get_dataset_columns dataset:',dataset)
 
         if not dataset:
             return get_error(RET.PARAMERR, 'Error: dataset_id not exists')
 
         file_path = datasetService.getDatasetFilePath(dataset)
-        print('get_dataset_columns file_path:',file_path)
 
         if not file_path:
             return get_error(RET.FILEERR, 'Error: dataset file not exists')
