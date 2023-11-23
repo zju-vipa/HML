@@ -90,7 +90,27 @@ def get_human_policy(learner_id):
         file_path = os.path.join(file_directory, file_name)
         # path = "action_pqvt.csv"
         #if(not os.path.exists(path)): os.makedirs(path)
-        numpy.save(file_path, info[0])
+        info = info[0]
+        netDetailInfoColumns = {
+          'v_pair': ['name', 'voltage', 'voltageLowerLimit', 'voltageHighLimit', 'voltageInfo'],
+          # 'balance_pair': ['name', 'power', 'powerLowerLimit', 'powerHighLimit', 'powerInfo'],
+          'line_pair': ['name', 'power'],
+          'gen_pair': ['name', 'power', 'powerLowerLimit', 'powerHighLimit', 'powerInfo'],
+          'sec_pair': ['name', 'power', 'powerLowerLimit', 'powerHighLimit', 'powerInfo'],
+          'target_sec_pair': ['name', 'now', 'target'],
+        }
+        
+        def map_func(x, item) :
+          out={}
+          for i in range(len(item)):
+            out[item[i]]=x[i]
+          return out
+        
+        for key, value in netDetailInfoColumns.items():
+          nn = list(map(lambda x: map_func(x, value), info[key]))
+          info[key]=list(nn)
+          
+        numpy.save(file_path, info)
 
         #action = input("Human Action:")
         #return action
