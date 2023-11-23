@@ -2,7 +2,7 @@ import axios from 'axios'
 // 2,创建一个axios实例对象
 const request = axios.create({
   // baseURL: 'http://10.214.211.135:8021/api/private/v1',
-  baseURL: 'http://10.82.29.169:8021/api/private/v1',
+  baseURL: 'http://10.214.211.137:8021/api/private/v1',
   // baseURL: 'http://192.168.137.8:8021/api/private/v1',
   timeout: 1000000
 })

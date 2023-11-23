@@ -114,7 +114,7 @@ export default {
       // 上传文件地址
       // uploadURL: 'http://192.168.137.8:8021/api/private/v1/dataset/upload',
       // uploadURL: 'http://192.168.160.192:8021/api/private/v1/dataset/upload',
-      uploadURL: 'http://10.82.29.169:8021/api/private/v1/dataset/upload',
+      uploadURL: 'http://10.214.211.137:8021/api/private/v1/dataset/upload',
       uploadFormRules: {
         dataset_name: [
           { required: true, message: '请输入数据名称', trigger: 'blur' }
