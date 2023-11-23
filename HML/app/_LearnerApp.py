@@ -256,13 +256,11 @@ def get_task_train_state():
 @bp.route('/action/query', methods=('GET', 'POST'))
 @login_required
 def query_action_detail():
-    # print('query_action_detail')
     if request.method == 'GET':
         try:
             learner_id = request.args.get('learner_id')
         except Exception:
             return get_error(RET.PARAMERR, 'Error: no request')
-        # print(learner_id)
 
         if not learner_id:
             return get_error(RET.PARAMERR, 'Error: request lacks learner_id')
@@ -270,18 +268,14 @@ def query_action_detail():
         if not learner:
             return get_error(RET.PARAMERR, 'Error: learner_id not exists')
         # p, q, v, theta
-        # print(learner)
         file_path = learnerService.getActionFilePath(learner)
-        # print(file_path)
         detail = []
-        # print('os.path.exists(file_path)', os.path.exists(file_path))
         if os.path.exists(file_path):
             # 先简单处理一下
             file = numpy.load(file_path, allow_pickle=True).item()
-            # print('file')
-            # print(file)
             detail=file.copy()
-        # print(detail)
+        # print("type(detail)", type(detail))
+        
         return {'meta': {'msg': 'query learner action detail success', 'code': 200},
                 'data': {'learner': learner.serialize, 'detail': detail}
                 }, 200
@@ -305,12 +299,14 @@ def query_danger_warn_info():
         
         file_path = learnerService.getActionFilePath(learner)
         dangerInfo=[]
+        # print(file_path)
         if os.path.exists(file_path):
             # 先简单处理一下
             file = numpy.load(file_path,allow_pickle=True).item()
             detail=file.copy()
             for index,info in enumerate(detail['v_pair']):
-              if info[-1]!='区间内':
+              print('info', info)
+              if info['voltageInfo']!='区间内':
                 dangerInfo.append(detail['v_str'][index])
                 
             for index,info in enumerate(detail['balance_pair']):
@@ -322,14 +318,13 @@ def query_danger_warn_info():
             #     dangerInfo.append(detail['line_str'][index])
                 
             for index,info in enumerate(detail['gen_pair']):
-              if info[-1]!='区间内':
+              if info['powerInfo']!='区间内':
                 dangerInfo.append(detail['gen_str'][index])
                 
             for index,info in enumerate(detail['sec_pair']):
-              if info[-1]!='区间内':
+              if info['powerInfo']!='区间内':
                 dangerInfo.append(detail['sec_str'][index])
-        # print(file_path)
-        # print(detail)
+        # print(dangerInfo)
         return {'meta': {'msg': 'query learner action detail success', 'code': 200},
                 'data': {'learner': learner.serialize, 'dangerInfo': dangerInfo}
                 }, 200

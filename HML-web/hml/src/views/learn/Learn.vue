@@ -5,20 +5,20 @@
         <div><h1 align="center">学习器状态</h1></div>
         <el-row align="center" style="margin-bottom: 30px" :gutter="20">
           <el-col align="center" :span="6">
-            <el-progress :format="format1" type="circle" stroke-width="12" width="300" color="#8e71c7"
+            <el-progress :format="format1" type="circle" stroke-width="12" width="250" color="#8e71c7"
             :percentage="1+learnerDoneCnt">
             </el-progress>
           </el-col>
           <el-col align="center" :span="6">
-            <el-progress :format="format2" type="circle" stroke-width="12" width="300" color="#f7d44b"
+            <el-progress :format="format2" type="circle" stroke-width="12" width="250" color="#f7d44b"
             :percentage="1+learnerUndoneCnt"></el-progress>
           </el-col>
           <el-col align="center" :span="6">
-            <el-progress :format="format3" type="circle" stroke-width="12" width="300" color="#f36838"
+            <el-progress :format="format3" type="circle" stroke-width="12" width="250" color="#f36838"
             :percentage="1+learnerActionCnt"></el-progress>
           </el-col>
           <el-col align="center" :span="6">
-            <el-progress :format="format4" type="circle" stroke-width="12" width="300" color="#21a675"
+            <el-progress :format="format4" type="circle" stroke-width="12" width="250" color="#21a675"
             :percentage="learnerCnt==0 ? 0 : parseFloat(learnerDoneCnt/learnerCnt*100).toFixed(1)"></el-progress>
           </el-col>
           <!-- <el-col align="center" :span="6">
@@ -335,7 +335,7 @@ export default {
     /* border: 1px solid #bfcbd9; */
   }
   h1{
-    font-size: 42px;
+    font-size: 36px;
   }
   .submitBtn {
     margin-left: 200px;

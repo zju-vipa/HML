@@ -123,6 +123,7 @@ export default {
         if (resp.meta.code === 200) {
           // this.$message.success('加载学习器成功')
           this.LearnerData = resp.data
+          console.log('this.LearnerData', this.LearnerData)
         }
       })
     },

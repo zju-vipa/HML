@@ -60,20 +60,20 @@
         </el-row>
         <el-row style="font-size: 22px; margin-bottom: 30px">
           <el-col class = "Power" :span="8" align="center">
-            <el-row class = "sectionPower">目标断面当前功率为：{{ formatValues(netDetailInfo.target_sec_pair[0][1]) }}</el-row>
-            <el-row class = "sectionPower">目标断面目标功率为：{{ formatValues(netDetailInfo.target_sec_pair[0][2]) }}</el-row>
-            <el-row class = "sectionPower">约束断面功率下界为：{{ formatValues(netDetailInfo.sec_pair[0][2]) }}</el-row>
-            <el-row class = "sectionPower">约束断面功率上界为：{{ formatValues(netDetailInfo.sec_pair[0][3]) }}</el-row>
+            <el-row class = "sectionPower">目标断面当前功率为：{{ formatValues(netDetailInfo.target_sec_pair.now) }}</el-row>
+            <el-row class = "sectionPower">目标断面目标功率为：{{ formatValues(netDetailInfo.target_sec_pair.target) }}</el-row>
+            <el-row class = "sectionPower">约束断面功率下界为：{{ formatValues(netDetailInfo.sec_pair.powerLowerLimit) }}</el-row>
+            <el-row class = "sectionPower">约束断面功率上界为：{{ formatValues(netDetailInfo.sec_pair.powerHighLimit) }}</el-row>
           </el-col>
           <el-col class = "Power" :span="6" align="center">
-            <el-row class = "basicGenPower">平衡机Gen1A-4当前功率为：{{ formatValues(netDetailInfo.balance_pair[0][1]) }}</el-row>
-            <el-row class = "basicGenPower">平衡机Gen1A-4功率下界为：{{ formatValues(netDetailInfo.balance_pair[0][2]) }}</el-row>
-            <el-row class = "basicGenPower">平衡机Gen1A-4功率上界为：{{ formatValues(netDetailInfo.balance_pair[0][3]) }}</el-row>
+            <el-row class = "basicGenPower">平衡机Gen1A-4当前功率为：{{ formatValues(netDetailInfo.balance_pair.Gen1A4_value) }}</el-row>
+            <el-row class = "basicGenPower">平衡机Gen1A-4功率下界为：{{ formatValues(netDetailInfo.balance_pair.Gen1A4_value_low) }}</el-row>
+            <el-row class = "basicGenPower">平衡机Gen1A-4功率上界为：{{ formatValues(netDetailInfo.balance_pair.Gen1A4_value_high) }}</el-row>
           </el-col>
           <el-col class = "Power" :span="6" align="center">
-            <el-row class = "basicGenPower">平衡机Gen2E-7当前功率为：{{ formatValues(netDetailInfo.balance_pair[1][1]) }}</el-row>
-            <el-row class = "basicGenPower">平衡机Gen2E-7功率下界为：{{ formatValues(netDetailInfo.balance_pair[1][2]) }}</el-row>
-            <el-row class = "basicGenPower">平衡机Gen2E-7功率上界为：{{ formatValues(netDetailInfo.balance_pair[1][3]) }}</el-row>
+            <el-row class = "basicGenPower">平衡机Gen2E-7当前功率为：{{ formatValues(netDetailInfo.balance_pair.Gen2E7_value) }}</el-row>
+            <el-row class = "basicGenPower">平衡机Gen2E-7功率下界为：{{ formatValues(netDetailInfo.balance_pair.Gen2E7_value_low) }}</el-row>
+            <el-row class = "basicGenPower">平衡机Gen2E-7功率上界为：{{ formatValues(netDetailInfo.balance_pair.Gen2E7_value_high) }}</el-row>
           </el-col>
         </el-row>
         <el-row style="font-size: 28px; margin-bottom: 30px">
@@ -82,7 +82,7 @@
         <el-row style="font-size: 28px; margin-bottom: 30px">
           <el-row style="height:200px; border: 2px solid #ebeef5; text-align: center; list-style: none; overflow-y: auto; z-index: 999;">
             <el-row v-if="netDangerWarnInfo.length!=0" >
-              <h4 style="font-weight: lighter;" :span="8" v-for="(item,id) in netDangerWarnInfo" :key="id">{{ item }}</h4>
+              <el-row style="font-size: 22px; margin: 8px 0 8px 0;" :span="8" v-for="(item,id) in netDangerWarnInfo" :key="id">{{ item }}</el-row>
             </el-row>
             <el-row v-else>
               <h4>无危险信息</h4>
@@ -103,9 +103,9 @@
               <el-row style="height:500px; border:1px solid #ebeef5; overflow-y: auto; z-index: 10;">
                 <el-col :span="6" align="center" v-for="(item,id) in netDetailInfo.v_pair" :key="id" style="list-style: none; min-width: 180px;">
                   <li>
-                    <div class="box" :style="cellStyleV(item)">
-                      <el-row style="height: 30px; line-height: 30px"> {{ item[0] }} </el-row>
-                      <el-row style="height: 30px; line-height: 30px"> {{ formatValues(item[1]) }} </el-row>
+                    <div class="box" :style="cellStyleV(item.voltage)">
+                      <el-row style="height: 30px; line-height: 30px"> {{ item.name }} </el-row>
+                      <el-row style="height: 30px; line-height: 30px"> {{ formatValues(item.voltage) }} </el-row>
                     </div>
                   </li>
                 </el-col>
@@ -118,9 +118,9 @@
               <el-row style="height:500px; border:1px solid #ebeef5; overflow-y: auto; z-index: 10;">
                 <el-col :span="6" align="center" v-for="(item,id) in netDetailInfo.line_pair" :key="id" style="list-style: none; min-width: 180px;">
                   <li>
-                    <div class="box" :style="cellStyleLine(item)">
-                      <el-row style="height: 30px; line-height: 30px"> {{ item[0] }} </el-row>
-                      <el-row style="height: 30px; line-height: 30px"> {{ formatValues(item[1]) }} </el-row>
+                    <div class="box" :style="cellStyleLine(item.power)">
+                      <el-row style="height: 30px; line-height: 30px"> {{ item.name }} </el-row>
+                      <el-row style="height: 30px; line-height: 30px"> {{ formatValues(item.power) }} </el-row>
                     </div>
                   </li>
                 </el-col>
@@ -135,9 +135,9 @@
               <el-row style="height:500px; border:1px solid #ebeef5; overflow-y: auto; z-index: 10;">
                 <el-col :span="4" align="center" v-for="(item,id) in netDetailInfo.gen_pair" :key="id" style="list-style: none; min-width: 180px;">
                   <li>
-                    <div class="box" :style="cellStyleGen(item)">
-                      <el-row style="height: 30px; line-height: 30px"> {{ item[0] }} </el-row>
-                      <el-row style="height: 30px; line-height: 30px"> {{ formatValues(item[1]) }} </el-row>
+                    <div class="box" :style="cellStyleGen(item.power)">
+                      <el-row style="height: 30px; line-height: 30px"> {{ item.name }} </el-row>
+                      <el-row style="height: 30px; line-height: 30px"> {{ formatValues(item.power) }} </el-row>
                     </div>
                   </li>
                 </el-col>
@@ -190,7 +190,7 @@ const netDetailInfoColumns = {
   sec_pair: ['name', 'power', 'powerLowerLimit', 'powerHighLimit', 'powerInfo'],
   sec_str: ['dangerInfo'],
 
-  target_sec_pair: ['name'],
+  target_sec_pair: ['now', 'target'],
   target_sec_str: ['dangerInfo']
 }
 export default {
@@ -225,17 +225,39 @@ export default {
       netDetailInfo: {
         action_idx: '',
         action_str: '',
-        balance_pair: [[], []],
+        balance_pair: {
+          Gen1A4_value: '',
+          Gen1A4_value_low: '',
+          Gen1A4_value_high: '',
+          Gen2E7_value: '',
+          Gen2E7_value_low: '',
+          Gen2E7_value_high: ''
+        },
         balance_str: '',
-        gen_pair: '',
+        gen_pair: {
+          name: '',
+          value: ''
+        },
         gen_str: '',
-        line_pair: '',
+        line_pair: {
+          name: '',
+          value: ''
+        },
         line_str: '',
-        sec_pair: [[]],
+        sec_pair: {
+          powerHighLimit: '',
+          powerLowerLimit: ''
+        },
         sec_str: '',
-        target_sec_pair: [[]],
-        target_sec_str: [[]],
-        v_pair: '',
+        target_sec_pair: {
+          now: '',
+          target: ''
+        },
+        target_sec_str: '',
+        v_pair: {
+          name: '',
+          value: ''
+        },
         v_str: ''
       },
       gen_min: 0,
@@ -319,28 +341,26 @@ export default {
             dataset_id: resp.data.learner.dataset_id,
             learner_action: ''
           }
-          // this.netDetailInfo = resp.data.detail
           this.netDetailInfo.action_idx = resp.data.detail.action_idx
           this.netDetailInfo.action_str = resp.data.detail.action_str
-          this.netDetailInfo.balance_pair = resp.data.detail.balance_pair
+          this.netDetailInfo.balance_pair.Gen1A4_value = resp.data.detail.balance_pair[0][1]
+          this.netDetailInfo.balance_pair.Gen1A4_value_low = resp.data.detail.balance_pair[0][2]
+          this.netDetailInfo.balance_pair.Gen1A4_value_high = resp.data.detail.balance_pair[0][3]
+          this.netDetailInfo.balance_pair.Gen2E7_value = resp.data.detail.balance_pair[1][1]
+          this.netDetailInfo.balance_pair.Gen2E7_value_low = resp.data.detail.balance_pair[1][2]
+          this.netDetailInfo.balance_pair.Gen2E7_value_high = resp.data.detail.balance_pair[1][3]
           this.netDetailInfo.balance_str = resp.data.detail.balance_str
           this.netDetailInfo.gen_pair = resp.data.detail.gen_pair
           this.netDetailInfo.gen_str = resp.data.detail.gen_str
           this.netDetailInfo.line_pair = resp.data.detail.line_pair
           this.netDetailInfo.line_str = resp.data.detail.line_str
-          this.netDetailInfo.sec_pair = resp.data.detail.sec_pair
+          this.netDetailInfo.sec_pair = resp.data.detail.sec_pair[0]
           this.netDetailInfo.sec_str = resp.data.detail.sec_str
-          this.netDetailInfo.target_sec_pair = resp.data.detail.target_sec_pair
+          this.netDetailInfo.target_sec_pair = resp.data.detail.target_sec_pair[0]
           this.netDetailInfo.target_sec_str = resp.data.detail.target_sec_str
           this.netDetailInfo.v_pair = resp.data.detail.v_pair
           this.netDetailInfo.v_str = resp.data.detail.v_str
           console.log('this.netDetailInfo:', this.netDetailInfo)
-          // console.log(this.netDetailInfo)
-          console.log(this.netDetailInfo.target_sec_pair)
-          console.log(typeof this.netDetailInfo.target_sec_pair)
-          console.log(this.netDetailInfo.target_sec_pair[0])
-          console.log(this.netDetailInfo.target_sec_pair[0][1])
-          console.log(this.netDetailInfo.target_sec_pair[0][2])
           let genMin = 999
           let lineMin = 999
           let vMin = 999
@@ -348,27 +368,27 @@ export default {
           let lineMax = -999
           let vMax = -999
           this.netDetailInfo.v_pair.forEach(item => {
-            if (item[1] < vMin) {
-              vMin = item[1]
+            if (item.voltage < vMin) {
+              vMin = item.voltage
             }
-            if (item[1] > vMax) {
-              vMax = item[1]
+            if (item.voltage > vMax) {
+              vMax = item.voltage
             }
           })
           this.netDetailInfo.line_pair.forEach(item => {
-            if (item[1] < lineMin) {
-              lineMin = item[1]
+            if (item.power < lineMin) {
+              lineMin = item.power
             }
-            if (item[1] > lineMax) {
-              lineMax = item[1]
+            if (item.power > lineMax) {
+              lineMax = item.power
             }
           })
           this.netDetailInfo.gen_pair.forEach(item => {
-            if (item[1] < vMin) {
-              genMin = item[1]
+            if (item.power < vMin) {
+              genMin = item.power
             }
-            if (item[1] > vMax) {
-              genMax = item[1]
+            if (item.power > vMax) {
+              genMax = item.power
             }
           })
           this.gen_min = genMin
@@ -406,18 +426,17 @@ export default {
     },
     // 根据级别显示颜色
     cellStyleLine (item) {
-      console.log(item)
-      const v = 255 - Math.floor((item[1] - this.line_min) * 200 / (this.line_max - this.line_min))
+      const v = 255 - Math.floor((item - this.line_min) * 200 / (this.line_max - this.line_min))
       const color = 0xff0000 + (v << 8) + v
       return `background:#${color.toString(16)}`
     },
     cellStyleV (item) {
-      const v = 255 - Math.floor((item[1] - this.v_min) * 200 / (this.v_max - this.v_min))
+      const v = 255 - Math.floor((item - this.v_min) * 200 / (this.v_max - this.v_min))
       const color = 0xff0000 + (v << 8) + v
       return `background:#${color.toString(16)}`
     },
     cellStyleGen (item) {
-      const v = 255 - Math.floor((item[1] - this.gen_min) * 200 / (this.gen_max - this.gen_min))
+      const v = 255 - Math.floor((item - this.gen_min) * 200 / (this.gen_max - this.gen_min))
       const color = 0xff0000 + (v << 8) + v
       return `background:#${color.toString(16)}`
     },
