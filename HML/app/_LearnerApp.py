@@ -305,7 +305,7 @@ def query_danger_warn_info():
             file = numpy.load(file_path,allow_pickle=True).item()
             detail=file.copy()
             for index,info in enumerate(detail['v_pair']):
-              print('info', info)
+              # print('info', info)
               if info['voltageInfo']!='区间内':
                 dangerInfo.append(detail['v_str'][index])
                 
