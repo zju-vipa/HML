@@ -1,4 +1,4 @@
-from flask import Blueprint, request, json, current app
+from flask import Blueprint, request, json, current_app
 from app.constant import get_error, RET
 from app._UserApp import login_required
 from model import Algorithm
