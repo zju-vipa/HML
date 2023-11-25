@@ -37,3 +37,11 @@ class AlgorithmDao(BaseDao):
         algorithm.algorithm_parameters = algorithm_bean.algorithm_parameters
         algorithm.introduction = algorithm_bean.introduction
         self.db.session.commit()
+
+    def queryAlgorithmListByType(self, algorithm_type):
+        algorithms = Algorithm.query.filter_by(algorithm_type=algorithm_type).all()
+        return algorithms
+
+    def queryAlgorithmParams(self, algorithm_name):
+        algorithm = Algorithm.query.filter_by(algorithm_name=algorithm_name).first()
+        return algorithm

@@ -1,4 +1,4 @@
-from flask import Blueprint, request, json
+from flask import Blueprint, request, json, current app
 from app.constant import get_error, RET
 from app._UserApp import login_required
 from model import Algorithm
@@ -66,4 +66,38 @@ def add_algorithm():
         algorithm = algorithmService.addAlgorithm(algorithm_bean).serialize
 
         return {'meta': {'msg': 'add algorithm success', 'code': 200}, 'data': algorithm}, 200
+    return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
+
+@bp.route('/queryByType', methods=('GET', 'POST'))
+@login_required
+def query_algorithm_list_byType():
+    if request.method == 'GET':
+        try:
+            algorithm_type = request.args.get('algorithm_type')
+        except Exception:
+            return get_error(RET.PARAMERR, 'Error: no request')
+
+        if not algorithm_type:
+            return get_error(RET.PARAMERR, 'Error: request lacks algorithm_type')
+        algorithms = algorithmService.queryAlgorithmListByType(algorithm_type)
+        if algorithms:
+            algorithms = [algorithm.serialize for algorithm in algorithms]
+        else:
+            algorithms = None
+        return {'meta': {'msg': 'query algorithm list success', 'code': 200}, 'data': algorithms}, 200
+    return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
+
+@bp.route('/queryParameters', methods=('GET', 'POST'))
+@login_required
+def query_algorithm_parameters():
+    if request.method == 'GET':
+        try:
+            algorithm_name = request.args.get('algorithm_name')
+        except Exception:
+            return get_error(RET.PARAMERR, 'Error: no request')
+
+        if not algorithm_name:
+            return get_error(RET.PARAMERR, 'Error: request lacks algorithm_type')
+        algorithm = algorithmService.queryAlgorithmParams(algorithm_name)
+        return {'meta': {'msg': 'query algorithm list success', 'code': 200}, 'data': algorithm.serialize}, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405

@@ -4,8 +4,12 @@ from sklearn.preprocessing import OneHotEncoder
 from celery_tasks.algorithms._DimReduction_utils import gnn
 from celery_tasks.algorithms._DimReduction_utils import c10folds
 
-def algorithm_OneHot_train(data):
+def algorithm_OneHot_train(self, process_idx, processes_num, data):
+    progress = 0.1 + 0.8 * process_idx / processes_num + 0.05
+    self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 编码器初始化'.format(process_idx+1)})
     model_enc = OneHotEncoder(sparse=False)
+    progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.9 / processes_num
+    self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 生成数据'.format(process_idx+1)})
     model_enc.fit(data)
     data_onehot = pd.DataFrame(model_enc.transform(data))
     return data_onehot, model_enc
@@ -16,8 +20,12 @@ def algorithm_OneHot_apply(data, model_enc):
     return data_onehot
 
 
-def algorithm_PCA_train(data, n_components):
+def algorithm_PCA_train(self, process_idx, processes_num, data, n_components):
+    progress = 0.1 + 0.8 * process_idx / processes_num + 0.1
+    self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 加载模型'.format(process_idx+1)})
     model_pca = PCA(n_components=n_components)
+    progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.9 / processes_num
+    self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 生成数据'.format(process_idx+1)})
     model_pca.fit(data)
     data_pca = pd.DataFrame(model_pca.transform(data))
     return data_pca, model_pca
