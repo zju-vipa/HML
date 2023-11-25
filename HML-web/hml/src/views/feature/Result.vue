@@ -62,7 +62,7 @@
                   </el-row>
                 </div>
                 <div style="margin: 15px; text-align: center; height: 300px">
-                  <el-row>
+                  <el-row v-if="newResultForm.efficiency != null">
                     <el-col span="12">
                       <el-row>
                         <el-progress type="dashboard" :percentage="newResultForm.efficiency" :stroke-width="20" :width="165" style="font-weight: bolder; font-size: 20px;">
@@ -77,6 +77,14 @@
                       </el-row>
                       <span style="color: steelblue; font-size: 18px;">初始任务准确率</span>
                     </el-col>
+                  </el-row>
+                  <el-row v-else>
+                    <div style="text-align: center">
+                      <el-row>
+                        <img src="./../../assets/img/empty-state.png" style="text-align: center; width: 200px; height: 200px">
+                      </el-row>
+                      <el-row><span style="color: darkgray">暂无记录</span></el-row>
+                    </div>
                   </el-row>
                 </div>
               </el-card>
@@ -230,6 +238,14 @@
                 </el-col>
               </el-row>
             </div>
+            <el-row v-if="draw == false">
+              <div style="text-align: center">
+                <el-row>
+                  <img src="./../../assets/img/empty-state.png" style="text-align: center; width: 200px; height: 200px">
+                </el-row>
+                <el-row><span style="color: darkgray">暂无记录</span></el-row>
+              </div>
+            </el-row>
             <div style="margin: 15px; text-align: center;">
               <div id="featureCharts" style="width: 400px; height: 500px; margin: 0 auto"></div>
             </div>
@@ -291,7 +307,7 @@
                   </el-row>
                 </div>
                 <div style="margin: 15px; text-align: center; height: 300px">
-                  <el-row>
+                  <el-row v-if="newResultForm.efficiency != null">
                     <el-col span="12">
                       <el-row>
                         <el-progress type="dashboard" :percentage="newResultForm.efficiency" :stroke-width="20" :width="165" style="font-weight: bolder; font-size: 20px;">
@@ -306,6 +322,14 @@
                       </el-row>
                       <span style="color: steelblue; font-size: 18px;">初始任务准确率</span>
                     </el-col>
+                  </el-row>
+                  <el-row v-else>
+                    <div style="text-align: center">
+                      <el-row>
+                        <img src="./../../assets/img/empty-state.png" style="text-align: center; width: 200px; height: 200px">
+                      </el-row>
+                      <el-row><span style="color: darkgray">暂无记录</span></el-row>
+                    </div>
                   </el-row>
                 </div>
               </el-card>
@@ -349,6 +373,14 @@
                 </el-col>
               </el-row>
             </div>
+            <el-row v-if="draw == false">
+              <div style="text-align: center">
+                <el-row>
+                  <img src="./../../assets/img/empty-state.png" style="text-align: center; width: 200px; height: 200px">
+                </el-row>
+                <el-row><span style="color: darkgray">暂无记录</span></el-row>
+              </div>
+            </el-row>
             <div id="featureCharts" style="width: 400px; height: 500px; margin: 0 auto"></div>
           </el-card>
         </el-col>
@@ -360,6 +392,7 @@
 // import queryFeaApi from './../../api/queryFea'
 // 操作状态
 import * as echarts from 'echarts'
+import featureEngApi from '../../api/queryFea'
 
 const moduleOptions = [
   { value: '1', label: '特征解耦' },
@@ -371,19 +404,20 @@ const moduleOptions = [
 export default {
   data () {
     return {
+      featureEng_id: '',
       moduleOptions,
       newResultForm: {
-        efficiency: 87.63,
-        accuracy: 89.35,
+        efficiency: 0,
+        accuracy: 0,
         isNewResult: true,
         isFeatureVisual: true,
-        checkedModules: ['1', '2', '3'],
+        checkedModules: [],
         taskDetails: [
-          { type: 'name', label: '特征工程名', value: '暂稳数据集1号特征工程' },
-          { type: 'type', label: '特征工程类型', value: '人机协同特征衍生与选择' },
+          { type: 'name', label: '特征工程名', value: '' },
+          { type: 'type', label: '特征工程类型', value: '' },
           { type: 'network', label: '网络拓扑', value: '300节点电网' },
-          { type: 'mode', label: '运行方式', value: '001夏平初始' },
-          { type: 'dataset', label: '数据集', value: '故障定位数据集' }
+          { type: 'mode', label: '运行方式', value: '' },
+          { type: 'dataset', label: '数据集', value: '' }
         ]
       },
       HumanMachineForm: {
@@ -417,112 +451,152 @@ export default {
       totalPage_taskFeatureList: 5,
       countTotal_taskFeature: 15,
       selectedIds: [],
+      checkedAll: false,
+      draw: false,
       operator_options: [{ value: '0', label: '求和' }],
       IteractionRecord: [{ record_efficiency: '87.63%', record_accuracy: '89.35%' }]
     }
   },
 
   created () {
-    // this.getHumanFeaInfo()
-    // 暂时用假数据替代
-    // 用假数据暂时替代
     this.taskFeatureList = []
-    for (let i = 0; i < this.countTotal_taskFeature; i++) {
-      const nameString = String.fromCharCode(i / 4 + 65) + '_' + i % 4
-      this.taskFeatureList.push({ name: nameString, dataset: '暂稳数据集', task: '暂态判稳任务', featureDecoupling: '基于因子图的特征解耦', featureLearning: '基于GNN的特征提取', featureDerivation: '人机协同特征生成', featureSelection: '基于模型的特征选择' })
-    }
+    this.getFeatureEngID()
+    this.getSelectedTaskDetails()
   },
   mounted () {
-    this.lazyLoading_taskFeatureList()
-    this.drawChart()
   },
   methods: {
-    drawChart () {
-      // 基于准备好的dom，初始化echarts实例  这个和上面的main对应
-      const myChart = echarts.init(document.getElementById('featureCharts'))
-      // 用于生成假数据
-      let countNum = 0
-      const yaxis = []
-      const value = []
-      for (let i = 0; i < 25; i = i + 1) {
-        for (let j = 0; j < 4; j = j + 1) {
-          yaxis.push(String.fromCharCode(i + 65) + '_' + j)
-          value.push(100 - countNum)
-          countNum = countNum + 1
+    getFeatureEngID () {
+      this.featureEng_id = this.$route.query.featureEng_id
+    },
+    getSelectedTaskDetails () {
+      // 当前任务概况+初始效果
+      featureEngApi.querySelectedTaskResults(this.featureEng_id).then(response => {
+        const resp = response.data.data
+        console.log('当前任务概况')
+        console.log(resp)
+        this.newResultForm.isNewResult = resp.isNewResult
+        this.newResultForm.efficiency = resp.original_efficiency
+        this.newResultForm.accuracy = resp.original_accuracy
+        for (let i = 0; i < this.newResultForm.taskDetails.length; i = i + 1) {
+          const key = this.newResultForm.taskDetails[i].type
+          this.newResultForm.taskDetails[i].value = resp[key]
         }
-      }
-      // 指定图表的配置项和数据
-      const option = {
-        tooltip: {},
-        dataZoom: [
-          {
-            yAxisIndex: [0],
-            show: true,
-            realtime: true,
-            type: 'inside',
-            startValue: 0,
-            endValue: 10,
-            zoomLock: true
-            // handleSize: 100
-          }
-        ],
-        xAxis: { type: 'value' },
-        yAxis: {
-          data: yaxis,
-          inverse: true
-        },
-        series: [
-          {
-            name: '特征重要性',
-            type: 'bar',
-            data: value,
-            itemStyle: {
-              color: {
-                type: 'linear', // 线性渐变
-                x: 0,
-                y: 0,
-                x2: 1,
-                y2: 0,
-                colorStops: [{
-                  offset: 0,
-                  color: '#58F3E1'
-                }, {
-                  offset: 1,
-                  color: '#4EAACC' // 100%处的颜色为蓝
-                }]
-              }
-            }
-          }
-        ]
-      }
-      myChart.setOption(option)
+        const modules = resp.checkedModules.split(',')
+        for (let i = 0; i < modules.length; i = i + 1) {
+          this.newResultForm.checkedModules.push(modules[i])
+        }
+        if (this.newResultForm.checkedModules.length === 4) {
+          this.checkedAll = true
+        }
+        this.getSelectedTaskFeatures()
+      })
     },
-    indexMethod (index) {
-      return index
-    },
-    lazyLoading_taskFeatureList () {
-      // const dom = document.querySelector('.el-table__body-wrapper')
-      const dom = this.$refs.task_feature_table.bodyWrapper
-      console.log(dom)
-      dom.addEventListener('scroll', (v) => {
-        const scrollDistance = dom.scrollHeight - dom.scrollTop - dom.clientHeight
-        console.log('鼠标滑动-scrollDistance', scrollDistance)
-        if (scrollDistance <= 1) {
-          if (this.pagination_taskFeatureList.page >= this.totalPage_taskFeatureList) {
-            this.$message.warning('当前任务生成特征已全部加载')
-          }
-          if (this.pagination_taskFeatureList.page < this.totalPage_taskFeatureList) {
-            this.pagination_taskFeatureList.page = this.pagination_taskFeatureList.page + 1
-            console.log('页面已经到达底部,可以请求接口,请求第' + this.pagination_taskFeatureList.page + '页数据')
-            var cIndex = this.countTotal_taskFeature + 10
-            for (let i = (this.countTotal_taskFeature + 1); i <= cIndex; i = i + 1) {
-              const nameString = String.fromCharCode(i / 4 + 65) + '_' + i % 4
-              this.taskFeatureList.push({ name: nameString, dataset: '暂稳数据集', task: '---', featureDecoupling: '---', featureLearning: '---', featureDerivation: '---', featureSelection: '---' })
-            }
-            this.countTotal_taskFeature += 10
+    getSelectedTaskFeatures () {
+      featureEngApi.querySelectedTaskFeatures(this.featureEng_id).then(response => {
+        const resp = JSON.parse(response.data.data)
+        console.log(resp)
+        if (resp != null) {
+          const upper = resp.length
+          for (let i = 0; i < upper; i = i + 1) {
+            this.taskFeatureList.push({
+              name: resp[i].name,
+              dataset: resp[i].dataset,
+              task: resp[i].task,
+              featureDecoupling: resp[i].featureDecoupling,
+              featureLearning: resp[i].featureSelection,
+              featureDerivation: resp[i].featureSelection,
+              featureSelection: resp[i].featureSelection
+            })
           }
         }
       })
+      if (this.checkedAll) {
+        this.getSelectedTaskRecord()
+      } else {
+        this.drawChart()
+      }
+    },
+    getSelectedTaskRecord () {
+      this.IteractionRecord = []
+      featureEngApi.querySelectedTaskRecord(this.featureEng_id).then(response => {
+        const resp = JSON.parse(response.data.data)
+        console.log(resp)
+        if (resp != null) {
+          const upper = resp.length
+          for (let i = 0; i < upper; i = i + 1) {
+            this.IteractionRecord.push({
+              record_efficiency: resp[i].record_efficiency + '%',
+              record_accuracy: resp[i].record_accuracy + '%'
+            })
+          }
+          this.drawChart()
+        }
+      })
+    },
+    drawChart () {
+      featureEngApi.querySelectedTaskScore(this.featureEng_id).then(response => {
+        const resp = JSON.parse(response.data.data)
+        if (resp === null) {
+          this.draw = false
+        } else {
+          this.draw = true
+          console.log('draw_fig')
+          console.log(resp)
+          // 基于准备好的dom，初始化echarts实例  这个和上面的main对应
+          const myChart = echarts.init(document.getElementById('featureCharts'))
+          const yaxis = resp.name
+          const value = resp.value
+          // 指定图表的配置项和数据
+          const option = {
+            tooltip: {},
+            dataZoom: [
+              {
+                yAxisIndex: [0],
+                show: true,
+                realtime: true,
+                type: 'inside',
+                startValue: 0,
+                endValue: 10,
+                zoomLock: true
+                // handleSize: 100
+              }
+            ],
+            xAxis: { type: 'value' },
+            yAxis: {
+              data: yaxis,
+              inverse: true
+            },
+            series: [
+              {
+                name: '特征重要性',
+                type: 'bar',
+                data: value,
+                itemStyle: {
+                  color: {
+                    type: 'linear', // 线性渐变
+                    x: 0,
+                    y: 0,
+                    x2: 1,
+                    y2: 0,
+                    colorStops: [{
+                      offset: 0,
+                      color: '#58F3E1'
+                    }, {
+                      offset: 1,
+                      color: '#4EAACC' // 100%处的颜色为蓝
+                    }]
+                  }
+                }
+              }
+            ]
+          }
+          myChart.setOption(option)
+        }
+      })
+    },
+    indexMethod (index) {
+      return index
     },
     backPage () {
       this.$router.back()
