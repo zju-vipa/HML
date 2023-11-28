@@ -32,3 +32,17 @@ class AlgorithmService:
             return algorithms
         else:
             return None
+
+    def queryAlgorithmListByType(self, algorithm_type):
+        algorithms = self.algorithmDao.queryAlgorithmListByType(algorithm_type)
+        if algorithms:
+            return algorithms
+        else:
+            return None
+
+    def queryAlgorithmParams(self, algorithm_name):
+        algorithm = self.algorithmDao.queryAlgorithmParams(algorithm_name)
+        if algorithm:
+            return algorithm
+        else:
+            return None

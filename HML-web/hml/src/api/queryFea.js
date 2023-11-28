@@ -38,6 +38,65 @@ export default {
       method: 'GET'
     })
   },
+  // 查询特征库
+  queryFeatureLibrary () {
+    return request({
+      url: '/featureEng/task/queryFeatureLibrary',
+      method: 'GET'
+    })
+  },
+  // 查询任务概况+初始结果
+  queryLatestResults () {
+    return request({
+      url: '/featureEng/task/queryLatestResult',
+      method: 'GET'
+    })
+  },
+  querySelectedTaskResults (id) {
+    return request({
+      url: `/featureEng/result/querySelectedTaskResults?featureEng_id=${id}`,
+      method: 'GET'
+    })
+  },
+  // 查询最新任务特征
+  queryLatestFeatures () {
+    return request({
+      url: '/featureEng/task/queryLatestFeature',
+      method: 'GET'
+    })
+  },
+  querySelectedTaskFeatures (id) {
+    return request({
+      url: `/featureEng/result/querySelectedTaskFeatures?featureEng_id=${id}`,
+      method: 'GET'
+    })
+  },
+  // 查询最新交互记录
+  queryLatestRecord () {
+    return request({
+      url: '/featureEng/task/queryLatestRecord',
+      method: 'GET'
+    })
+  },
+  querySelectedTaskRecord (id) {
+    return request({
+      url: `/featureEng/result/querySelectedTaskRecord?featureEng_id=${id}`,
+      method: 'GET'
+    })
+  },
+  // 查询前100特征
+  queryFeatureScore () {
+    return request({
+      url: '/featureEng/task/queryLatestImportance',
+      method: 'GET'
+    })
+  },
+  querySelectedTaskScore (id) {
+    return request({
+      url: `/featureEng/result/querySelectedImportance?featureEng_id=${id}`,
+      method: 'GET'
+    })
+  },
   // 下载数据集
   downloadFile (id) {
     return request({

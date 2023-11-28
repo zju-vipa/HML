@@ -1,3 +1,6 @@
+import csv
+import zipfile
+
 from dao import DatasetDao
 from model import db
 from utils.EncryptUtil import get_uid
@@ -105,10 +108,18 @@ class DatasetService:
 
     def getDatasetColumns(self, file_path):
         try:
-            data = pd.read_csv(file_path, delimiter=',', header=0, nrows=16, encoding='utf-8').columns.tolist()
+            if file_path.endswith('csv'):
+                data = pd.read_csv(file_path, delimiter=',', header=0, nrows=16, encoding='utf-8').columns.tolist()
+            else:
+                decompress_dataset_path = file_path.split('.')[0]
+                if not os.path.exists(decompress_dataset_path):
+                    with zipfile.ZipFile(file_path, "r") as zipobj:
+                        zipobj.extractall(current_app.config['SAVE_DATASET_PATH'])
+                file_num = len(os.listdir(decompress_dataset_path))
+                sample_file = os.listdir(decompress_dataset_path)[int(file_num / 2)]
+                data = pd.read_csv(os.path.join(decompress_dataset_path, sample_file), delimiter=',', encoding='utf-8').columns.tolist()
         except Exception:
             return None
-
         return data
 
     def getTaskAnalyzeProfileState(self, task_id):

@@ -5,8 +5,7 @@ from utils.CommonUtil import download_file
 from model import Dataset
 from service import DatasetService
 import os
-import shutil
-from pathlib import Path
+
 datasetService = DatasetService()
 
 bp = Blueprint('dataset', __name__, url_prefix='/api/private/v1/dataset')
@@ -252,7 +251,6 @@ def get_dataset_data():
 
 
 @bp.route('/columns', methods=('GET', 'POST'))
-@login_required
 def get_dataset_columns():
     if request.method == 'GET':
         try:
@@ -300,14 +298,12 @@ def get_task_analyze_profile_state():
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
 
 
-
-
-
 # 断面算法
 @bp.route('/uploadCrossSectionTrainingSet', methods=('POST',))
 @login_required
 def upload_cross_section_training_set():
     return upload_cross_section_file()
+
 
 # 断面算法
 @bp.route('/uploadCrossSectionTestSet', methods=('POST',))
@@ -336,4 +332,3 @@ def upload_cross_section_file():
     file.save(file_path)
 
     return {'meta': {'msg': 'upload success', 'code': 200}, 'data': None}, 200
-

@@ -1,13 +1,16 @@
+import zipfile
+
 from celery_tasks.celery import celery_app
 from celery_tasks.algorithms import DimReduction
+from celery_tasks.algorithms import FeatureEngineering
 from utils.EncryptUtil import get_uid
-from flask import current_app
 import pandas as pd
 import os
 import copy
 import joblib
 from dao import FeatureEngDao, DatasetDao
 from model import db, FeatureEng, Dataset
+from flask import current_app
 datasetDao = DatasetDao(db)
 featureEngDao = FeatureEngDao(db)
 
@@ -24,7 +27,11 @@ def featureEng_to_bean(featureEng_json):
     featureEng_bean.original_dataset_id = featureEng_json['original_dataset_id']
     featureEng_bean.user_id = featureEng_json['user_id']
     featureEng_bean.username = featureEng_json['username']
-
+    featureEng_bean.featureEng_modules = featureEng_json['featureEng_modules']
+    featureEng_bean.featureEng_operationMode = featureEng_json['featureEng_operationMode']
+    featureEng_bean.FeatureEng_accuracy = featureEng_json['FeatureEng_accuracy']
+    featureEng_bean.FeatureEng_efficiency = featureEng_json['FeatureEng_efficiency']
+    featureEng_bean.start_time = featureEng_json['start_time']
     return featureEng_bean
 
 
@@ -51,73 +58,138 @@ def dataset_to_bean(dataset_json):
 def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
                   original_dataset_file_path, new_dataset_name):
 
-    self.update_state(state='PROCESS', meta={'progress': 0.01, 'message': 'start'})
+    self.update_state(state='PROCESS', meta={'progress': 0.01, 'message': '开始'})
     featureEng_bean = featureEng_to_bean(featureEng_json)
     original_dataset_bean = dataset_to_bean(original_dataset_json)
     featureEng_id = featureEng_bean.featureEng_id
 
     # try:
     data = None
-    self.update_state(state='PROCESS', meta={'progress': 0.05, 'message': 'read csv'})
+    self.update_state(state='PROCESS', meta={'progress': 0.05, 'message': '正在查找数据集位置'})
     current_app.logger.info(original_dataset_file_path)
     if(original_dataset_file_path[-3:]=="csv"):
         data = pd.read_csv(original_dataset_file_path, delimiter=',', header=0, encoding='utf-8')
+        processes_num = len(featureEng_processes)
+        self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
+        for process_idx in range(processes_num):
+            col_retain = None
+            if "col_retain" in featureEng_processes[int(str(process_idx))]:
+                col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
+            data_retain = pd.DataFrame()
+            if col_retain:
+                data_retain = data[col_retain]
+                data.drop(columns=col_retain, inplace=True)
+            data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))])
+        data = pd.concat([data, data_retain], axis=1)
+        self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
+        new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
     elif(original_dataset_file_path[-3:]=="mat"):
         data = original_dataset_file_path
-    processes_num = len(featureEng_processes)
-    for process_idx in range(processes_num):
-        progress = round(0.1 + process_idx / processes_num * 0.85, 2)
-        message = featureEng_processes[int(str(process_idx))]['operate_name'] + 'operating'
-        self.update_state(state='PROCESS', meta={'progress': progress, 'message': message})  # need update
-        col_retain = None
-        if "col_retain" in featureEng_processes[int(str(process_idx))]:
-            col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
-        data_retain = pd.DataFrame()
-        if col_retain:
-            data_retain = data[col_retain]
-            data.drop(columns=col_retain, inplace=True)
-
-        data = run_algorithm_train(data, featureEng_id, featureEng_processes[int(str(process_idx))])
-
+        processes_num = len(featureEng_processes)
+        self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
+        for process_idx in range(processes_num):
+            col_retain = None
+            if "col_retain" in featureEng_processes[int(str(process_idx))]:
+                col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
+            data_retain = pd.DataFrame()
+            if col_retain:
+                data_retain = data[col_retain]
+                data.drop(columns=col_retain, inplace=True)
+            data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))])
         data = pd.concat([data, data_retain], axis=1)
-
-    new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
-
-    self.update_state(state='PROCESS', meta={'progress': 0.95, 'message': 'update operate_state'})
+        self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
+        new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+    # 数据集为zip的情况
+    else:
+        data = original_dataset_file_path
+        processes_num = len(featureEng_processes)
+        col_retain = None
+        for process_idx in range(processes_num):
+            if "col_retain" in featureEng_processes[int(str(process_idx))]:
+                col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
+                # return_type: List
+            data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))])
+        self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
+        if col_retain:
+            # 拼接保留列和生成的数据
+            data = concat_data(data, col_retain, original_dataset_file_path)
+        new_dataset = add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+    self.update_state(state='PROCESS', meta={'progress': 0.95, 'message': '新数据集保存完毕'})
     featureEng_bean.operate_state = '2'
     featureEng_bean.new_dataset_id = new_dataset.dataset_id
     featureEngDao.updateFeatureEng(featureEng_bean)
-
-    # except Exception:
-    #     self.update_state(state='FAILURE', meta={'progress': 1.0, 'message': 'failure'})
-    #     featureEng_bean.operate_state = '3'F
-    #     featureEngDao.updateFeatureEng(featureEng_bean)
-    #     return 'FAILURE'
+    self.update_state(state='PROCESS', meta={'progress': 1.0, 'message': '完成！'})
 
     return 'SUCCESS'
 
 
-def run_algorithm_train(data, featureEng_id, featureEng_process):
+def run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, featureEng_process):
     if featureEng_process['operate_name'] == 'OneHot':
-        data_onehot, model_enc = DimReduction.algorithm_OneHot_train(data)
-        save_featureEng_model(model_enc, 'OneHot.pkl', featureEng_id)
+        # zip
+        if type(data) == str:
+            progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+            self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+            data_onehot, model_enc = FeatureEngineering.algorithm_OneHot_train(self, process_idx, processes_num, data, featureEng_process)
+            save_featureEng_model(model_enc, 'OneHot.pkl', featureEng_id)
+        # csv
+        else:
+            progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+            self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+            data_onehot, model_enc = DimReduction.algorithm_OneHot_train(self, process_idx, processes_num, data)
+            save_featureEng_model(model_enc, 'OneHot.pkl', featureEng_id)
         return data_onehot
     if featureEng_process['operate_name'] == 'PCA':
-        n_components = featureEng_process['n_components']
-        data_pca, model_pca = DimReduction.algorithm_PCA_train(data, n_components)
-        save_featureEng_model(model_pca, 'PCA.pkl', featureEng_id)
+        # zip and list
+        if type(data) == str or isinstance(data, list):
+            n_components = int(featureEng_process['n_components'])
+            progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+            self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+            data_pca, model_pca = FeatureEngineering.algorithm_PCA_train(self, process_idx, processes_num, data, n_components, featureEng_process)
+            save_featureEng_model(model_pca, 'PCA.pkl', featureEng_id)
+        # csv
+        else:
+            progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+            self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+            n_components = int(featureEng_process['n_components'])
+            data_pca, model_pca = DimReduction.algorithm_PCA_train(self, process_idx, processes_num, data, n_components)
+            save_featureEng_model(model_pca, 'PCA.pkl', featureEng_id)
         return data_pca
     if featureEng_process['operate_name'] == 'GNN':
-        current_app.logger.info("GNN data path")
-        current_app.logger.info(data  )
-        n_components = featureEng_process['n_components']
-        epoch = featureEng_process['epoch']
-        data_GNN, model_GNN = DimReduction.algorithm_GNN_train(data, n_components, epoch) # may need some ohter parameter
-        save_featureEng_model(model_GNN, 'GNN.pkl', featureEng_id)
+        # 数据集为暂稳判别数据集（zip）
+        num_layers = int(featureEng_process['num_layers'])
+        n_components = int(featureEng_process['n_components'])
+        epoch = int(featureEng_process['epoch'])
+        progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+        self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+        data_GNN, model_GNN = FeatureEngineering.algorithm_GNN_train(self, process_idx, processes_num, data, featureEng_id, num_layers, n_components, epoch)
+        current_app.logger.info(data_GNN)
+        save_featureEng_model(model_GNN, 'gnn.pkl', featureEng_id)
         return data_GNN
-
+    if featureEng_process['operate_name'] == 'FactorGNN':
+        # 数据集为故障定位数据集（zip）
+        epoch = int(featureEng_process['epoch'])
+        latent_dims = int(featureEng_process['latent_dims'])
+        num_of_dis = int(featureEng_process['num_of_dis'])
+        progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+        self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+        data_factor, model_factor = FeatureEngineering.algorithm_factorgnn_train(self, process_idx, processes_num, data, featureEng_id, epoch=epoch, latent_dims=latent_dims, num_of_dis=num_of_dis)
+        current_app.logger.info('data_factor')
+        current_app.logger.info(data_factor)
+        save_featureEng_model(model_factor, 'factorgnn.pkl', featureEng_id)
+        return data_factor
+    if featureEng_process['operate_name'] == 'OperatorBased-Manual':
+        # zip
+        if type(data) == str:
+            progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+            self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+            data_operator = FeatureEngineering.algorithm_operator_train(self, process_idx, processes_num, data, featureEng_process)
+        # csv
+        else:
+            progress = 0.1 + 0.8 * (process_idx + 1) / processes_num
+            self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 处理完毕'.format(process_idx)})
+            return data
+        return data_operator
     return data
-
 
 def save_featureEng_model(model_object, model_file_name, featureEng_id):
     model_directory = os.path.join(celery_app.conf["SAVE_FE_MODEL_PATH"], featureEng_id)
@@ -127,7 +199,6 @@ def save_featureEng_model(model_object, model_file_name, featureEng_id):
     joblib.dump(model_object, model_path)
     return model_path
 
-
 def add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name):
     dataset = copy.deepcopy(original_dataset_bean)
     dataset.dataset_id = get_uid()
@@ -136,7 +207,7 @@ def add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name):
     dataset.featureEng_id = featureEng_bean.featureEng_id
     dataset.original_dataset_id = original_dataset_bean.dataset_id
 
-    dataset.file_type = '.csv'
+    dataset.file_type = 'csv'
     file_type = dataset.file_type
     file_name = dataset.dataset_id + '.' + file_type
     file_path = os.path.join(celery_app.conf["SAVE_DATASET_PATH"], file_name)
@@ -147,5 +218,52 @@ def add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name):
     dataset.if_profile = False
     dataset.task_id = None
     datasetDao.addDataset(dataset)
-
     return dataset
+
+def add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_name):
+    dataset = copy.deepcopy(original_dataset_bean)
+    dataset.dataset_id = get_uid()
+    dataset.dataset_name = new_dataset_name
+    dataset.if_featureEng = True
+    dataset.featureEng_id = featureEng_bean.featureEng_id
+    dataset.original_dataset_id = original_dataset_bean.dataset_id
+
+    dataset.file_type = 'zip'
+    file_name = dataset.dataset_id
+    file_path = os.path.join(celery_app.conf["SAVE_DATASET_PATH"], file_name)
+    current_app.logger.info(data)
+    os.makedirs(file_path, exist_ok=True)
+    zipf = zipfile.ZipFile(file_path + '.zip', 'w', zipfile.ZIP_DEFLATED)
+    for i in range(len(data)):
+        if isinstance(data[i], pd.DataFrame):
+            temp_data = data[i]
+        else:
+            columns = ['C_{}'.format(j) for j in range(data[i].shape[1])]
+            temp_data = pd.DataFrame(data[i], columns=columns)
+        temp_data.to_csv(os.path.join(file_path, '{}.csv'.format(i)), header=True, index=False)
+        zipf.write(os.path.join(file_path, '{}.csv'.format(i)), arcname=os.path.join(file_name, '{}.csv'.format(i)))
+    dataset.profile_state = '0'
+    # lsy_warning: 不生成分析文件
+    dataset.if_profile = False
+    dataset.task_id = None
+    datasetDao.addDataset(dataset)
+    return dataset
+
+def concat_data(data, col_retain, data_path):
+    concat_data_list = []
+    decompress_dataset_path = data_path.split('.')[0]
+    if not os.path.exists(decompress_dataset_path):
+        with zipfile.ZipFile(data_path, "r") as zipobj:
+            zipobj.extractall(current_app.config['SAVE_DATASET_PATH'])
+    file_list = []
+    for file_name in os.listdir(decompress_dataset_path):
+        if file_name.startswith('branch') or file_name.startswith('v'):
+            file_list.append(file_name)
+    index = 0
+    for filename in file_list:
+        data_item = pd.read_csv(os.path.join(decompress_dataset_path, filename), delimiter=',', header=0, encoding='utf-8')
+        col_retain_item = data_item[col_retain]
+        concat_data_item = pd.concat([data[index], col_retain_item], axis=1)
+        index = index + 1
+        concat_data_list.append(concat_data_item)
+    return concat_data_list

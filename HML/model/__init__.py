@@ -95,15 +95,19 @@ class FeatureEng(db.Model):
 
     featureEng_id = db.Column(db.String(32), primary_key=True, info='特征工程ID')
     featureEng_name = db.Column(db.String(32), nullable=False, info='特征工程名')
+    featureEng_operationMode = db.Column(db.String(32), nullable=False, info='运行方式')
     featureEng_type = db.Column(db.String(32), nullable=False, info='特征工程类型')
+    featureEng_modules = db.Column(db.String(32), nullable=True, info='功能模块')
     featureEng_processes = db.Column(db.Text, nullable=False, info='特征工程流程')
     operate_state = db.Column(db.String(1), nullable=False, default='0', info='操作状态')
+    FeatureEng_efficiency = db.Column(db.String(32), nullable=True, info='特征有效率')
+    FeatureEng_accuracy = db.Column(db.String(32), nullable=True, info='任务准确率')
     task_id = db.Column(db.String(36), nullable=False, info='操作任务ID')
     new_dataset_id = db.Column(db.String(32), nullable=True, info='新数据集ID')
     original_dataset_id = db.Column(db.String(32), nullable=False, info='原数据集ID')
     user_id = db.Column(db.String(32), nullable=False, info='用户ID')
     username = db.Column(db.String(32), nullable=False, info='用户名')
-
+    start_time = db.Column(db.DateTime, nullable=True, info='创建时间')
     @property
     def serialize(self):
         return to_json(self, self.__class__)
