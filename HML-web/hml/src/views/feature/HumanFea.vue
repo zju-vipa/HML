@@ -278,7 +278,6 @@
     <el-dialog
       title="已有特征工程"
       :visible.sync="existedFeatureEng"
-      @open="lazyLoading_featureEngList"
       width="70%">
       <el-table
         :data="HumanFeaData"
@@ -286,6 +285,7 @@
         ref="featureEng_list_table"
         height="550"
         style="font-size: 15px"
+        @row-click="importFeatureEng"
         solt="append">
         <el-table-column  label="序号" type="index" style="font-weight: bolder"> </el-table-column>
         <el-table-column prop="featureEng_name" label="特征工程名" style="font-weight: bolder"> </el-table-column>
@@ -293,27 +293,36 @@
         <el-table-column prop="featureEng_result" label="任务效果" style="font-weight: bolder">
           <template slot-scope="scope">
             <el-progress
+              v-if="scope.row.featureEng_accuracy!=null"
               type="line"
               :stroke-width="10"
-              :percentage="scope.row.featureEng_result"
+              :percentage="scope.row.featureEng_accuracy"
               color="green">
             </el-progress>
+            <span v-else>
+              暂无数据
+            </span>
           </template>
         </el-table-column>
         <el-table-column prop="featureEng_efficiency" label="特征有效率">
           <template slot-scope="scope">
             <el-progress
+              v-if="scope.row.featureEng_efficiency!=null"
               type="line"
               :stroke-width="10"
               :percentage="scope.row.featureEng_efficiency"
               :color="blue">
             </el-progress>
+            <span v-else>
+              暂无数据
+            </span>
           </template>
         </el-table-column>
         <el-table-column prop="operate_state" label="状态">
           <template slot-scope="scope">
             <span v-if="scope.row.operate_state==='已完成'" style="color: green">已完成</span>
             <span v-else-if="scope.row.operate_state==='交互中'"  style="color: orange">交互中</span>
+            <span v-else-if="scope.row.operate_state==='已停止'"  style="color: orange">交互中</span>
           </template>
         </el-table-column>
       </el-table>
@@ -385,6 +394,7 @@
 <script>
 import featureApi from './../../api/feature'
 import humanFeaApi from './../../api/HumanFea'
+import featureEngApi from './../../api/queryFea'
 // 所属运行方式
 const runModeOptions = [
   { value: '1', label: '001夏平初始' }
@@ -490,17 +500,17 @@ export default {
       // 算法参数
       // algorithm_parameters2: [{ introduction: '保留列', name: 'col_retain', value: '' }, { introduction: '维度', name: 'dimension', value: '' }, { introduction: '迭代数', name: 'iteration', value: '' }],
       // 算法参数
-      algorithm_parameters1: [],
-      algorithm_parameters2: [],
+      algorithm_parameters1: [{ introduction: '解耦层维度', name: 'latent_dims', select: 'single-select', type: 'int', value: 32 }, { introduction: '迭代数', name: 'epoch', select: 'single-select', type: 'int', value: 100 }, { introduction: '解耦图个数', name: 'num_of_dis', select: 'single-select', type: 'int', value: 4 }],
+      algorithm_parameters2: [{ introduction: '维度', name: 'n_components', select: 'single-select', type: 'int', value: 10 }, { introduction: '迭代数', name: 'epoch', select: 'single-select', type: 'int', value: 100 }, { introduction: '模型层数', name: 'num_layers', select: 'single-select', type: 'int', value: 5 }],
       algorithm_parameters3: [],
       algorithm_parameters4: [],
-      algorithm_parameters5: [],
-      algorithm_parameters6: [],
+      algorithm_parameters5: [{ introduction: '保留列', name: 'col_retain', select: 'multi-select', type: 'column', value: '' }],
+      algorithm_parameters6: [{ introduction: '维度', name: 'n_components', select: 'single-select', type: 'int', value: 5 }],
       labelMultible1: false,
       labelMultible2: false,
       labelMultible3: false,
       labelMultible4: false,
-      labelMultible5: false,
+      labelMultible5: true,
       labelMultible6: false,
       processConstructForm: {
         operate_name: 'OperatorBased-Manual'
@@ -541,38 +551,16 @@ export default {
   },
   methods: {
     showDeriveSetting () {
-      this.featureEngDialogVisible = true
-      this.percentageListen = setInterval(() => {
-        this.percentage = this.percentage + 1
-        console.log(this.percentage)
-      }, 1000 * 1)
+      // this.featureEngDialogVisible = true
+      // this.percentageListen = setInterval(() => {
+      //   this.percentage = this.percentage + 1
+      //   console.log(this.percentage)
+      // }, 1000 * 1)
     },
     clear () {
       this.featureEngDialogVisible = false
       clearInterval(this.percentageListen)
       this.$router.push('/feature')
-    },
-    lazyLoading_featureEngList () {
-      // const dom = document.querySelector('.el-table__body-wrapper')
-      this.$nextTick(() => {
-        const dom = this.$refs.featureEng_list_table.bodyWrapper
-        dom.addEventListener('scroll', (v) => {
-          const scrollDistance = dom.scrollHeight - dom.scrollTop - dom.clientHeight
-          if (scrollDistance <= 1) {
-            if (this.pagination_featureEngList.page >= this.totalPage_featureEngList) {
-              this.$message.warning('已有特征工程数据已全部加载')
-            }
-            if (this.pagination_featureEngList.page < this.totalPage_featureEngList) {
-              this.pagination_featureEngList.page = this.pagination_featureEngList.page + 1
-              var cIndex = this.countTotal_featureEngList + 10
-              for (let i = (this.countTotal_featureEngList + 1); i <= cIndex; i = i + 1) {
-                this.HumanFeaData.push({ featureEng_name: '特征工程' + i, featureEng_type: '暂稳数据集', featureEng_result: '10', featureEng_efficiency: '20', operate_state: '交互中' })
-              }
-              this.countTotal_featureEngList += 10
-            }
-          }
-        })
-      })
     },
     handleCheckedChange () {
     },
@@ -695,18 +683,36 @@ export default {
     backPage () {
       this.$router.back()
     },
-    loadFeatureEng () {
-      this.HumanFeaData = []
-      for (let i = 0; i < this.countTotal_featureEngList; i++) {
-        this.HumanFeaData.push({ featureEng_name: '特征工程' + i, featureEng_type: '暂稳数据集', featureEng_result: 20, featureEng_efficiency: 10, operate_state: '已完成' })
-      }
-    },
     showExistedFeatureEng () {
-      this.loadFeatureEng()
-      this.lazyLoading_featureEngList()
-      console.log('11111111')
       console.log(this.HumanFeaData)
-      this.existedFeatureEng = true
+      // 导入已有特征工程
+      this.HumanFeaData = []
+      // 已有特征工程
+      featureEngApi.query().then(response => {
+        const resp = response.data
+        console.log(resp.data)
+        const upper = resp.data.length
+        let state = ''
+        let type = ''
+        for (let i = 0; i < upper; i = i + 1) {
+          if (resp.data[i].operate_state === '1') {
+            state = '交互中'
+          } else if (resp.data[i].operate_state === '2') {
+            state = '已完成'
+          } else if (resp.data[i].operate_state === '3') {
+            state = '已停止'
+          }
+          if (resp.data[i].featureEng_type === 'HumanInLoop') {
+            type = '人机协同特征学习与衍生技术'
+          } else if (resp.data[i].featureEng_type === 'Machine') {
+            type = '纯机器方法'
+          } else {
+            type = '纯人工方法'
+          }
+          this.existedFeatureEng = true
+          this.HumanFeaData.push({ featureEng_id: resp.data[i].featureEng_id, featureEng_name: resp.data[i].featureEng_name, featureEng_type: type, featureEng_accuracy: resp.data[i].FeatureEng_accuracy, featureEng_efficiency: resp.data[i].FeatureEng_efficiency, operate_state: state })
+        }
+      })
     },
     // 点击确定按钮，提交上传数据表单
     submitHumanForm () {
@@ -755,13 +761,17 @@ export default {
           this.addFeatureForm.featureEng_processes.push(process4)
         }
         console.log(this.addFeatureForm)
-        humanFeaApi.submitFeatureEngForm(this.addFeatureForm).then(response => {
-          console.log(response.data.data)
-          this.featureEngDialogVisible = true
-          this.percentageListen = setInterval(() => {
-            this.getTaskStatues(response.data.data.task_id)
-          }, 1000 * 0.2)
-        })
+        if (this.addFeatureForm.checkedModules.length === 0) {
+          this.$message.error('请选择功能模块！')
+        } else {
+          humanFeaApi.submitFeatureEngForm(this.addFeatureForm).then(response => {
+            console.log(response.data.data)
+            this.featureEngDialogVisible = true
+            this.percentageListen = setInterval(() => {
+              this.getTaskStatues(response.data.data.task_id)
+            }, 1000 * 0.2)
+          })
+        }
       } else if (this.addFeatureForm.featureEng_type === 'Manual') {
         this.addFeatureForm.featureEng_processes = []
         this.addFeatureForm.checkedModules = ['1', '2']
@@ -1142,6 +1152,47 @@ export default {
     submitExtractParams () {
       console.log(this.processExtractForm)
       this.featureExtractDialog = false
+    },
+    // 导入特征工程
+    importFeatureEng (row) {
+      const id = row.featureEng_id
+      featureEngApi.importFeatureEng(id).then(response => {
+        const resp = response.data.data
+        this.addFeatureForm.featureEng_type = resp.featureEng_type
+        this.addFeatureForm.featureEng_name = resp.featureEng_name
+        this.addFeatureForm.original_dataset_id = resp.dataset_id
+        this.addFeatureForm.original_dataset_name = resp.dataset_name
+        this.addFeatureForm.new_dataset_name = resp.new_dataset_name
+        this.addFeatureForm.run_mode = resp.featureEng_operationMode
+        this.addFeatureForm.checkedModules = []
+        const modules = resp.checkedModules.split(',')
+        for (let i = 0; i < modules.length; i = i + 1) {
+          this.addFeatureForm.checkedModules.push(modules[i])
+        }
+        const process = resp.featureEng_processes
+        for (let i = 0; i < process.length; i = i + 1) {
+          if (process[i].process_name === 'Feature_Decoupling') {
+            this.processDecouplingForm.operate_name = process[i].operate_name
+          }
+          if (process[i].process_name === 'Feature_Learning') {
+            this.processLearningForm.operate_name = process[i].operate_name
+          }
+          if (process[i].process_name === 'Feature_Derive') {
+            this.processDeriveForm.operate_name = process[i].operate_name
+          }
+          if (process[i].process_name === 'Feature_Selection') {
+            this.processSelectionForm.operate_name = process[i].operate_name
+          }
+          if (process[i].process_name === 'FeatureEng_construct') {
+            this.processConstructForm.operate_name = process[i].operate_name
+          }
+          if (process[i].process_name === 'FeatureEng_extract') {
+            this.processExtractForm.operate_name = process[i].operate_name
+          }
+        }
+        console.log(this.addFeatureForm)
+      })
+      this.existedFeatureEng = false
     }
   }
 }

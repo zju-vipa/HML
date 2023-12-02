@@ -42,6 +42,9 @@ class FeatureEngService:
     def updateFeatureEng(self, featureEng):
         return self.featureEngDao.updateFeatureEng(featureEng)
 
+    def updateTaskStatus(self, featureEng_id):
+        return self.featureEngDao.updateTaskStatus(featureEng_id)
+
     def queryFeatureEngById(self, featureEng_id):
         featureEng = self.featureEngDao.queryFeatureEngById(featureEng_id)
         if featureEng:
@@ -94,6 +97,11 @@ class FeatureEngService:
             }
 
         return data
+
+    def stopTask(self, task_id):
+        result = FeatureEngTasks.operate.AsyncResult(task_id)
+        result.revoke(terminate=True)
+        return 'SUCCESS'
 
     def queryFeatureLibraryByUserId(self, user_id):
         featureEngs = self.featureEngDao.queryFinishedFeatureEngListByUserId(user_id)

@@ -32,6 +32,7 @@ def featureEng_to_bean(featureEng_json):
     featureEng_bean.FeatureEng_accuracy = featureEng_json['FeatureEng_accuracy']
     featureEng_bean.FeatureEng_efficiency = featureEng_json['FeatureEng_efficiency']
     featureEng_bean.start_time = featureEng_json['start_time']
+    featureEng_bean.task_id = featureEng_json['task_id']
     return featureEng_bean
 
 
@@ -75,8 +76,14 @@ def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
             col_retain = None
             if "col_retain" in featureEng_processes[int(str(process_idx))]:
                 col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
+            data_not_number = data.select_dtypes([object]).columns.tolist()
             data_retain = pd.DataFrame()
             if col_retain:
+                col_retain = list(set(col_retain + data_not_number))
+                data_retain = data[col_retain]
+                data.drop(columns=col_retain, inplace=True)
+            else:
+                col_retain = data_not_number
                 data_retain = data[col_retain]
                 data.drop(columns=col_retain, inplace=True)
             data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))])
@@ -104,13 +111,15 @@ def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
         data = original_dataset_file_path
         processes_num = len(featureEng_processes)
         col_retain = None
+        need_concat = False
         for process_idx in range(processes_num):
             if "col_retain" in featureEng_processes[int(str(process_idx))]:
+                need_concat = True
                 col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
                 # return_type: List
             data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))])
         self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
-        if col_retain:
+        if need_concat:
             # 拼接保留列和生成的数据
             data = concat_data(data, col_retain, original_dataset_file_path)
         new_dataset = add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_name)
@@ -250,6 +259,8 @@ def add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_na
     return dataset
 
 def concat_data(data, col_retain, data_path):
+    if not col_retain:
+        col_retain = []
     concat_data_list = []
     decompress_dataset_path = data_path.split('.')[0]
     if not os.path.exists(decompress_dataset_path):
@@ -262,6 +273,8 @@ def concat_data(data, col_retain, data_path):
     index = 0
     for filename in file_list:
         data_item = pd.read_csv(os.path.join(decompress_dataset_path, filename), delimiter=',', header=0, encoding='utf-8')
+        data_not_number = data_item.select_dtypes([object]).columns.tolist()
+        col_retain = list(set(col_retain + data_not_number))
         col_retain_item = data_item[col_retain]
         concat_data_item = pd.concat([data[index], col_retain_item], axis=1)
         index = index + 1

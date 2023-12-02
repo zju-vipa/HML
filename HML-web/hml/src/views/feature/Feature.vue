@@ -479,6 +479,7 @@
                       <template slot-scope="scope">
                         <span v-if="scope.row.operate_state==='已完成'" style="color: green">已完成</span>
                         <span v-else-if="scope.row.operate_state==='交互中'"  style="color: orange">交互中</span>
+                        <span v-else-if="scope.row.operate_state==='已停止'"  style="color: red">已停止</span>
                       </template>
                     </el-table-column>
                     <el-table-column label="结果">
@@ -492,7 +493,7 @@
                     <el-table-column label="操作">
                       <template slot-scope="scope">
                         <el-row>
-                          <el-button size="mini" type="primary" :disabled="scope.row.operate_state==='已完成'">停止任务</el-button>
+                          <el-button size="mini" type="primary" :disabled="scope.row.operate_state==='已完成'" @click="stopTask(scope.row)">停止任务</el-button>
                           <el-button size="mini" type="danger" icon="el-icon-delete" style="margin-top: 5px" @click="deleteFeatureEng(scope.row)">删除</el-button>
                         </el-row>
                       </template>
@@ -671,6 +672,19 @@ export default {
         this.getLatestTaskDetails()
       })
     },
+    stopTask (row) {
+      console.log(row.featureEng_id)
+      featureEngApi.stopTask(row.featureEng_id).then(response => {
+        const resp = response.data
+        console.log(resp)
+        if (resp.meta.code === 200) {
+          this.$message.success('任务停止成功')
+        } else {
+          this.$message.error('任务停止失败')
+        }
+        this.getAllFeatureEngs()
+      })
+    },
     getLatestTaskDetails () {
       // 当前任务概况+初始效果
       this.displayType = 0
@@ -678,6 +692,7 @@ export default {
         const resp = response.data.data
         console.log('当前任务概况')
         console.log(resp)
+        this.newResultForm.checkedModules = []
         this.newResultForm.isNewResult = resp.isNewResult
         this.newResultForm.efficiency = resp.original_efficiency
         this.newResultForm.accuracy = resp.original_accuracy
@@ -725,6 +740,8 @@ export default {
             state = '交互中'
           } else if (resp.data[i].operate_state === '2') {
             state = '已完成'
+          } else if (resp.data[i].operate_state === '3') {
+            state = '已停止'
           }
           if (resp.data[i].featureEng_type === 'HumanInLoop') {
             type = '人机协同特征学习与衍生技术'

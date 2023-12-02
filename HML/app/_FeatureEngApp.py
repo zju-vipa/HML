@@ -58,6 +58,29 @@ def delete_featureEng():
         return {'meta': {'msg': 'delete featureEng success', 'code': 200}, 'data': None}, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
 
+@bp.route('/stopTask', methods=('GET', 'POST'))
+@login_required
+def stop_task():
+    if request.method == 'GET':
+        try:
+            featureEng_id = request.args.get('featureEng_id')
+        except Exception:
+            return get_error(RET.PARAMERR, 'Error: no request')
+
+        if not featureEng_id:
+            return get_error(RET.PARAMERR, 'Error: request lacks featureEng_id')
+
+        featureEng = featureEngService.queryFeatureEngById(featureEng_id)
+
+        if not featureEng:
+            return get_error(RET.PARAMERR, 'Error: featureEng_id not exists')
+        task_id = featureEng.task_id
+        stop_result = featureEngService.stopTask(task_id)
+        if stop_result == 'SUCCESS':
+            result = featureEngService.updateTaskStatus(featureEng_id)
+        return {'meta': {'msg': 'stop featureEng task success', 'code': 200}, 'data': stop_result}, 200
+    return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
+
 
 @bp.route('/add', methods=('GET', 'POST'))
 @login_required
@@ -436,4 +459,30 @@ def querySelectedImportance():
         else:
             scores = None
         return {'meta': {'msg': 'query feature importance success', 'code': 200}, 'data': scores}, 200
+    return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
+
+@bp.route('/importFeatureEng', methods=('GET', 'POST'))
+@login_required
+def import_featureEng():
+    if request.method == 'GET':
+        try:
+            featureEng_id = request.args.get('featureEng_id')
+        except Exception:
+            return get_error(RET.PARAMERR, 'Error: no request')
+        featureEng = featureEngService.queryFeatureEngById(featureEng_id)
+        if featureEng:
+            dataset = datasetService.queryDatasetById(featureEng.original_dataset_id)
+            new_dataset = datasetService.queryDatasetById(featureEng.new_dataset_id)
+            existedFeatureEng = {}
+            existedFeatureEng['featureEng_name'] = featureEng.featureEng_name
+            existedFeatureEng['featureEng_type'] = featureEng.featureEng_type
+            existedFeatureEng['featureEng_operationMode'] = featureEng.featureEng_operationMode
+            existedFeatureEng['checkedModules'] = featureEng.featureEng_modules
+            existedFeatureEng['dataset_name'] = dataset.dataset_name
+            existedFeatureEng['featureEng_processes'] = featureEng.featureEng_processes
+            existedFeatureEng['dataset_id'] = featureEng.original_dataset_id
+            existedFeatureEng['new_dataset_name'] = new_dataset.dataset_name
+        else:
+            existedFeatureEng = {}
+        return {'meta': {'msg': 'import featureEng success', 'code': 200}, 'data': existedFeatureEng}, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405

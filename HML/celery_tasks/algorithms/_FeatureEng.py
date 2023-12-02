@@ -95,14 +95,16 @@ def algorithm_OneHot_train(self, process_idx, processes_num, data_path, featureE
         col_retain = None
         if "col_retain" in featureEng_process:
             col_retain = featureEng_process["col_retain"]
-        data_retain = pd.DataFrame()
+        data_not_number = data_item.select_dtypes([object]).columns.tolist()
         if col_retain:
-            data_retain = data_item[col_retain]
+            col_retain = list(set(col_retain + data_not_number))
+            data_item.drop(columns=col_retain, inplace=True)
+        else:
+            col_retain = data_not_number
             data_item.drop(columns=col_retain, inplace=True)
         model_enc.fit(data_item)
         data_onehot = pd.DataFrame(model_enc.transform(data_item))
-        data_processed = pd.concat([data_onehot, data_retain], axis=1)
-        data_list.append(data_processed)
+        data_list.append(data_onehot)
     return data_list, model_enc
 
 
@@ -133,7 +135,12 @@ def algorithm_operator_train(self, process_idx, processes_num, data_path, featur
         col_retain = None
         if "col_retain" in featureEng_process:
             col_retain = featureEng_process["col_retain"]
+        data_not_number = data.select_dtypes([object]).columns.tolist()
         if col_retain:
+            col_retain = list(set(col_retain + data_not_number))
+            data.drop(columns=col_retain, inplace=True)
+        else:
+            col_retain = data_not_number
             data.drop(columns=col_retain, inplace=True)
         data_list.append(data)
     return data_list

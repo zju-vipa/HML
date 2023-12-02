@@ -14,6 +14,7 @@ class FeatureEngDao(BaseDao):
     """
     provide functions of base class another name 
     """
+
     def addFeatureEng(self, featureEng):
         self.add(featureEng)
 
@@ -43,8 +44,13 @@ class FeatureEngDao(BaseDao):
         featureEng.username = featureEng_bean.username
         featureEng.FeatureEng_efficiency = featureEng_bean.FeatureEng_efficiency
         featureEng.FeatureEng_accuracy = featureEng_bean.FeatureEng_accuracy
-        featureEng_bean.featureEng_operationMode = featureEng_bean.featureEng_operationMode
-        featureEng_bean.start_time = featureEng_bean.start_time
+        featureEng.featureEng_operationMode = featureEng_bean.featureEng_operationMode
+        featureEng.start_time = featureEng_bean.start_time
+        self.db.session.commit()
+
+    def updateTaskStatus(self, featureEng_id):
+        featureEng = FeatureEng.query.filter_by(featureEng_id=featureEng_id).first()
+        featureEng.operate_state = '3'
         self.db.session.commit()
 
     def queryLatestFeatureEngByUserId(self, user_id):
@@ -54,5 +60,3 @@ class FeatureEngDao(BaseDao):
     def queryFinishedFeatureEngListByUserId(self, user_id):
         featureEngs = FeatureEng.query.filter_by(user_id=user_id, operate_state='2').all()
         return featureEngs
-
-
