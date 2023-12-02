@@ -50,7 +50,7 @@
             </el-form-item>
             <el-form-item prop="learner_type">
               <template slot="label"><div class="label" style="font-size: 20px">学习器类型</div></template>
-              <el-select  v-model="addLearnerForm.learner_type" placeholder="请选择学习器类型" style="width: 300px">
+              <el-select  v-model="addLearnerForm.learner_type" placeholder="请选择学习器类型" style="width: 300px" @change="handleSelectLearnType">
                 <el-option v-for="(option, index) in learnerTypeOptions" :key="index" :label="option.name" :value="option.type"></el-option>
               </el-select>
             </el-form-item>
@@ -59,10 +59,9 @@
           <el-form label-position="right" label-width="150px" :model="learnParamsForm" ref="learnParamsFormRef" >
             <el-form-item prop="train_name">
               <template slot="label"><div class="label" style="font-size: 20px">训练方法</div></template>
-              <el-select  v-model="learnParamsForm.train_name" placeholder="请选择训练方法" style="width: 300px"
-              @change="handleselectTrainname">
+              <el-select  v-model="learnParamsForm.train_name" placeholder="请选择训练方法" style="width: 300px" @change="handleSelectTrainName">
                 <el-option
-                  v-for="(item,index) in algorithm_Options" :key="index"
+                  v-for="(item,index) in displayAlgorithm_Options" :key="index"
                   :label="item.introduction"
                   :value="item.algorithm_name">
                 </el-option>
@@ -120,7 +119,7 @@ const learnerTypeOptions = [
   { type: 'HumanInLoop', name: '人机协同双向学习' }
 ]
 // 训练方法
-const learnerTrainMethods = ['HML_RL', 'RFC', 'LR', 'SVM']
+const learnerTrainMethods = ['HML_RL', 'RFC', 'LR', 'SVM', 'HML_ML']
 export default {
   name: 'Learn',
   components: {
@@ -175,8 +174,18 @@ export default {
     }
   },
   created () {
+    this.addLearnerForm.learner_type = 'Machine'
+    this.learnParamsForm.train_name = 'HML_ML'
+    this.algorithm_parameters = [
+      {
+        introduction: '备注',
+        name: 'note',
+        select: 'single-select',
+        type: 'string'
+      }
+    ]
     this.getAlgorithm()
-    // this.getAlgorithmTrainMethodsIntroductions()
+    this.getAlgorithmTrainMethodsIntroductions(this.learnParamsForm.train_name)
     this.getLearnerInfo()
     this.timer = setInterval(() => {
       this.getLearnerInfo()
@@ -184,6 +193,17 @@ export default {
   },
   destroyed () {
     clearInterval(this.timer)
+  },
+  computed: {
+    displayAlgorithm_Options () {
+      console.log('displayAlgorithm_Options')
+      const ttype = this.addLearnerForm.learner_type
+      return this.algorithm_Options.filter(function (data) {
+        if (data.algorithm_type === ttype) {
+          return data
+        }
+      })
+    }
   },
   methods: {
     // 接受数据集组件传来的数据
@@ -203,20 +223,24 @@ export default {
       }
     },
     // 当选择标签选择框没有先选择方法的时候，
-    handleselect () {
+    handleSelect () {
       // console.log(12)
       if (this.learnParamsForm.train_name === '') {
         this.$message.error('请先选择方法')
         this.columnsList = []
       }
     },
+    // 当学习器类型发生改变的时候
+    handleSelectLearnType () {
+      this.learnParamsForm.train_name = this.displayAlgorithm_Options[0].algorithm_name
+      this.handleSelectTrainName()
+    },
     // 当训练方法发生改变的时候
-    handleselectTrainname () {
+    handleSelectTrainName () {
       console.log('handleselectTrainname')
       this.getAlgorithmTrainMethodsIntroductions(this.learnParamsForm.train_name)
       console.log(this.learnParamsForm)
       this.getColumns()
-      console.log(this.learnParamsForm)
       for (let i = 0; i < this.algorithm_Options.length; i++) {
         if (this.algorithm_Options[i].algorithm_name === this.learnParamsForm.train_name) {
           this.algorithm_parameters = JSON.parse(this.algorithm_Options[i].algorithm_parameters)

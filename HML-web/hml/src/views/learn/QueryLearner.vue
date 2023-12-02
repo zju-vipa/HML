@@ -21,6 +21,7 @@
               <el-button  size="mini" plain @click="trainProgress(scope.row.task_id)" style="font-size: 16px">训练进度</el-button>
               <el-button size="mini" plain @click="handleDownLoadPrediction(scope.row)" style="font-size: 16px">下载预测结果</el-button>
               <el-button size="mini" plain @click="handleDownLoadReport(scope.row)" style="font-size: 16px">下载预测报告</el-button>
+              <el-button v-if="scope.row.train_state==='2'" size="mini" plain @click="handleModelTest(scope.row.learner_id)" style="font-size: 16px">模型测试</el-button>
               <el-button  size="mini" type="danger" plain icon="el-icon-delete" @click="handleDelete(scope.row.learner_id)" style="font-size: 16px">删除</el-button>
               <!-- <el-button  size="mini" type="primary" plain  @click="taskProgress(scope.row.task_id)">操作进度</el-button>
               <el-button  size="mini" type="danger" plain  @click="handleDelete(scope.row.featureEng_id)">删除</el-button> -->
@@ -142,6 +143,7 @@ export default {
       var date2 = new Date(obj2.start_time)
       return (date1.getTime() - date2.getTime())
     },
+    // 待处理
     handleLearner (rowId) {
       console.log(rowId)
       if (rowId) {
@@ -149,6 +151,10 @@ export default {
       } else {
         this.$message.error('该学习器未进行训练')
       }
+    },
+    // 模型测试
+    handleModelTest (rowId) {
+      console.log(rowId)
     },
     // 查看分析任务进度
     trainProgress (rowId) {
