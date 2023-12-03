@@ -1,3 +1,4 @@
+import shutil
 import zipfile
 
 from celery_tasks.celery import celery_app
@@ -122,7 +123,10 @@ def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
         if need_concat:
             # 拼接保留列和生成的数据
             data = concat_data(data, col_retain, original_dataset_file_path)
-        new_dataset = add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+        if isinstance(data, pd.DataFrame):
+            new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+        else:
+            new_dataset = add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_name)
     self.update_state(state='PROCESS', meta={'progress': 0.95, 'message': '新数据集保存完毕'})
     featureEng_bean.operate_state = '2'
     featureEng_bean.new_dataset_id = new_dataset.dataset_id
@@ -178,10 +182,10 @@ def run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, f
         # 数据集为故障定位数据集（zip）
         epoch = int(featureEng_process['epoch'])
         latent_dims = int(featureEng_process['latent_dims'])
-        num_of_dis = int(featureEng_process['num_of_dis'])
+        lr = float(featureEng_process['lr'])
         progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
         self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
-        data_factor, model_factor = FeatureEngineering.algorithm_factorgnn_train(self, process_idx, processes_num, data, featureEng_id, epoch=epoch, latent_dims=latent_dims, num_of_dis=num_of_dis)
+        data_factor, model_factor = FeatureEngineering.algorithm_factorgnn_train(self, process_idx, processes_num, data, featureEng_id, epoch=epoch, latent_dims=latent_dims, lr=lr)
         current_app.logger.info('data_factor')
         current_app.logger.info(data_factor)
         save_featureEng_model(model_factor, 'factorgnn.pkl', featureEng_id)
@@ -236,7 +240,7 @@ def add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_na
     dataset.if_featureEng = True
     dataset.featureEng_id = featureEng_bean.featureEng_id
     dataset.original_dataset_id = original_dataset_bean.dataset_id
-
+    original_file_path = os.path.join(celery_app.conf["SAVE_DATASET_PATH"], original_dataset_bean.dataset_id)
     dataset.file_type = 'zip'
     file_name = dataset.dataset_id
     file_path = os.path.join(celery_app.conf["SAVE_DATASET_PATH"], file_name)
@@ -247,10 +251,16 @@ def add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_na
         if isinstance(data[i], pd.DataFrame):
             temp_data = data[i]
         else:
-            columns = ['C_{}'.format(j) for j in range(data[i].shape[1])]
+            columns = ['feature_{}'.format(j) for j in range(data[i].shape[1])]
             temp_data = pd.DataFrame(data[i], columns=columns)
         temp_data.to_csv(os.path.join(file_path, '{}.csv'.format(i)), header=True, index=False)
         zipf.write(os.path.join(file_path, '{}.csv'.format(i)), arcname=os.path.join(file_name, '{}.csv'.format(i)))
+    if os.path.exists(os.path.join(original_file_path, 'line.csv')):
+        shutil.copyfile(src=os.path.join(original_file_path, 'line.csv'), dst=os.path.join(file_path, 'line.csv'))
+    if os.path.exists(os.path.join(original_file_path, 'bus.csv')):
+        shutil.copyfile(src=os.path.join(original_file_path, 'bus.csv'), dst=os.path.join(file_path, 'bus.csv'))
+    if os.path.exists(os.path.join(original_file_path, 'label.csv')):
+        shutil.copyfile(src=os.path.join(original_file_path, 'label.csv'), dst=os.path.join(file_path, 'label.csv'))
     dataset.profile_state = '0'
     # lsy_warning: 不生成分析文件
     dataset.if_profile = False

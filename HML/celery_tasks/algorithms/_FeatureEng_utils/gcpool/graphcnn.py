@@ -11,6 +11,7 @@ from tqdm import tqdm
 from celery_tasks.algorithms._FeatureEng_utils.gcpool.utils import load_psdata
 from celery_tasks.algorithms._FeatureEng_utils.gcpool.graph_model import GraphCNN
 from flask import current_app
+import pandas as pd
 
 criterion = nn.CrossEntropyLoss()
 
@@ -94,6 +95,11 @@ class graphcnn():
         train_graphs, test_graphs, train_label, test_label = load_psdata(datapath, 'CASE300', 0)
         input = train_graphs + test_graphs
         output = self.pass_data_iteratively(model, input).cpu().numpy()
+        columns = ['gnn_{}'.format(j) for j in range(output.shape[1])]
+        output = pd.DataFrame(output, columns=columns)
+        labels = pd.read_csv(os.path.join(datapath, 'label.csv'))
+        labels.sort_values(by=labels.columns[0], key=lambda x: x.map(str))
+        output['label'] = labels['Istable'].astype(np.float32)
         model.Is_dim = False
         return output  # need pd.dataframe
 

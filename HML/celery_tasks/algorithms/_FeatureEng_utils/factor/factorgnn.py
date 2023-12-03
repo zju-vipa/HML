@@ -16,14 +16,15 @@ from celery_tasks.algorithms._FeatureEng_utils.factor.factor_model import Factor
 
 
 class factorgnn(nn.Module):
-    def __init__(self, data_path, result_path, num_of_dis=4, epoch=100, latent_dims=32, feat_drop=0, dis_weight=1):
+    def __init__(self, data_path, result_path, lr=0.01, epoch=100, latent_dims=32, feat_drop=0, dis_weight=1):
         self.data_path = data_path
-        self.num_layers = num_of_dis
+        self.num_layers = 4
         self.epoch = epoch
         self.latent_dims = latent_dims
         self.feat_drop = feat_drop
         self.dis_weight = dis_weight
         self.result_path = result_path
+        self.lr = lr
 
     def main(self):
         if not os.path.exists(self.result_path):
@@ -45,7 +46,7 @@ class factorgnn(nn.Module):
         model = FactorGNN(batched_graph_structure, self.in_feats, self.hidden_feats, self.out_feats, self.num_layers,
                           self.feat_drop).to('cpu')
         criterion = nn.MSELoss()
-        optimizer = torch.optim.AdamW(model.parameters(), 1e-2)
+        optimizer = torch.optim.AdamW(model.parameters(), self.lr)
         scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, self.epoch)
 
         for epoch_id in range(self.epoch):
@@ -105,40 +106,63 @@ class factorgnn(nn.Module):
         edges_src = torch.LongTensor(edges_src)
         edges_des = torch.LongTensor(edges_des)
         feature_list = []
-        for filename in file_list:
-            # 去除第二行及之后所有部分结尾有多余逗号的情况
-            with open(os.path.join(feature_path, filename), 'r', encoding='utf-8') as file:
-                lines = file.readlines()
-            for i in range(1, len(lines)):
-                lines[i] = lines[i].rstrip('\n')
-                lines[i] = lines[i].strip(',')
-                lines[i] = lines[i] + '\n'
-            with open(os.path.join(feature_path, filename), 'w', encoding='utf-8') as file:
-                file.writelines(lines)
-            branch = pd.read_csv(os.path.join(feature_path, filename))
-            branch = branch.rename(columns={'Unnamed: 0': 'IDName'})
-            branch = branch.drop('ID_No', axis=1)
-            branch.columns = branch.columns.str.strip()
-            df = pd.merge(branch, line, how='inner', on=['IDName'])
-            assert (df['IDName'].values == line['IDName'].values).all()
-            assert df['IDName'][272] == 'AC32'
-            edge_features = ['Qji(出J侧无功功率)', 'Ri(I侧视在电阻)', 'Qij(出I侧无功功率)', 'Zδi(I侧V/I夹角)',
-                             'Pji(出J侧有功功率)', \
-                             'δj(J侧母线电压相角)', 'δi(I侧母线电压相角)', 'Ij(J侧电流)', 'Vj(J侧母线幅值)',
-                             'Vi(I侧母线电压)', 'Xj(J侧视在电抗)', \
-                             'Zδj(J侧V/I夹角)', 'Ii(I侧电流)', 'Xi(I侧视在电抗)', 'ωi(I侧母线频率)',
-                             'Pij(出I侧有功功率)', 'ωj(J侧母线频率)', \
-                             'Rj(J侧视在电阻)']
-            nodes_feat = df[edge_features].values
-            scaler = StandardScaler()
-            scaler.fit(nodes_feat)
-            nodes_feat_scaled = scaler.transform(nodes_feat)
-            nodes_feat_scaled = torch.FloatTensor(nodes_feat_scaled)
-            g = dgl.graph((edges_src, edges_des))
-            g.ndata['feat'] = nodes_feat_scaled
-            with torch.no_grad():
-                input = g.ndata['feat']
-                h = model(input).detach()
-                feature = model.feat_list[-1].detach().numpy()
-                feature_list.append(feature)
-        return feature_list
+        with open(os.path.join(self.result_path, 'result.txt'), 'a', encoding='utf-8') as f:
+            for filename in file_list:
+                # 去除第二行及之后所有部分结尾有多余逗号的情况
+                with open(os.path.join(feature_path, filename), 'r', encoding='utf-8') as file:
+                    lines = file.readlines()
+                for i in range(1, len(lines)):
+                    lines[i] = lines[i].rstrip('\n')
+                    lines[i] = lines[i].strip(',')
+                    lines[i] = lines[i] + '\n'
+                with open(os.path.join(feature_path, filename), 'w', encoding='utf-8') as file:
+                    file.writelines(lines)
+                branch = pd.read_csv(os.path.join(feature_path, filename))
+                branch = branch.rename(columns={'Unnamed: 0': 'IDName'})
+                branch = branch.drop('ID_No', axis=1)
+                branch.columns = branch.columns.str.strip()
+                df = pd.merge(branch, line, how='inner', on=['IDName'])
+                assert (df['IDName'].values == line['IDName'].values).all()
+                assert df['IDName'][272] == 'AC32'
+                edge_features = ['Qji(出J侧无功功率)', 'Ri(I侧视在电阻)', 'Qij(出I侧无功功率)', 'Zδi(I侧V/I夹角)',
+                                 'Pji(出J侧有功功率)', \
+                                 'δj(J侧母线电压相角)', 'δi(I侧母线电压相角)', 'Ij(J侧电流)', 'Vj(J侧母线幅值)',
+                                 'Vi(I侧母线电压)', 'Xj(J侧视在电抗)', \
+                                 'Zδj(J侧V/I夹角)', 'Ii(I侧电流)', 'Xi(I侧视在电抗)', 'ωi(I侧母线频率)',
+                                 'Pij(出I侧有功功率)', 'ωj(J侧母线频率)', \
+                                 'Rj(J侧视在电阻)']
+                nodes_feat = df[edge_features].values
+                scaler = StandardScaler()
+                scaler.fit(nodes_feat)
+                nodes_feat_scaled = scaler.transform(nodes_feat)
+                nodes_feat_scaled = torch.FloatTensor(nodes_feat_scaled)
+                g = dgl.graph((edges_src, edges_des))
+                g.ndata['feat'] = nodes_feat_scaled
+                with torch.no_grad():
+                    # # 存解耦层特征
+                    # input = g.ndata['feat']
+                    # h = model(input).detach()
+                    # feature = model.feat_list[-1].detach().numpy()
+                    # feature_list.append(feature)
+
+                    # 存最后一层特征
+                    input = g.ndata['feat']
+                    h = model(input)
+                    h_temp = []
+                    for h_i in h:
+                        h_temp.append(h_i.item())
+                    feature_list.append(h_temp)
+                    h = h.reshape(-1, self.out_feats)
+                    h = h[272, :].squeeze(-1)
+                    pred = torch.round(F.sigmoid(h) * 100)
+                    pred_lo = max(2, int(pred.item()) - 5)
+                    pred_hi = min(98, int(pred.item()) + 5)
+                    f.write(f'{filename[:-4]:<12} - {pred_lo:>2}%~{pred_hi:>2}%\n')
+
+        feature_list = np.array(feature_list)
+        columns = ['factorgnn_{}'.format(j) for j in range(feature_list.shape[1])]
+        feature = pd.DataFrame(feature_list, columns=columns)
+        labels = pd.read_csv(os.path.join(data_path, 'label.csv'))
+        labels.sort_values(by=labels.columns[0], key=lambda x: x.map(str))
+        feature['label'] = labels['K%'].astype(np.float32)
+        return feature

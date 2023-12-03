@@ -41,7 +41,7 @@ def algoritm_GNN_apply(data_path, model_GNN):
 
 
 def algorithm_factorgnn_train(self, process_idx, processes_num, data_path, featureEng_id, epoch, latent_dims,
-                              num_of_dis):
+                              lr):
     progress = 0.1 + 0.8 * process_idx / processes_num + 0.05
     self.update_state(state='PROCESS',
                       meta={'progress': progress, 'message': '模块{}： 加载模型'.format(process_idx + 1)})
@@ -51,7 +51,7 @@ def algorithm_factorgnn_train(self, process_idx, processes_num, data_path, featu
             zipobj.extractall(current_app.config['SAVE_DATASET_PATH'])
     result_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'result')
     factorgnn = factor.factorgnn(data_path=decompress_dataset_path, result_path=result_path, epoch=epoch,
-                                 latent_dims=latent_dims, num_of_dis=num_of_dis)
+                                 latent_dims=latent_dims, lr=lr)
     progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.6 / processes_num
     self.update_state(state='PROCESS',
                       meta={'progress': progress, 'message': '模块{}： 训练模型'.format(process_idx + 1)})
