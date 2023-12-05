@@ -7,7 +7,7 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.decomposition import PCA
 from flask import current_app
 import os
-
+from celery_tasks.algorithms._FeatureEng_utils.FETCH import fetch as fetch_model
 
 def algorithm_GNN_train(self, process_idx, processes_num, data_path, featureEng_id, num_layers, n_components, epoch):
     progress = 0.1 + 0.8 * process_idx / processes_num + 0.05
@@ -71,6 +71,31 @@ def algorithm_factorgnn_apply(data_path, model_factor):
     data_factor = pd.DataFrame(model_factor.transform(decompress_dataset_path))
     return data_factor
 
+
+def algorithm_FETCH_train(self, process_idx, processes_num, data, featureEng_id, steps_num, worker, epoch):
+    # progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.6 / processes_num
+    # self.update_state(state='PROCESS',
+    #                   meta={'progress': progress, 'message': '模块{}： 生成数据'.format(process_idx + 1)})
+    # df = pd.read_csv(data)
+    # df_part = pd.DataFrame()
+    # sample_interval = 25
+    # columns = df.columns.tolist()
+    # df_out_col = len(df.columns)
+    # # 得到5000x?维的部分特征
+    # for i in range(0, df_out_col - 1, sample_interval):
+    #     j = i / sample_interval
+    #     df_part[f'fetch_{int(j)}'] = df[columns[i]]
+    # return df_part
+    progress = 0.1 + 0.8 * process_idx / processes_num + 0.05
+    self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 加载数据'.format(process_idx + 1)})
+    os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id), exist_ok=True)
+    result_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'grid_process.csv')
+    fetchModel = fetch_model.fetch(result_path, steps_num=steps_num, worker=worker, epoch=epoch)
+    progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.6 / processes_num
+    self.update_state(state='PROCESS',
+                      meta={'progress': progress, 'message': '模块{}： 训练模型'.format(process_idx + 1)})
+    data_fetch, model_fetch = fetchModel.main(data)
+    return data_fetch
 
 def algorithm_OneHot_train(self, process_idx, processes_num, data_path, featureEng_process):
     progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.6 / processes_num

@@ -44,8 +44,14 @@
                       <h3 style="text-align: left">已选功能模块</h3>
                     </el-col>
                     <el-col span="18" style="text-align: left">
-                      <el-checkbox-group v-model="newResultForm.checkedModules">
+                      <el-checkbox-group v-model="newResultForm.checkedModules" v-if="displayType == 0">
                         <el-checkbox v-for="(item, index) in moduleOptions" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
+                      </el-checkbox-group>
+                      <el-checkbox-group v-model="newResultForm.checkedModules" v-else-if="displayType == 1">
+                        <el-checkbox v-for="(item, index) in moduleOptions2" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
+                      </el-checkbox-group>
+                      <el-checkbox-group v-model="newResultForm.checkedModules" v-else>
+                        <el-checkbox v-for="(item, index) in moduleOptions3" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
                       </el-checkbox-group>
                     </el-col>
                   </el-row>
@@ -289,8 +295,14 @@
                       <h3 style="text-align: left">已选功能模块</h3>
                     </el-col>
                     <el-col span="18" style="text-align: left">
-                      <el-checkbox-group v-model="newResultForm.checkedModules">
+                      <el-checkbox-group v-model="newResultForm.checkedModules" v-if="displayType == 0">
                         <el-checkbox v-for="(item, index) in moduleOptions" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
+                      </el-checkbox-group>
+                      <el-checkbox-group v-model="newResultForm.checkedModules" v-else-if="displayType == 1">
+                        <el-checkbox v-for="(item, index) in moduleOptions2" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
+                      </el-checkbox-group>
+                      <el-checkbox-group v-model="newResultForm.checkedModules" v-else>
+                        <el-checkbox v-for="(item, index) in moduleOptions3" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
                       </el-checkbox-group>
                     </el-col>
                   </el-row>
@@ -400,12 +412,21 @@ const moduleOptions = [
   { value: '3', label: '特征衍生' },
   { value: '4', label: '特征选择' }
 ]
+const moduleOptions2 = [
+  { value: '1', label: '特征构建' }
+]
+const moduleOptions3 = [
+  { value: '1', label: '特征生成' }
+]
 
 export default {
   data () {
     return {
       featureEng_id: '',
+      displayType: 0,
       moduleOptions,
+      moduleOptions2,
+      moduleOptions3,
       newResultForm: {
         efficiency: 0,
         accuracy: 0,
@@ -471,6 +492,7 @@ export default {
     },
     getSelectedTaskDetails () {
       // 当前任务概况+初始效果
+      this.displayType = 0
       featureEngApi.querySelectedTaskResults(this.featureEng_id).then(response => {
         const resp = response.data.data
         console.log('当前任务概况')
@@ -481,6 +503,13 @@ export default {
         for (let i = 0; i < this.newResultForm.taskDetails.length; i = i + 1) {
           const key = this.newResultForm.taskDetails[i].type
           this.newResultForm.taskDetails[i].value = resp[key]
+          if (key === 'type') {
+            if (this.newResultForm.taskDetails[i].value === '纯人工方法') {
+              this.displayType = 1
+            } else if (this.newResultForm.taskDetails[i].value === '纯机器方法') {
+              this.displayType = 2
+            }
+          }
         }
         const modules = resp.checkedModules.split(',')
         for (let i = 0; i < modules.length; i = i + 1) {

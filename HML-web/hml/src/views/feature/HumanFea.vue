@@ -109,7 +109,7 @@
                         </el-select>
                       </el-col>
                       <el-col span="6">
-                        <el-button type="mini" :disabled="!addFeatureForm.checkedModules.includes('4')">参数配置</el-button>
+                        <el-button type="mini" :disabled="!addFeatureForm.checkedModules.includes('4')" @click="showSelectionSetting">参数配置</el-button>
                       </el-col>
                     </el-card>
                   </el-col>
@@ -135,22 +135,43 @@
                     </el-col>
                   </el-card>
                 </el-row>
+<!--                <el-row style="width: 600px">-->
+<!--                  <el-card class="card-form">-->
+<!--                    <el-col span="4">-->
+<!--                      <span>特征提取</span>-->
+<!--                    </el-col>-->
+<!--                    <el-col span="14">-->
+<!--                      <el-select v-model="processExtractForm.operate_name" placeholder="请选择方法" @change="handleselectTrainname6">-->
+<!--                        <el-option-->
+<!--                          v-for="(item,index) in algorithm_Options6" :key="index"-->
+<!--                          :label="item.introduction"-->
+<!--                          :value="item.algorithm_name">-->
+<!--                        </el-option>-->
+<!--                      </el-select>-->
+<!--                    </el-col>-->
+<!--                    <el-col span="6">-->
+<!--                      <el-button type="mini" @click="showExtractSetting">参数配置</el-button>-->
+<!--                    </el-col>-->
+<!--                  </el-card>-->
+<!--                </el-row>-->
+              </div>
+              <div v-if="addFeatureForm.featureEng_type === 'Machine'">
                 <el-row style="width: 600px">
                   <el-card class="card-form">
                     <el-col span="4">
-                      <span>特征提取</span>
+                      <span>特征生成</span>
                     </el-col>
                     <el-col span="14">
-                      <el-select v-model="processExtractForm.operate_name" placeholder="请选择方法" @change="handleselectTrainname6">
+                      <el-select v-model="processGenerationForm.operate_name" placeholder="请选择方法" @change="handleselectTrainname7">
                         <el-option
-                          v-for="(item,index) in algorithm_Options6" :key="index"
+                          v-for="(item,index) in algorithm_Options7" :key="index"
                           :label="item.introduction"
                           :value="item.algorithm_name">
                         </el-option>
                       </el-select>
                     </el-col>
                     <el-col span="6">
-                      <el-button type="mini" @click="showExtractSetting">参数配置</el-button>
+                      <el-button type="mini" @click="showGenerationSetting">参数配置</el-button>
                     </el-col>
                   </el-card>
                 </el-row>
@@ -376,6 +397,75 @@
         <el-button type="primary" @click="submitExtractParams">确 定</el-button>
       </div>
     </el-dialog>
+    <!--机器学习--参数配置，弹出的窗口-->
+    <el-dialog
+      title="特征提取参数配置"
+      :visible.sync="featureGenerationDialog"
+      width="30%">
+      <el-form label-width="150px" label-position="left" :model="processGenerationForm">
+        <el-form-item class="label" v-for="(params, index) in algorithm_parameters7" :label="params.introduction" :key="index">
+          <el-input style="width:100%" v-model="params.value"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="featureGenerationDialog = false">取 消</el-button>
+        <el-button type="primary" @click="submitGenerationParams">确 定</el-button>
+      </div>
+    </el-dialog>
+    <!--特征衍生参数配置-->
+    <el-dialog
+      title="特征衍生参数配置"
+      :visible.sync="featureDeriveDialog"
+      width="30%">
+<!--      <el-form label-width="150px" label-position="left" :model="processDeriveForm">-->
+<!--        <el-form-item class="label" v-for="(params, index) in algorithm_parameters3" :label="params.introduction" :key="index">-->
+<!--          <el-select v-if="params.name==='col_retain'" style="width:100%"  :multiple="labelMultible6"-->
+<!--                     v-model="params.value" placeholder="请选择保留列">-->
+<!--            <el-option-->
+<!--              v-for="(item,index) in columnsList" :key="index"-->
+<!--              :label="item"-->
+<!--              :value="item">-->
+<!--            </el-option>-->
+<!--          </el-select>-->
+<!--          <el-input v-else style="width:100%" v-model="params.value"></el-input>-->
+<!--        </el-form-item>-->
+<!--      </el-form>-->
+<!--      <div slot="footer" class="dialog-footer">-->
+<!--        <el-button @click="featureExtractDialog = false">取 消</el-button>-->
+<!--        <el-button type="primary" @click="submitExtractParams">确 定</el-button>-->
+<!--      </div>-->
+      <span>暂无内容</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="featureDeriveDialog = false">确定</el-button>
+      </div>
+    </el-dialog>
+    <!--特征选择参数配置-->
+    <el-dialog
+      title="特征选择参数配置"
+      :visible.sync="featureSelectionDialog"
+      width="30%">
+      <!--      <el-form label-width="150px" label-position="left" :model="processDeriveForm">-->
+      <!--        <el-form-item class="label" v-for="(params, index) in algorithm_parameters3" :label="params.introduction" :key="index">-->
+      <!--          <el-select v-if="params.name==='col_retain'" style="width:100%"  :multiple="labelMultible6"-->
+      <!--                     v-model="params.value" placeholder="请选择保留列">-->
+      <!--            <el-option-->
+      <!--              v-for="(item,index) in columnsList" :key="index"-->
+      <!--              :label="item"-->
+      <!--              :value="item">-->
+      <!--            </el-option>-->
+      <!--          </el-select>-->
+      <!--          <el-input v-else style="width:100%" v-model="params.value"></el-input>-->
+      <!--        </el-form-item>-->
+      <!--      </el-form>-->
+      <!--      <div slot="footer" class="dialog-footer">-->
+      <!--        <el-button @click="featureExtractDialog = false">取 消</el-button>-->
+      <!--        <el-button type="primary" @click="submitExtractParams">确 定</el-button>-->
+      <!--      </div>-->
+      <span>暂无内容</span>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="featureSelectionDialog = false">确定</el-button>
+      </div>
+    </el-dialog>
     <!--查看特征工程进度-->
     <el-dialog title="特征工程进度" :visible.sync="featureEngDialogVisible">
       <el-progress
@@ -495,17 +585,19 @@ export default {
       algorithm_Options2: [{ algorithm_name: 'GNN', introduction: '基于GNN的特征提取' }],
       algorithm_Options3: [{ algorithm_name: 'HumanMachineCooperation', introduction: '人机协同特征生成' }],
       algorithm_Options4: [{ algorithm_name: 'ModelBased', introduction: '基于模型的特征选择' }],
-      algorithm_Options5: [{ algorithm_name: 'OperatorBased-Manual', introduction: '基于算子的特征构建' }],
+      algorithm_Options5: [{ algorithm_name: 'OperatorBased-Manual', introduction: '基于专家经验的特征构建' }],
       algorithm_Options6: [{ algorithm_name: 'PCA', introduction: 'PCA主成分分析' }],
+      algorithm_Options7: [{ algorithm_name: 'FETCH', introduction: 'FETCH自动化特征工程' }],
       // 算法参数
       // algorithm_parameters2: [{ introduction: '保留列', name: 'col_retain', value: '' }, { introduction: '维度', name: 'dimension', value: '' }, { introduction: '迭代数', name: 'iteration', value: '' }],
       // 算法参数
-      algorithm_parameters1: [{ introduction: '解耦层维度', name: 'latent_dims', select: 'single-select', type: 'int', value: 32 }, { introduction: '迭代数', name: 'epoch', select: 'single-select', type: 'int', value: 100 }, { introduction: '解耦图个数', name: 'num_of_dis', select: 'single-select', type: 'int', value: 4 }],
+      algorithm_parameters1: [{ introduction: '解耦层维度', name: 'latent_dims', select: 'single-select', type: 'int', value: 32 }, { introduction: '迭代数', name: 'epoch', select: 'single-select', type: 'int', value: 100 }, { introduction: '学习率', name: 'lr', select: 'single-select', type: 'float', value: 0.01 }],
       algorithm_parameters2: [{ introduction: '维度', name: 'n_components', select: 'single-select', type: 'int', value: 10 }, { introduction: '迭代数', name: 'epoch', select: 'single-select', type: 'int', value: 100 }, { introduction: '模型层数', name: 'num_layers', select: 'single-select', type: 'int', value: 5 }],
       algorithm_parameters3: [],
       algorithm_parameters4: [],
       algorithm_parameters5: [{ introduction: '保留列', name: 'col_retain', select: 'multi-select', type: 'column', value: '' }],
       algorithm_parameters6: [{ introduction: '维度', name: 'n_components', select: 'single-select', type: 'int', value: 5 }],
+      algorithm_parameters7: [{ introduction: '步数', name: 'steps_num', select: 'single-select', type: 'int', value: 3 }, { introduction: '迭代数', name: 'epoch', select: 'single-select', type: 'int', value: 100 }, { introduction: 'worker个数', name: 'worker', select: 'single-select', type: 'int', value: 12 }],
       labelMultible1: false,
       labelMultible2: false,
       labelMultible3: false,
@@ -530,12 +622,16 @@ export default {
       processSelectionForm: {
         operate_name: 'ModelBased'
       },
+      processGenerationForm: {
+        operate_name: 'FETCH'
+      },
       featureDecouplingDialog: false,
       featureLearningDialog: false,
       featureDeriveDialog: false,
       featureSelectionDialog: false,
       featureConstructDialog: false,
       featureExtractDialog: false,
+      featureGenerationDialog: false,
       existedFeatureEng: false,
       HumanFeaData: [],
       totalPage_featureEngList: 5,
@@ -551,11 +647,23 @@ export default {
   },
   methods: {
     showDeriveSetting () {
+      this.featureDeriveDialog = true
       // this.featureEngDialogVisible = true
       // this.percentageListen = setInterval(() => {
       //   this.percentage = this.percentage + 1
       //   console.log(this.percentage)
       // }, 1000 * 1)
+    },
+    showGenerationSetting () {
+      this.featureGenerationDialog = true
+      // this.featureEngDialogVisible = true
+      // this.percentageListen = setInterval(() => {
+      //   this.percentage = this.percentage + 1
+      //   console.log(this.percentage)
+      // }, 1000 * 1)
+    },
+    showSelectionSetting () {
+      this.featureSelectionDialog = true
     },
     clear () {
       this.featureEngDialogVisible = false
@@ -774,7 +882,7 @@ export default {
         }
       } else if (this.addFeatureForm.featureEng_type === 'Manual') {
         this.addFeatureForm.featureEng_processes = []
-        this.addFeatureForm.checkedModules = ['1', '2']
+        this.addFeatureForm.checkedModules = ['1']
         var process5 = {}
         this.processConstructForm.process_name = 'FeatureEng_construct'
         process5.process_name = 'FeatureEng_construct'
@@ -792,6 +900,25 @@ export default {
         }
         console.log(this.algorithm_parameters6)
         this.addFeatureForm.featureEng_processes.push(process6)
+        console.log(this.addFeatureForm)
+        humanFeaApi.submitFeatureEngForm(this.addFeatureForm).then(response => {
+          console.log(response.data.data)
+          this.featureEngDialogVisible = true
+          this.percentageListen = setInterval(() => {
+            this.getTaskStatues(response.data.data.task_id)
+          }, 1000 * 0.2)
+        })
+      } else {
+        this.addFeatureForm.featureEng_processes = []
+        this.addFeatureForm.checkedModules = ['1']
+        var process7 = {}
+        this.processConstructForm.process_name = 'Feature_Generation'
+        process7.process_name = 'Feature_Generation'
+        process7.operate_name = this.processGenerationForm.operate_name
+        for (let i = 0; i < this.algorithm_parameters7.length; i = i + 1) {
+          process7[this.algorithm_parameters7[i].name] = this.algorithm_parameters7[i].value
+        }
+        this.addFeatureForm.featureEng_processes.push(process7)
         console.log(this.addFeatureForm)
         humanFeaApi.submitFeatureEngForm(this.addFeatureForm).then(response => {
           console.log(response.data.data)
@@ -910,19 +1037,21 @@ export default {
             this.$message.success('获取数据集成功')
           }
           this.algorithm_originalOptions1 = resp.data
-          console.log('algorithm_originalOptions1', this.algorithm_originalOptions1)
-          this.algorithm_Options1 = this.algorithm_originalOptions1.filter((p) => {
-            return p.algorithm_category === 'Feature_Decoupling'
-          })
-          this.algorithm_Options2 = this.algorithm_originalOptions1.filter((p) => {
-            return p.algorithm_category === 'Feature_Learning'
-          })
-          this.algorithm_Options3 = this.algorithm_originalOptions1.filter((p) => {
-            return p.algorithm_category === 'Feature_Derive'
-          })
-          this.algorithm_Options4 = this.algorithm_originalOptions1.filter((p) => {
-            return p.algorithm_category === 'Feature_Selection'
-          })
+          if (this.algorithm_originalOptions1.length > 0) {
+            console.log('algorithm_originalOptions1', this.algorithm_originalOptions1)
+            this.algorithm_Options1 = this.algorithm_originalOptions1.filter((p) => {
+              return p.algorithm_category === 'Feature_Decoupling'
+            })
+            this.algorithm_Options2 = this.algorithm_originalOptions1.filter((p) => {
+              return p.algorithm_category === 'Feature_Learning'
+            })
+            this.algorithm_Options3 = this.algorithm_originalOptions1.filter((p) => {
+              return p.algorithm_category === 'Feature_Derive'
+            })
+            this.algorithm_Options4 = this.algorithm_originalOptions1.filter((p) => {
+              return p.algorithm_category === 'Feature_Selection'
+            })
+          }
         })
       } else if (this.addFeatureForm.featureEng_type === 'Manual') {
         this.algorithm_originalOptions1 = []
@@ -932,13 +1061,32 @@ export default {
             this.$message.success('获取数据集成功')
           }
           this.algorithm_originalOptions1 = resp.data
-          this.algorithm_Options5 = this.algorithm_originalOptions1.filter((p) => {
-            return p.algorithm_category === 'FeatureEng_construct'
-          })
-          this.algorithm_Options6 = this.algorithm_originalOptions1.filter((p) => {
-            return p.algorithm_category === 'FeatureEng_extract'
-          })
-          this.getColumns()
+          console.log('testtest')
+          console.log(this.algorithm_originalOptions1)
+          if (this.algorithm_originalOptions1.length > 0) {
+            this.algorithm_Options5 = this.algorithm_originalOptions1.filter((p) => {
+              return p.algorithm_category === 'FeatureEng_construct'
+            })
+            this.algorithm_Options6 = this.algorithm_originalOptions1.filter((p) => {
+              return p.algorithm_category === 'FeatureEng_extract'
+            })
+
+            this.getColumns()
+          }
+        })
+      } else if (this.addFeatureForm.featureEng_type === 'Machine') {
+        this.algorithm_originalOptions1 = []
+        humanFeaApi.queryAlgorithmByType(this.addFeatureForm.featureEng_type).then(response => {
+          const resp = response.data
+          if (resp.meta.code === 200) {
+            this.$message.success('获取数据集成功')
+          }
+          this.algorithm_originalOptions1 = resp.data
+          if (this.algorithm_originalOptions1.length > 0) {
+            this.algorithm_Options7 = this.algorithm_originalOptions1.filter((p) => {
+              return p.algorithm_category === 'Feature_Generation'
+            })
+          }
         })
       }
     },
@@ -1071,6 +1219,24 @@ export default {
         }
       })
     },
+    handleselectTrainname7 () {
+      this.algorithm_parameters7 = []
+      humanFeaApi.queryAlgorithmParas(this.processGenerationForm.operate_name).then(response => {
+        const resp = response.data
+        console.log(resp.data)
+        if (typeof JSON.parse(resp.data.algorithm_parameters) === 'string') {
+          const algorithmParametersList = JSON.parse(JSON.parse(resp.data.algorithm_parameters))
+          for (let i = 0; i < algorithmParametersList.length; i = i + 1) {
+            this.algorithm_parameters7.push(algorithmParametersList[i])
+          }
+        } else {
+          const algorithmParametersList = JSON.parse(resp.data.algorithm_parameters)
+          for (let i = 0; i < algorithmParametersList.length; i = i + 1) {
+            this.algorithm_parameters7.push(algorithmParametersList[i])
+          }
+        }
+      })
+    },
     // 删除行
     deleteRow (index, rows) {
       rows.splice(index, 1)
@@ -1152,6 +1318,11 @@ export default {
     submitExtractParams () {
       console.log(this.processExtractForm)
       this.featureExtractDialog = false
+    },
+    // 机器学习-特征生成参数配置
+    submitGenerationParams () {
+      console.log(this.processExtractForm)
+      this.featureGenerationDialog = false
     },
     // 导入特征工程
     importFeatureEng (row) {

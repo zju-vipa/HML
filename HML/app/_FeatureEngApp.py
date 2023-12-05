@@ -290,8 +290,6 @@ def addFeatureEngTask():
             featureEng_processes = request.json.get('featureEng_processes')
             original_dataset_id = request.json.get('original_dataset_id')
             new_dataset_name = request.json.get('new_dataset_name')
-            current_app.logger.info('featureEng_processes')
-            current_app.logger.info(featureEng_processes)
         except Exception:
             return get_error(RET.PARAMERR, 'Error: no request')
 
@@ -315,16 +313,12 @@ def addFeatureEngTask():
             return get_error(RET.PARAMERR, 'Error: request lacks original_dataset_id')
         if not new_dataset_name:
             return get_error(RET.PARAMERR, 'Error: request lacks new_dataset_name')
-        current_app.logger.info('load original dataset')
         original_dataset = datasetService.queryDatasetById(original_dataset_id)
-        current_app.logger.info(original_dataset)
         if not original_dataset:
             return get_error(RET.PARAMERR, 'Error: original_dataset_id not exists')
 
 
         original_dataset_file_path = datasetService.getDatasetFilePath(original_dataset)
-
-        current_app.logger.info(original_dataset_file_path)
 
         if not original_dataset_file_path:
             return get_error(RET.FILEERR, 'Error: original dataset file not exists')
@@ -337,8 +331,6 @@ def addFeatureEngTask():
         for i in range(len(featureEng_modules)):
             moduleString = moduleString + str(featureEng_modules[i]) + ','
         moduleString = moduleString[:-1]
-        current_app.logger.info('moduleString')
-        current_app.logger.info(moduleString)
         featureEng_bean.featureEng_modules = moduleString
         featureEng_bean.featureEng_processes = json.dumps(featureEng_processes, ensure_ascii=False)
         featureEng_bean.original_dataset_id = original_dataset_id

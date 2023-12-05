@@ -12,7 +12,6 @@ import os
 import shutil
 from flask import current_app
 
-
 class FeatureEngService:
 
     def __init__(self):
@@ -117,8 +116,6 @@ class FeatureEngService:
             feature_decoupling, feature_learning, feature_derive, feature_selection = "无", "无", "无", "无"
             if featureEng_processes:
                 for j in range(len(featureEng_processes)):
-                    current_app.logger.info("testtesttest")
-                    current_app.logger.info(featureEng_processes[j])
                     if featureEng_processes[j]['process_name'] == 'Feature_Decoupling':
                         feature_decoupling = featureEng_processes[j]['operate_name']
                         if feature_decoupling == 'FactorGNN':
@@ -233,9 +230,7 @@ class FeatureEngService:
         with open(record_path, 'r') as file:
             reader = csv.reader(file)
             header = next(reader)
-            current_app.logger.info(header)
             for row in reader:
-                current_app.logger.info(row)
                 record_item = {}
                 accuracy = row[0]
                 efficiency = row[1]
@@ -259,14 +254,14 @@ class FeatureEngService:
                     reader = csv.reader(file)
                     header = next(reader)
                     data = [row for row in reader]
-                    sorted_data = sorted(data, key=lambda x: x[1], reverse=True)
+                    # sorted_data = sorted(data, key=lambda x: x[1], reverse=True)
+                    sorted_data = data
                     score_dict = {}
                     key = []
                     value = []
                     if len(sorted_data) > 100:
                         sorted_data = sorted_data[0:100]
                     for row in sorted_data:
-                        current_app.logger.info(row)
                         key.append(row[0])
                         value.append(row[1])
                     file.close()
@@ -285,9 +280,7 @@ class FeatureEngService:
             with open(record_path, 'r') as file:
                 reader = csv.reader(file)
                 header = next(reader)
-                current_app.logger.info(header)
                 for row in reader:
-                    current_app.logger.info(row)
                     record_item = {}
                     accuracy = row[0]
                     efficiency = row[1]

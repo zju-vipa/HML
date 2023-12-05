@@ -70,10 +70,6 @@ class factorgnn(nn.Module):
                 optimizer.step()
                 loss_array.append(loss.detach().item())
             scheduler.step()
-            feature_list = model.get_hidden_feature()
-            # print("feature_list", len(feature_list))
-            # for i in range(len(feature_list)):
-            #     print("feature_{}".format(i), feature_list[i].shape)
             print(f'avg mse loss: {np.array(loss_array).mean()}')
         torch.save(model.state_dict(), os.path.join(self.result_path, 'factor.pth'))
         model.load_state_dict(torch.load(os.path.join(self.result_path, 'factor.pth')))
@@ -106,6 +102,7 @@ class factorgnn(nn.Module):
         edges_src = torch.LongTensor(edges_src)
         edges_des = torch.LongTensor(edges_des)
         feature_list = []
+        pred_list = []
         with open(os.path.join(self.result_path, 'result.txt'), 'a', encoding='utf-8') as f:
             for filename in file_list:
                 # 去除第二行及之后所有部分结尾有多余逗号的情况
@@ -165,4 +162,11 @@ class factorgnn(nn.Module):
         labels = pd.read_csv(os.path.join(data_path, 'label.csv'))
         labels.sort_values(by=labels.columns[0], key=lambda x: x.map(str))
         feature['label'] = labels['K%'].astype(np.float32)
+
+        # 总的预测准确率
+        result_list = (labels['K%'] - pd.Series(pred_list)).tolist()
+        count = np.sum(np.abs(result_list) <= 5)
+        length = len(result_list)
+        accuracy = count / length
+        print('预测准确率为：', accuracy)
         return feature

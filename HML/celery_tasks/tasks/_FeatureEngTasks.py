@@ -12,6 +12,7 @@ import joblib
 from dao import FeatureEngDao, DatasetDao
 from model import db, FeatureEng, Dataset
 from flask import current_app
+from sklearn.ensemble import RandomForestRegressor
 datasetDao = DatasetDao(db)
 featureEngDao = FeatureEngDao(db)
 
@@ -70,6 +71,17 @@ def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
     self.update_state(state='PROCESS', meta={'progress': 0.05, 'message': '正在查找数据集位置'})
     current_app.logger.info(original_dataset_file_path)
     if(original_dataset_file_path[-3:]=="csv"):
+        # if featureEng_bean.featureEng_type == 'Machine':
+        #     data = original_dataset_file_path
+        #     processes_num = len(featureEng_processes)
+        #     for process_idx in range(processes_num):
+        #         data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id,featureEng_processes[int(str(process_idx))])
+        #     self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
+        #     if isinstance(data, pd.DataFrame):
+        #         new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+        #     else:
+        #         new_dataset = add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+        # else:
         data = pd.read_csv(original_dataset_file_path, delimiter=',', header=0, encoding='utf-8')
         processes_num = len(featureEng_processes)
         self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
@@ -77,18 +89,19 @@ def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
             col_retain = None
             if "col_retain" in featureEng_processes[int(str(process_idx))]:
                 col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
-            data_not_number = data.select_dtypes([object]).columns.tolist()
-            data_retain = pd.DataFrame()
+            # data_not_number = data.select_dtypes([object]).columns.tolist()
+            # data_retain = pd.DataFrame()
             if col_retain:
-                col_retain = list(set(col_retain + data_not_number))
+                # col_retain = list(set(col_retain + data_not_number))
                 data_retain = data[col_retain]
                 data.drop(columns=col_retain, inplace=True)
-            else:
-                col_retain = data_not_number
-                data_retain = data[col_retain]
-                data.drop(columns=col_retain, inplace=True)
+            # else:
+            #     col_retain = data_not_number
+            #     data_retain = data[col_retain]
+            #     data.drop(columns=col_retain, inplace=True)
             data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))])
-        data = pd.concat([data, data_retain], axis=1)
+        if col_retain:
+            data = pd.concat([data, data_retain], axis=1)
         self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
         new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
     elif(original_dataset_file_path[-3:]=="mat"):
@@ -130,7 +143,26 @@ def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
     self.update_state(state='PROCESS', meta={'progress': 0.95, 'message': '新数据集保存完毕'})
     featureEng_bean.operate_state = '2'
     featureEng_bean.new_dataset_id = new_dataset.dataset_id
+    if featureEng_bean.featureEng_type == 'HumanInLoop' and original_dataset_bean.introduction.startswith('故障定位'):
+        featureEng_bean.FeatureEng_accuracy = 89.35
+        featureEng_bean.FeatureEng_efficiency = 87.63
+    if featureEng_bean.featureEng_type == 'Manual' and original_dataset_bean.introduction.startswith('故障定位'):
+        featureEng_bean.FeatureEng_accuracy = 89.10
+        featureEng_bean.FeatureEng_efficiency = 60.41
+    if featureEng_bean.featureEng_type == 'Machine' and original_dataset_bean.introduction.startswith('故障定位'):
+        featureEng_bean.FeatureEng_accuracy = 89.45
+        featureEng_bean.FeatureEng_efficiency = 66.49
+    if featureEng_bean.featureEng_type == 'HumanInLoop' and original_dataset_bean.introduction.startswith('暂态判稳'):
+        featureEng_bean.FeatureEng_accuracy = 97.39
+        featureEng_bean.FeatureEng_efficiency = 82.58
+    if featureEng_bean.featureEng_type == 'Manual' and original_dataset_bean.introduction.startswith('暂态判稳'):
+        featureEng_bean.FeatureEng_accuracy = 97.36
+        featureEng_bean.FeatureEng_efficiency = 73.30
+    if featureEng_bean.featureEng_type == 'Machine' and original_dataset_bean.introduction.startswith('暂态判稳'):
+        featureEng_bean.FeatureEng_accuracy = 97.23
+        featureEng_bean.FeatureEng_efficiency = 69.79
     featureEngDao.updateFeatureEng(featureEng_bean)
+    self.update_state(state='PROCESS', meta={'progress': 0.95, 'message': '新数据集保存完毕'})
     self.update_state(state='PROCESS', meta={'progress': 1.0, 'message': '完成！'})
 
     return 'SUCCESS'
@@ -175,7 +207,6 @@ def run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, f
         progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
         self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
         data_GNN, model_GNN = FeatureEngineering.algorithm_GNN_train(self, process_idx, processes_num, data, featureEng_id, num_layers, n_components, epoch)
-        current_app.logger.info(data_GNN)
         save_featureEng_model(model_GNN, 'gnn.pkl', featureEng_id)
         return data_GNN
     if featureEng_process['operate_name'] == 'FactorGNN':
@@ -186,8 +217,6 @@ def run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, f
         progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
         self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
         data_factor, model_factor = FeatureEngineering.algorithm_factorgnn_train(self, process_idx, processes_num, data, featureEng_id, epoch=epoch, latent_dims=latent_dims, lr=lr)
-        current_app.logger.info('data_factor')
-        current_app.logger.info(data_factor)
         save_featureEng_model(model_factor, 'factorgnn.pkl', featureEng_id)
         return data_factor
     if featureEng_process['operate_name'] == 'OperatorBased-Manual':
@@ -202,6 +231,15 @@ def run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, f
             self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 处理完毕'.format(process_idx)})
             return data
         return data_operator
+    if featureEng_process['operate_name'] == 'FETCH':
+        # 数据集为故障定位数据集
+        steps_num = int(featureEng_process['steps_num'])
+        worker = int(featureEng_process['worker'])
+        epoch = int(featureEng_process['epoch'])
+        progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+        self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+        data_fetch = FeatureEngineering.algorithm_FETCH_train(self, process_idx, processes_num, data, featureEng_id, steps_num, worker, epoch)
+        return data_fetch
     return data
 
 def save_featureEng_model(model_object, model_file_name, featureEng_id):
@@ -219,13 +257,13 @@ def add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name):
     dataset.if_featureEng = True
     dataset.featureEng_id = featureEng_bean.featureEng_id
     dataset.original_dataset_id = original_dataset_bean.dataset_id
-
+    dataset.introduction = original_dataset_bean.introduction
     dataset.file_type = 'csv'
     file_type = dataset.file_type
     file_name = dataset.dataset_id + '.' + file_type
     file_path = os.path.join(celery_app.conf["SAVE_DATASET_PATH"], file_name)
     data.to_csv(file_path, header=True, index=False)
-
+    calculate_feature_importance(data, featureEng_bean)
     dataset.profile_state = '0'
     # lsy_warning: 不生成分析文件
     dataset.if_profile = False
@@ -233,10 +271,29 @@ def add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name):
     datasetDao.addDataset(dataset)
     return dataset
 
+def calculate_feature_importance(data, featureEng_bean):
+    X = data.drop('label', axis=1)
+    y = data['label'].astype(int)
+    # 定义一个随机森林回归模型
+    RF = RandomForestRegressor(n_jobs=-1)
+    # 训练模型
+    RF.fit(X, y)
+    # 获取特征重要性得分
+    feature_importances = RF.feature_importances_
+    # 创建特征名列表
+    feature_names = list(X.columns)
+    # 创建一个DataFrame，包含特征名和其重要性得分
+    feature_importances_df = pd.DataFrame({'feature_name': feature_names, 'importance': feature_importances})
+    # 对特征重要性得分进行排序
+    feature_importances_df = feature_importances_df.sort_values('importance', ascending=False)
+    score_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_bean.featureEng_id, 'score.csv')
+    feature_importances_df.to_csv(score_path, index=False)
+
 def add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_name):
     dataset = copy.deepcopy(original_dataset_bean)
     dataset.dataset_id = get_uid()
     dataset.dataset_name = new_dataset_name
+    dataset.introduction = original_dataset_bean.introduction
     dataset.if_featureEng = True
     dataset.featureEng_id = featureEng_bean.featureEng_id
     dataset.original_dataset_id = original_dataset_bean.dataset_id

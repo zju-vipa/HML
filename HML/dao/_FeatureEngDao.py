@@ -53,7 +53,11 @@ class FeatureEngDao(BaseDao):
         self.db.session.commit()
 
     def queryLatestFeatureEngByUserId(self, user_id):
-        featureEng = FeatureEng.query.filter_by(user_id=user_id, operate_state='2').order_by('start_time')[-1]
+        featureEngs = FeatureEng.query.filter_by(user_id=user_id, operate_state='2').all()
+        if len(featureEngs) != 0:
+            featureEng = FeatureEng.query.filter_by(user_id=user_id, operate_state='2').order_by('start_time')[-1]
+        else:
+            featureEng = None
         return featureEng
 
     def queryFinishedFeatureEngListByUserId(self, user_id):

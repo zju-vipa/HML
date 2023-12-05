@@ -86,8 +86,11 @@
                             <el-checkbox-group v-model="newResultForm.checkedModules" v-if="displayType == 0">
                               <el-checkbox v-for="(item, index) in moduleOptions" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
                             </el-checkbox-group>
-                            <el-checkbox-group v-model="newResultForm.checkedModules" v-else>
+                            <el-checkbox-group v-model="newResultForm.checkedModules" v-else-if="displayType == 1">
                               <el-checkbox v-for="(item, index) in moduleOptions2" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
+                            </el-checkbox-group>
+                            <el-checkbox-group v-model="newResultForm.checkedModules" v-else>
+                              <el-checkbox v-for="(item, index) in moduleOptions3" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
                             </el-checkbox-group>
                           </el-col>
                         </el-row>
@@ -289,7 +292,7 @@
                   </div>
                 </el-row>
                 <div style="margin: 15px; text-align: center;">
-                  <div id="featureCharts" style="width: 400px; height: 500px; margin: 0 auto"></div>
+                  <div id="featureCharts" style="width: 550px; height: 600px; margin: 0 auto;"></div>
                 </div>
               </el-card>
             </el-col>
@@ -336,8 +339,11 @@
                             <el-checkbox-group v-model="newResultForm.checkedModules" v-if="displayType == 0">
                               <el-checkbox v-for="(item, index) in moduleOptions" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
                             </el-checkbox-group>
-                            <el-checkbox-group v-model="newResultForm.checkedModules" v-else>
+                            <el-checkbox-group v-model="newResultForm.checkedModules" v-else-if="displayType == 1">
                               <el-checkbox v-for="(item, index) in moduleOptions2" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
+                            </el-checkbox-group>
+                            <el-checkbox-group v-model="newResultForm.checkedModules" v-else>
+                              <el-checkbox v-for="(item, index) in moduleOptions3" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
                             </el-checkbox-group>
                           </el-col>
                         </el-row>
@@ -428,7 +434,7 @@
                       <el-row><span style="color: darkgray">暂无记录</span></el-row>
                     </div>
                   </el-row>
-                  <div id="featureCharts" style="width: 400px; height: 500px; margin: 0 auto"></div>
+                  <div id="featureCharts" style="width: 550px; height: 600px; margin: 0 auto;"></div>
                 </el-card>
               </el-col>
             </el-row>
@@ -551,8 +557,10 @@ const moduleOptions = [
   { value: '4', label: '特征选择' }
 ]
 const moduleOptions2 = [
-  { value: '1', label: '特征构建' },
-  { value: '2', label: '特征提取' }
+  { value: '1', label: '特征构建' }
+]
+const moduleOptions3 = [
+  { value: '1', label: '特征生成' }
 ]
 export default {
   name: 'Feature',
@@ -574,6 +582,7 @@ export default {
       checkedAll: false,
       moduleOptions,
       moduleOptions2,
+      moduleOptions3,
       displayType: 0,
       newResultForm: {
         efficiency: 0,
@@ -694,25 +703,30 @@ export default {
         console.log(resp)
         this.newResultForm.checkedModules = []
         this.newResultForm.isNewResult = resp.isNewResult
-        this.newResultForm.efficiency = resp.original_efficiency
-        this.newResultForm.accuracy = resp.original_accuracy
-        for (let i = 0; i < this.newResultForm.taskDetails.length; i = i + 1) {
-          const key = this.newResultForm.taskDetails[i].type
-          this.newResultForm.taskDetails[i].value = resp[key]
-          if (key === 'type') {
-            if (this.newResultForm.taskDetails[i].value === '纯人工方法') {
-              this.displayType = 1
+        console.log(resp.isNewResult === true)
+        if (resp.isNewResult === true) {
+          this.newResultForm.efficiency = resp.original_efficiency
+          this.newResultForm.accuracy = resp.original_accuracy
+          for (let i = 0; i < this.newResultForm.taskDetails.length; i = i + 1) {
+            const key = this.newResultForm.taskDetails[i].type
+            this.newResultForm.taskDetails[i].value = resp[key]
+            if (key === 'type') {
+              if (this.newResultForm.taskDetails[i].value === '纯人工方法') {
+                this.displayType = 1
+              } else if (this.newResultForm.taskDetails[i].value === '纯机器方法') {
+                this.displayType = 2
+              }
             }
           }
+          const modules = resp.checkedModules.split(',')
+          for (let i = 0; i < modules.length; i = i + 1) {
+            this.newResultForm.checkedModules.push(modules[i])
+          }
+          if (this.newResultForm.checkedModules.length === 4) {
+            this.checkedAll = true
+          }
+          this.getLatestFeatures()
         }
-        const modules = resp.checkedModules.split(',')
-        for (let i = 0; i < modules.length; i = i + 1) {
-          this.newResultForm.checkedModules.push(modules[i])
-        }
-        if (this.newResultForm.checkedModules.length === 4) {
-          this.checkedAll = true
-        }
-        this.getLatestFeatures()
       })
     },
     getLatestFeatures () {
@@ -865,46 +879,6 @@ export default {
               this.taskFeatureList.push({ name: 'feature' + i, dataset: '暂稳数据集', task: '---', featureDecoupling: '---', featureLearning: '---', featureDerivation: '---', featureSelection: '---' })
             }
             this.countTotal_taskFeature += 10
-          }
-        }
-      })
-    },
-    lazyLoading_featureLibrary () {
-      // const dom = document.querySelector('.el-table__body-wrapper')
-      const dom = this.$refs.feature_library_table.bodyWrapper
-      dom.addEventListener('scroll', (v) => {
-        const scrollDistance = dom.scrollHeight - dom.scrollTop - dom.clientHeight
-        if (scrollDistance <= 1) {
-          if (this.pagination_featureLibrary.page >= this.totalPage_featureLibrary) {
-            this.$message.warning('特征库数据已全部加载')
-          }
-          if (this.pagination_featureLibrary.page < this.totalPage_featureLibrary) {
-            this.pagination_featureLibrary.page = this.pagination_featureLibrary.page + 1
-            var cIndex = this.countTotal_featureLibrary + 10
-            for (let i = (this.countTotal_featureLibrary + 1); i <= cIndex; i = i + 1) {
-              this.featureLibraryList.push({ name: 'feature' + i, dataset: '暂稳数据集', task: '---', featureDecoupling: '---', featureLearning: '---', featureDerivation: '---', featureSelection: '---' })
-            }
-            this.countTotal_featureLibrary += 10
-          }
-        }
-      })
-    },
-    lazyLoading_featureEngList () {
-      // const dom = document.querySelector('.el-table__body-wrapper')
-      const dom = this.$refs.featureEng_list_table.bodyWrapper
-      dom.addEventListener('scroll', (v) => {
-        const scrollDistance = dom.scrollHeight - dom.scrollTop - dom.clientHeight
-        if (scrollDistance <= 1) {
-          if (this.pagination_featureEngList.page >= this.totalPage_featureEngList) {
-            this.$message.warning('已有特征工程数据已全部加载')
-          }
-          if (this.pagination_featureEngList.page < this.totalPage_featureEngList) {
-            this.pagination_featureEngList.page = this.pagination_featureEngList.page + 1
-            var cIndex = this.countTotal_featureEngList + 10
-            for (let i = (this.countTotal_featureEngList + 1); i <= cIndex; i = i + 1) {
-              this.HumanFeaData.push({ featureEng_name: '特征工程' + i, featureEng_type: '暂稳数据集', featureEng_accuracy: '10', featureEng_efficiency: '20', operate_state: '交互中' })
-            }
-            this.countTotal_featureEngList += 10
           }
         }
       })
