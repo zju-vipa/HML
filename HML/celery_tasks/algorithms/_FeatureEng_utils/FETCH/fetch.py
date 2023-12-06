@@ -8,7 +8,6 @@ from celery_tasks.algorithms._FeatureEng_utils.FETCH.autofe import AutoFE
 
 warnings.filterwarnings("ignore")
 
-
 class Parser():
     def __init__(self, steps_num, worker, epoch):
         self.cuda = "0"
@@ -44,7 +43,6 @@ class Parser():
         self.metric = None
         self.file_name = 'grid'
 
-
 class fetch():
     def __init__(self, result_path, steps_num=3, worker=12, epoch=100):
         self.result_path = result_path
@@ -59,11 +57,14 @@ class fetch():
         sample_interval = 20
         columns = df.columns.tolist()
         df_out_col = len(df.columns)
-        # 得到5000x?维的部分特征
-        for i in range(0, df_out_col - 1, sample_interval):
-            j = i / sample_interval
-            df_part[f'{int(j)}'] = df[columns[i]]
-        df_part['label'] = df['label']
+        if df_out_col > 40:
+            # 得到5000x?维的部分特征
+            for i in range(0, df_out_col - 1, sample_interval):
+                j = i / sample_interval
+                df_part[f'{int(j)}'] = df[columns[i]]
+            df_part['label'] = df['label']
+        else:
+            df_part = df
         df_part.to_csv(self.result_path, index=False)
         df_part = pd.read_csv(self.result_path, delimiter=',', header=0, encoding='utf-8')
         part_columns = df_part.columns.tolist()
@@ -100,10 +101,8 @@ class fetch():
 
         return data, autofe
 
-
 if __name__ == '__main__':
-    machine = fetch.fetch('celery_tasks/algorithms/_FeatureEng_utils/FETCH/data',
-                          'celery_tasks/algorithms/_FeatureEng_utils/FETCH/result', steps_num=1, worker=5, epoch=1)
+    machine = fetch.fetch('celery_tasks/algorithms/_FeatureEng_utils/FETCH/data','celery_tasks/algorithms/_FeatureEng_utils/FETCH/result', steps_num=1, worker=5, epoch=1)
     data, model = machine.main()
     data_factor = len(data)
     print(data_factor)
