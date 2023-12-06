@@ -71,39 +71,40 @@ def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
     self.update_state(state='PROCESS', meta={'progress': 0.05, 'message': '正在查找数据集位置'})
     current_app.logger.info(original_dataset_file_path)
     if(original_dataset_file_path[-3:]=="csv"):
-        # if featureEng_bean.featureEng_type == 'Machine':
-        #     data = original_dataset_file_path
-        #     processes_num = len(featureEng_processes)
-        #     for process_idx in range(processes_num):
-        #         data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id,featureEng_processes[int(str(process_idx))])
-        #     self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
-        #     if isinstance(data, pd.DataFrame):
-        #         new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
-        #     else:
-        #         new_dataset = add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_name)
-        # else:
-        data = pd.read_csv(original_dataset_file_path, delimiter=',', header=0, encoding='utf-8')
-        processes_num = len(featureEng_processes)
-        self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
-        for process_idx in range(processes_num):
-            col_retain = None
-            if "col_retain" in featureEng_processes[int(str(process_idx))]:
-                col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
-            # data_not_number = data.select_dtypes([object]).columns.tolist()
-            # data_retain = pd.DataFrame()
+        if featureEng_bean.featureEng_type == 'Manual':
+            # 原始数据无需处理
+            # 直接添加新数据集
+            self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
+            new_dataset_id = featureEng_processes[0]['new_dataset_id']
+            current_app.logger.info(new_dataset_id)
+            new_dataset_tmp_file_path = featureEng_processes[0]['new_dataset_tmp_file_path']
+            current_app.logger.info(new_dataset_tmp_file_path)
+            self.update_state(state='PROCESS', meta={'progress': 0.5, 'message': '开始添加专家经验'})
+            new_dataset = add_manual_dataset(featureEng_bean, original_dataset_bean, new_dataset_name, new_dataset_id, new_dataset_tmp_file_path)
+            self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
+        else:
+            data = pd.read_csv(original_dataset_file_path, delimiter=',', header=0, encoding='utf-8')
+            processes_num = len(featureEng_processes)
+            self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
+            for process_idx in range(processes_num):
+                col_retain = None
+                if "col_retain" in featureEng_processes[int(str(process_idx))]:
+                    col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
+                # data_not_number = data.select_dtypes([object]).columns.tolist()
+                # data_retain = pd.DataFrame()
+                if col_retain:
+                    # col_retain = list(set(col_retain + data_not_number))
+                    data_retain = data[col_retain]
+                    data.drop(columns=col_retain, inplace=True)
+                # else:
+                #     col_retain = data_not_number
+                #     data_retain = data[col_retain]
+                #     data.drop(columns=col_retain, inplace=True)
+                data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))])
             if col_retain:
-                # col_retain = list(set(col_retain + data_not_number))
-                data_retain = data[col_retain]
-                data.drop(columns=col_retain, inplace=True)
-            # else:
-            #     col_retain = data_not_number
-            #     data_retain = data[col_retain]
-            #     data.drop(columns=col_retain, inplace=True)
-            data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))])
-        if col_retain:
-            data = pd.concat([data, data_retain], axis=1)
-        self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
-        new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+                data = pd.concat([data, data_retain], axis=1)
+            self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
+            new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
     elif(original_dataset_file_path[-3:]=="mat"):
         data = original_dataset_file_path
         processes_num = len(featureEng_processes)
@@ -122,24 +123,35 @@ def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
         new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
     # 数据集为zip的情况
     else:
-        data = original_dataset_file_path
-        processes_num = len(featureEng_processes)
-        col_retain = None
-        need_concat = False
-        for process_idx in range(processes_num):
-            if "col_retain" in featureEng_processes[int(str(process_idx))]:
-                need_concat = True
-                col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
-                # return_type: List
-            data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))])
-        self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
-        if need_concat:
-            # 拼接保留列和生成的数据
-            data = concat_data(data, col_retain, original_dataset_file_path)
-        if isinstance(data, pd.DataFrame):
-            new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+        # 纯人工的情况：
+        if featureEng_bean.featureEng_type == 'Manual':
+            # 原始数据无需处理
+            # 直接添加新数据集
+            self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
+            new_dataset_id = featureEng_processes[0]['new_dataset_id']
+            current_app.logger.info(new_dataset_id)
+            new_dataset_tmp_file_path = featureEng_processes[0]['new_dataset_tmp_file_path']
+            current_app.logger.info(new_dataset_tmp_file_path)
+            self.update_state(state='PROCESS', meta={'progress': 0.5, 'message': '开始添加专家经验'})
+            new_dataset = add_manual_dataset(featureEng_bean, original_dataset_bean, new_dataset_name, new_dataset_id, new_dataset_tmp_file_path)
+        # 其它情况
         else:
-            new_dataset = add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+            data = original_dataset_file_path
+            processes_num = len(featureEng_processes)
+            for process_idx in range(processes_num):
+                # if "col_retain" in featureEng_processes[int(str(process_idx))]:
+                #     need_concat = True
+                #     col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
+                    # return_type: List
+                data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))])
+            self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
+            # if need_concat:
+            #     # 拼接保留列和生成的数据
+            #     data = concat_data(data, col_retain, original_dataset_file_path)
+            if isinstance(data, pd.DataFrame):
+                new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+            else:
+                new_dataset = add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_name)
     self.update_state(state='PROCESS', meta={'progress': 0.95, 'message': '新数据集保存完毕'})
     featureEng_bean.operate_state = '2'
     featureEng_bean.new_dataset_id = new_dataset.dataset_id
@@ -162,7 +174,7 @@ def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
         featureEng_bean.FeatureEng_accuracy = 97.23
         featureEng_bean.FeatureEng_efficiency = 69.79
     featureEngDao.updateFeatureEng(featureEng_bean)
-    self.update_state(state='PROCESS', meta={'progress': 0.95, 'message': '新数据集保存完毕'})
+    self.update_state(state='PROCESS', meta={'progress': 0.95, 'message': '特征工程创建完毕'})
     self.update_state(state='PROCESS', meta={'progress': 1.0, 'message': '完成！'})
 
     return 'SUCCESS'
@@ -200,15 +212,18 @@ def run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, f
             save_featureEng_model(model_pca, 'PCA.pkl', featureEng_id)
         return data_pca
     if featureEng_process['operate_name'] == 'GNN':
-        # 数据集为暂稳判别数据集（zip）
-        num_layers = int(featureEng_process['num_layers'])
-        n_components = int(featureEng_process['n_components'])
-        epoch = int(featureEng_process['epoch'])
-        progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
-        self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
-        data_GNN, model_GNN = FeatureEngineering.algorithm_GNN_train(self, process_idx, processes_num, data, featureEng_id, num_layers, n_components, epoch)
-        save_featureEng_model(model_GNN, 'gnn.pkl', featureEng_id)
-        return data_GNN
+        if type(data) == str:
+            # 数据集为暂稳判别数据集（zip）
+            num_layers = int(featureEng_process['num_layers'])
+            n_components = int(featureEng_process['n_components'])
+            epoch = int(featureEng_process['epoch'])
+            progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+            self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+            data_GNN, model_GNN = FeatureEngineering.algorithm_GNN_train(self, process_idx, processes_num, data, featureEng_id, num_layers, n_components, epoch)
+            save_featureEng_model(model_GNN, 'gnn.pkl', featureEng_id)
+            return data_GNN
+        else:
+            return data
     if featureEng_process['operate_name'] == 'FactorGNN':
         # 数据集为故障定位数据集（zip）
         epoch = int(featureEng_process['epoch'])
@@ -271,23 +286,50 @@ def add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name):
     datasetDao.addDataset(dataset)
     return dataset
 
+def add_manual_dataset(featureEng_bean, original_dataset_bean, new_dataset_name, new_dataset_id, new_dataset_tmp_file_path):
+    dataset = copy.deepcopy(original_dataset_bean)
+    dataset.dataset_id = new_dataset_id
+    dataset.dataset_name = new_dataset_name
+    dataset.if_featureEng = True
+    dataset.featureEng_id = featureEng_bean.featureEng_id
+    dataset.original_dataset_id = original_dataset_bean.dataset_id
+    dataset.introduction = original_dataset_bean.introduction
+    file_name = os.path.split(new_dataset_tmp_file_path)[-1]
+    file_type = os.path.splitext(file_name)[-1][1:]
+    dataset.file_type = file_type
+    file_path = os.path.join(current_app.config["SAVE_DATASET_PATH"], file_name)
+    current_app.logger.info('new_dataset_tmp_file_path')
+    current_app.logger.info(new_dataset_tmp_file_path)
+    shutil.move(new_dataset_tmp_file_path, current_app.config["SAVE_DATASET_PATH"])
+    dataset.profile_state = '0'
+    data = pd.read_csv(file_path, delimiter=',', header=0, encoding='utf-8')
+    calculate_feature_importance(data, featureEng_bean)
+    # lsy_warning: 不生成分析文件
+    dataset.if_profile = False
+    dataset.task_id = None
+    datasetDao.addDataset(dataset)
+    return dataset
+
 def calculate_feature_importance(data, featureEng_bean):
-    X = data.drop('label', axis=1)
-    y = data['label'].astype(int)
-    # 定义一个随机森林回归模型
-    RF = RandomForestRegressor(n_jobs=-1)
-    # 训练模型
-    RF.fit(X, y)
-    # 获取特征重要性得分
-    feature_importances = RF.feature_importances_
-    # 创建特征名列表
-    feature_names = list(X.columns)
-    # 创建一个DataFrame，包含特征名和其重要性得分
-    feature_importances_df = pd.DataFrame({'feature_name': feature_names, 'importance': feature_importances})
-    # 对特征重要性得分进行排序
-    feature_importances_df = feature_importances_df.sort_values('importance', ascending=False)
-    score_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_bean.featureEng_id, 'score.csv')
-    feature_importances_df.to_csv(score_path, index=False)
+    if 'label' in data.columns:
+        X = data.drop('label', axis=1)
+        y = data['label'].astype(int)
+        # 定义一个随机森林回归模型
+        RF = RandomForestRegressor(n_jobs=-1)
+        # 训练模型
+        RF.fit(X, y)
+        # 获取特征重要性得分
+        feature_importances = RF.feature_importances_
+        # 创建特征名列表
+        feature_names = list(X.columns)
+        # 创建一个DataFrame，包含特征名和其重要性得分
+        feature_importances_df = pd.DataFrame({'feature_name': feature_names, 'importance': feature_importances})
+        # 对特征重要性得分进行排序
+        feature_importances_df = feature_importances_df.sort_values('importance', ascending=False)
+        score_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_bean.featureEng_id, 'score.csv')
+        if not os.path.exists(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_bean.featureEng_id)):
+            os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_bean.featureEng_id))
+        feature_importances_df.to_csv(score_path, index=False)
 
 def add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_name):
     dataset = copy.deepcopy(original_dataset_bean)
@@ -324,26 +366,3 @@ def add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_na
     dataset.task_id = None
     datasetDao.addDataset(dataset)
     return dataset
-
-def concat_data(data, col_retain, data_path):
-    if not col_retain:
-        col_retain = []
-    concat_data_list = []
-    decompress_dataset_path = data_path.split('.')[0]
-    if not os.path.exists(decompress_dataset_path):
-        with zipfile.ZipFile(data_path, "r") as zipobj:
-            zipobj.extractall(current_app.config['SAVE_DATASET_PATH'])
-    file_list = []
-    for file_name in os.listdir(decompress_dataset_path):
-        if file_name.startswith('branch') or file_name.startswith('v'):
-            file_list.append(file_name)
-    index = 0
-    for filename in file_list:
-        data_item = pd.read_csv(os.path.join(decompress_dataset_path, filename), delimiter=',', header=0, encoding='utf-8')
-        data_not_number = data_item.select_dtypes([object]).columns.tolist()
-        col_retain = list(set(col_retain + data_not_number))
-        col_retain_item = data_item[col_retain]
-        concat_data_item = pd.concat([data[index], col_retain_item], axis=1)
-        index = index + 1
-        concat_data_list.append(concat_data_item)
-    return concat_data_list

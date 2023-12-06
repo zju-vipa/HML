@@ -8,6 +8,7 @@ from celery_tasks.algorithms._FeatureEng_utils.FETCH.autofe import AutoFE
 
 warnings.filterwarnings("ignore")
 
+
 class Parser():
     def __init__(self, steps_num, worker, epoch):
         self.cuda = "0"
@@ -43,6 +44,7 @@ class Parser():
         self.metric = None
         self.file_name = 'grid'
 
+
 class fetch():
     def __init__(self, result_path, steps_num=3, worker=12, epoch=100):
         self.result_path = result_path
@@ -52,9 +54,23 @@ class fetch():
 
     def main(self, data):
         args = Parser(self.steps_num, self.worker, self.epoch)
+        df = data
+        df_part = pd.DataFrame()
+        sample_interval = 20
+        columns = df.columns.tolist()
+        df_out_col = len(df.columns)
+        # 得到5000x?维的部分特征
+        for i in range(0, df_out_col - 1, sample_interval):
+            j = i / sample_interval
+            df_part[f'{int(j)}'] = df[columns[i]]
+        df_part['label'] = df['label']
+        df_part.to_csv(self.result_path, index=False)
+        df_part = pd.read_csv(self.result_path, delimiter=',', header=0, encoding='utf-8')
+        part_columns = df_part.columns.tolist()
+        part_columns.remove('label')
+
         configs = {'mode': 'regression',
-                   'c_columns': ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14',
-                                 '15', '16'],
+                   'c_columns': part_columns,
                    'd_columns': [],
                    'target': 'label',
                    "model": "lgb",
@@ -77,26 +93,17 @@ class fetch():
         args.c_columns = c_columns
         args.d_columns = d_columns
         args.target = target
-        df = data
-        df_part = pd.DataFrame()
-        sample_interval = 20
-        columns = df.columns.tolist()
-        df_out_col = len(df.columns)
-        # 得到5000x?维的部分特征
-        for i in range(0, df_out_col - 1, sample_interval):
-            j = i / sample_interval
-            df_part[f'{int(j)}'] = df[columns[i]]
-        df_part['label'] = df['label']
-        df_part.to_csv(self.result_path, index=False)
-        df_part = pd.read_csv(self.result_path)
+
         autofe = AutoFE(df_part, args)
         data = autofe.fit_attention(args)
         data['label'] = df['label']
+
         return data, autofe
 
+
 if __name__ == '__main__':
-    machine = fetch.fetch('celery_tasks/algorithms/_FeatureEng_utils/FETCH/data','celery_tasks/algorithms/_FeatureEng_utils/FETCH/result', steps_num=1, worker=5, epoch=1)
+    machine = fetch.fetch('celery_tasks/algorithms/_FeatureEng_utils/FETCH/data',
+                          'celery_tasks/algorithms/_FeatureEng_utils/FETCH/result', steps_num=1, worker=5, epoch=1)
     data, model = machine.main()
     data_factor = len(data)
     print(data_factor)
-

@@ -14,9 +14,13 @@ def algorithm_GNN_train(self, process_idx, processes_num, data_path, featureEng_
     self.update_state(state='PROCESS',
                       meta={'progress': progress, 'message': '模块{}： 加载模型'.format(process_idx + 1)})
     decompress_dataset_path = data_path.split('.')[0]
+    dataset_id = decompress_dataset_path.split('/')[-1]
     if not os.path.exists(decompress_dataset_path):
         with zipfile.ZipFile(data_path, "r") as zipobj:
-            zipobj.extractall(current_app.config['SAVE_DATASET_PATH'])
+            zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+    data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+    # if len(data_files) == 1 and os.path.isdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])):
+    decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
     result_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'result')
     graphcnn = gnn.graphcnn(decompress_dataset_path, result_path, num_layers=num_layers, n_components=n_components,
                             epoch=epoch)
@@ -34,8 +38,13 @@ def algorithm_GNN_train(self, process_idx, processes_num, data_path, featureEng_
 def algoritm_GNN_apply(data_path, model_GNN):
     decompress_dataset_path = data_path.split('.')[0]
     if not os.path.exists(decompress_dataset_path):
-        with zipfile.ZipFile(data_path, "r") as zipobj:
-            zipobj.extractall(current_app.config['SAVE_DATASET_PATH'])
+        dataset_id = decompress_dataset_path.split('/')[-1]
+        if not os.path.exists(decompress_dataset_path):
+            with zipfile.ZipFile(data_path, "r") as zipobj:
+                zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+        data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+        # if len(data_files) == 1 and os.path.isdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])):
+        decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
     data_GNN = pd.DataFrame(model_GNN.transform(decompress_dataset_path))
     return data_GNN
 
@@ -46,9 +55,13 @@ def algorithm_factorgnn_train(self, process_idx, processes_num, data_path, featu
     self.update_state(state='PROCESS',
                       meta={'progress': progress, 'message': '模块{}： 加载模型'.format(process_idx + 1)})
     decompress_dataset_path = data_path.split('.')[0]
+    dataset_id = decompress_dataset_path.split('/')[-1]
     if not os.path.exists(decompress_dataset_path):
         with zipfile.ZipFile(data_path, "r") as zipobj:
-            zipobj.extractall(current_app.config['SAVE_DATASET_PATH'])
+            zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+    data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+    # if len(data_files) == 1 and os.path.isdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])):
+    decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
     result_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'result')
     factorgnn = factor.factorgnn(data_path=decompress_dataset_path, result_path=result_path, epoch=epoch,
                                  latent_dims=latent_dims, lr=lr)
@@ -66,8 +79,13 @@ def algorithm_factorgnn_train(self, process_idx, processes_num, data_path, featu
 def algorithm_factorgnn_apply(data_path, model_factor):
     decompress_dataset_path = data_path.split('.')[0]
     if not os.path.exists(decompress_dataset_path):
-        with zipfile.ZipFile(data_path, "r") as zipobj:
-            zipobj.extractall(current_app.config['SAVE_DATASET_PATH'])
+        dataset_id = decompress_dataset_path.split('/')[-1]
+        if not os.path.exists(decompress_dataset_path):
+            with zipfile.ZipFile(data_path, "r") as zipobj:
+                zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+        data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+        # if len(data_files) == 1 and os.path.isdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])):
+        decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
     data_factor = pd.DataFrame(model_factor.transform(decompress_dataset_path))
     return data_factor
 
@@ -103,9 +121,13 @@ def algorithm_OneHot_train(self, process_idx, processes_num, data_path, featureE
                       meta={'progress': progress, 'message': '模块{}： 编码器初始化'.format(process_idx + 1)})
     model_enc = OneHotEncoder(sparse=False)
     decompress_dataset_path = data_path.split('.')[0]
+    dataset_id = decompress_dataset_path.split('/')[-1]
     if not os.path.exists(decompress_dataset_path):
         with zipfile.ZipFile(data_path, "r") as zipobj:
-            zipobj.extractall(current_app.config['SAVE_DATASET_PATH'])
+            zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+    data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+    # if len(data_files) == 1 and os.path.isdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])):
+    decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
     data_list = []
     file_list = []
     for file_name in os.listdir(decompress_dataset_path):
@@ -132,12 +154,15 @@ def algorithm_OneHot_train(self, process_idx, processes_num, data_path, featureE
         data_list.append(data_onehot)
     return data_list, model_enc
 
-
 def algorithm_OneHot_apply(data_path, model_enc):
     decompress_dataset_path = data_path.split('.')[0]
+    dataset_id = decompress_dataset_path.split('/')[-1]
     if not os.path.exists(decompress_dataset_path):
         with zipfile.ZipFile(data_path, "r") as zipobj:
-            zipobj.extractall(current_app.config['SAVE_DATASET_PATH'])
+            zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+    data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+    # if len(data_files) == 1 and os.path.isdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])):
+    decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
     data_onehot = pd.DataFrame(model_enc.transform(decompress_dataset_path))
     return data_onehot
 
@@ -146,9 +171,13 @@ def algorithm_operator_train(self, process_idx, processes_num, data_path, featur
     data_list = []
     file_list = []
     decompress_dataset_path = data_path.split('.')[0]
+    dataset_id = decompress_dataset_path.split('/')[-1]
     if not os.path.exists(decompress_dataset_path):
         with zipfile.ZipFile(data_path, "r") as zipobj:
-            zipobj.extractall(current_app.config['SAVE_DATASET_PATH'])
+            zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+    data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+    # if len(data_files) == 1 and os.path.isdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])):
+    decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
     for file_name in os.listdir(decompress_dataset_path):
         if file_name.startswith('branch') or file_name.startswith('v'):
             file_list.append(file_name)
@@ -181,9 +210,13 @@ def algorithm_PCA_train(self, process_idx, processes_num, data, n_components, fe
     # data - file_path
     if type(data) == str:
         decompress_dataset_path = data.split('.')[0]
+        dataset_id = decompress_dataset_path.split('/')[-1]
         if not os.path.exists(decompress_dataset_path):
             with zipfile.ZipFile(data, "r") as zipobj:
-                zipobj.extractall(current_app.config['SAVE_DATASET_PATH'])
+                zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+        data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+        # if len(data_files) == 1 and os.path.isdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])):
+        decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
         file_list = []
         for file_name in os.listdir(decompress_dataset_path):
             if file_name.startswith('branch') or file_name.startswith('v'):

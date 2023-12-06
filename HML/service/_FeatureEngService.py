@@ -38,6 +38,9 @@ class FeatureEngService:
         shutil.rmtree(file_directory)
         return self.featureEngDao.deleteFeatureEng(featureEng_id)
 
+    def deleteFeatureEngRecord(self, featureEng_id):
+        return self.featureEngDao.deleteFeatureEng(featureEng_id)
+
     def updateFeatureEng(self, featureEng):
         return self.featureEngDao.updateFeatureEng(featureEng)
 
@@ -113,9 +116,17 @@ class FeatureEngService:
             new_dataset_name = new_dataset.dataset_name
             new_dataset_introduction = new_dataset.introduction
             new_dataset_file_type = new_dataset.file_type
-            feature_decoupling, feature_learning, feature_derive, feature_selection = "无", "无", "无", "无"
+            feature_construct, feature_generation, feature_decoupling, feature_learning, feature_derive, feature_selection = "无", "无", "无", "无", "无", "无"
             if featureEng_processes:
                 for j in range(len(featureEng_processes)):
+                    if featureEng_processes[j]['process_name'] == 'Feature_Construct':
+                        feature_construct = featureEng_processes[j]['operate_name']
+                        if feature_construct == 'Expert-Experience':
+                            feature_construct = '基于专家经验的特征构建'
+                    if featureEng_processes[j]['process_name'] == 'Feature_Generation':
+                        feature_generation = featureEng_processes[j]['operate_name']
+                        if feature_generation == 'FETCH':
+                            feature_generation = 'FETCH自动化特征工程'
                     if featureEng_processes[j]['process_name'] == 'Feature_Decoupling':
                         feature_decoupling = featureEng_processes[j]['operate_name']
                         if feature_decoupling == 'FactorGNN':
@@ -124,25 +135,112 @@ class FeatureEngService:
                         feature_learning = featureEng_processes[j]['operate_name']
                         if feature_learning == 'GNN':
                             feature_learning = '基于GNN的特征提取'
-                    if featureEng_processes[j]['process_name'] == 'Feature_Decoupling':
+                    if featureEng_processes[j]['process_name'] == 'Feature_Derive':
                         feature_derive = featureEng_processes[j]['operate_name']
+                        if feature_derive == 'HumanMachineCooperation':
+                            feature_derive = '人机协同特征生成'
                     if featureEng_processes[j]['process_name'] == 'Feature_Selection':
                         feature_selection = featureEng_processes[j]['operate_name']
+                        if feature_selection == 'ModelBased':
+                            feature_selection = '基于模型的特征选择'
             if new_dataset_file_type == 'csv':
                 data_path = current_app.config['SAVE_DATASET_PATH'] + '/' + new_dataset_id + '.csv'
+                if os.path.exists(data_path):
+                    columns = pd.read_csv(data_path, delimiter=',', encoding='utf-8').columns.tolist()
+                    for k in range(len(columns)):
+                        feature_item = {}
+                        feature_item['name'] = columns[k]
+                        feature_item['dataset'] = new_dataset_name
+                        feature_item['task'] = new_dataset_introduction
+                        feature_item['featureConstruct'] = feature_construct
+                        feature_item['featureGeneration'] = feature_generation
+                        feature_item['featureDecoupling'] = feature_decoupling
+                        feature_item['featureLearning'] = feature_learning
+                        feature_item['featureDerivation'] = feature_derive
+                        feature_item['featureSelection'] = feature_selection
+                        featureLibrary.append(feature_item)
+            elif new_dataset_file_type == 'zip':
+                new_dataset_save_path = current_app.config['SAVE_DATASET_PATH'] + '/' + new_dataset_id + '.zip'
+                if os.path.exists(new_dataset_save_path):
+                    decompress_dataset_path = current_app.config['SAVE_DATASET_PATH'] + '/' + new_dataset_id
+                    if not os.path.exists(decompress_dataset_path):
+                        with zipfile.ZipFile(new_dataset_save_path, "r") as zipobj:
+                            zipobj.extractall(current_app.config['SAVE_DATASET_PATH'])
+                    file_num = len(os.listdir(decompress_dataset_path))
+                    sample_file = os.listdir(decompress_dataset_path)[int(file_num / 2)]
+                    columns = pd.read_csv(os.path.join(decompress_dataset_path, sample_file), delimiter=',', encoding='utf-8').columns.tolist()
+                    for k in range(len(columns)):
+                        feature_item = {}
+                        feature_item['name'] = columns[k]
+                        feature_item['dataset'] = new_dataset_name
+                        feature_item['task'] = new_dataset_introduction
+                        feature_item['featureConstruct'] = feature_construct
+                        feature_item['featureGeneration'] = feature_generation
+                        feature_item['featureDecoupling'] = feature_decoupling
+                        feature_item['featureLearning'] = feature_learning
+                        feature_item['featureDerivation'] = feature_derive
+                        feature_item['featureSelection'] = feature_selection
+                        featureLibrary.append(feature_item)
+        return featureLibrary
+
+    def getTaskFeatureList(self, featureEng_id):
+        featureEng = self.featureEngDao.queryFeatureEngById(featureEng_id)
+        featureEng_processes = featureEng.featureEng_processes
+        featureEng_processes = json.loads(featureEng_processes)
+        new_dataset_id = featureEng.new_dataset_id
+        new_dataset = self.datasetDao.queryDatasetById(new_dataset_id)
+        new_dataset_name = new_dataset.dataset_name
+        new_dataset_introduction = new_dataset.introduction
+        new_dataset_file_type = new_dataset.file_type
+        feature_construct, feature_generation, feature_decoupling, feature_learning, feature_derive, feature_selection = "无", "无", "无", "无", "无", "无"
+        if featureEng_processes:
+            for j in range(len(featureEng_processes)):
+                if featureEng_processes[j]['process_name'] == 'Feature_Construct':
+                    feature_construct = featureEng_processes[j]['operate_name']
+                    if feature_construct == 'Expert-Experience':
+                        feature_construct = '基于专家经验的特征构建'
+                if featureEng_processes[j]['process_name'] == 'Feature_Generation':
+                    feature_generation = featureEng_processes[j]['operate_name']
+                    if feature_generation == 'FETCH':
+                        feature_generation = 'FETCH自动化特征工程'
+                if featureEng_processes[j]['process_name'] == 'Feature_Decoupling':
+                    feature_decoupling = featureEng_processes[j]['operate_name']
+                    if feature_decoupling == 'FactorGNN':
+                        feature_decoupling = '基于因子图的特征解耦'
+                if featureEng_processes[j]['process_name'] == 'Feature_Learning':
+                    feature_learning = featureEng_processes[j]['operate_name']
+                    if feature_learning == 'GNN':
+                        feature_learning = '基于GNN的特征提取'
+                if featureEng_processes[j]['process_name'] == 'Feature_Derive':
+                    feature_derive = featureEng_processes[j]['operate_name']
+                    if feature_derive == 'HumanMachineCooperation':
+                        feature_derive = '人机协同特征生成'
+                if featureEng_processes[j]['process_name'] == 'Feature_Selection':
+                    feature_selection = featureEng_processes[j]['operate_name']
+                    if feature_selection == 'ModelBased':
+                        feature_selection = '基于模型的特征选择'
+        featureList = []
+        if new_dataset_file_type == 'csv':
+            data_path = current_app.config['SAVE_DATASET_PATH'] + '/' + new_dataset_id + '.csv'
+            if os.path.exists(data_path):
                 columns = pd.read_csv(data_path, delimiter=',', encoding='utf-8').columns.tolist()
                 for k in range(len(columns)):
                     feature_item = {}
                     feature_item['name'] = columns[k]
                     feature_item['dataset'] = new_dataset_name
                     feature_item['task'] = new_dataset_introduction
+                    feature_item['featureConstruct'] = feature_construct
+                    feature_item['featureGeneration'] = feature_generation
                     feature_item['featureDecoupling'] = feature_decoupling
                     feature_item['featureLearning'] = feature_learning
                     feature_item['featureDerivation'] = feature_derive
                     feature_item['featureSelection'] = feature_selection
-                    featureLibrary.append(feature_item)
-            elif new_dataset_file_type == 'zip':
-                new_dataset_save_path = current_app.config['SAVE_DATASET_PATH'] + '/' + new_dataset_id + '.zip'
+                    featureList.append(feature_item)
+            else:
+                return None
+        elif new_dataset_file_type == 'zip':
+            new_dataset_save_path = current_app.config['SAVE_DATASET_PATH'] + '/' + new_dataset_id + '.zip'
+            if os.path.exists(new_dataset_save_path):
                 decompress_dataset_path = current_app.config['SAVE_DATASET_PATH'] + '/' + new_dataset_id
                 if not os.path.exists(decompress_dataset_path):
                     with zipfile.ZipFile(new_dataset_save_path, "r") as zipobj:
@@ -155,71 +253,15 @@ class FeatureEngService:
                     feature_item['name'] = columns[k]
                     feature_item['dataset'] = new_dataset_name
                     feature_item['task'] = new_dataset_introduction
+                    feature_item['featureConstruct'] = feature_construct
+                    feature_item['featureGeneration'] = feature_generation
                     feature_item['featureDecoupling'] = feature_decoupling
                     feature_item['featureLearning'] = feature_learning
                     feature_item['featureDerivation'] = feature_derive
                     feature_item['featureSelection'] = feature_selection
-                    featureLibrary.append(feature_item)
-        current_app.logger.info(featureLibrary)
-        return featureLibrary
-
-    def getTaskFeatureList(self, featureEng_id):
-        featureEng = self.featureEngDao.queryFeatureEngById(featureEng_id)
-        featureEng_processes = featureEng.featureEng_processes
-        featureEng_processes = json.loads(featureEng_processes)
-        new_dataset_id = featureEng.new_dataset_id
-        new_dataset = self.datasetDao.queryDatasetById(new_dataset_id)
-        new_dataset_name = new_dataset.dataset_name
-        new_dataset_introduction = new_dataset.introduction
-        new_dataset_file_type = new_dataset.file_type
-        feature_decoupling, feature_learning, feature_derive, feature_selection = "无", "无", "无", "无"
-        if featureEng_processes:
-            for j in range(len(featureEng_processes)):
-                if featureEng_processes[j]['process_name'] == 'Feature_Decoupling':
-                    feature_decoupling = featureEng_processes[j]['operate_name']
-                    if feature_decoupling == 'FactorGNN':
-                        feature_decoupling = '基于因子图的特征解耦'
-                if featureEng_processes[j]['process_name'] == 'Feature_Learning':
-                    feature_learning = featureEng_processes[j]['operate_name']
-                    if feature_learning == 'GNN':
-                        feature_learning = '基于GNN的特征提取'
-                if featureEng_processes[j]['process_name'] == 'Feature_Decoupling':
-                    feature_derive = featureEng_processes[j]['operate_name']
-                if featureEng_processes[j]['process_name'] == 'Feature_Selection':
-                    feature_selection = featureEng_processes[j]['operate_name']
-        featureList = []
-        if new_dataset_file_type == 'csv':
-            data_path = current_app.config['SAVE_DATASET_PATH'] + '/' + new_dataset_id + '.csv'
-            columns = pd.read_csv(data_path, delimiter=',', encoding='utf-8').columns.tolist()
-            for k in range(len(columns)):
-                feature_item = {}
-                feature_item['name'] = columns[k]
-                feature_item['dataset'] = new_dataset_name
-                feature_item['task'] = new_dataset_introduction
-                feature_item['featureDecoupling'] = feature_decoupling
-                feature_item['featureLearning'] = feature_learning
-                feature_item['featureDerivation'] = feature_derive
-                feature_item['featureSelection'] = feature_selection
-                featureList.append(feature_item)
-        elif new_dataset_file_type == 'zip':
-            new_dataset_save_path = current_app.config['SAVE_DATASET_PATH'] + '/' + new_dataset_id + '.zip'
-            decompress_dataset_path = current_app.config['SAVE_DATASET_PATH'] + '/' + new_dataset_id
-            if not os.path.exists(decompress_dataset_path):
-                with zipfile.ZipFile(new_dataset_save_path, "r") as zipobj:
-                    zipobj.extractall(current_app.config['SAVE_DATASET_PATH'])
-            file_num = len(os.listdir(decompress_dataset_path))
-            sample_file = os.listdir(decompress_dataset_path)[int(file_num / 2)]
-            columns = pd.read_csv(os.path.join(decompress_dataset_path, sample_file), delimiter=',', encoding='utf-8').columns.tolist()
-            for k in range(len(columns)):
-                feature_item = {}
-                feature_item['name'] = columns[k]
-                feature_item['dataset'] = new_dataset_name
-                feature_item['task'] = new_dataset_introduction
-                feature_item['featureDecoupling'] = feature_decoupling
-                feature_item['featureLearning'] = feature_learning
-                feature_item['featureDerivation'] = feature_derive
-                feature_item['featureSelection'] = feature_selection
-                featureList.append(feature_item)
+                    featureList.append(feature_item)
+            else:
+                return None
         return featureList
 
     def getLatestRecord(self, user_id):
@@ -227,18 +269,21 @@ class FeatureEngService:
         latestTask_id = latestTask.featureEng_id
         record_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], latestTask_id, 'record.csv')
         record_list = []
-        with open(record_path, 'r') as file:
-            reader = csv.reader(file)
-            header = next(reader)
-            for row in reader:
-                record_item = {}
-                accuracy = row[0]
-                efficiency = row[1]
-                record_item['record_accuracy'] = accuracy
-                record_item['record_efficiency'] = efficiency
-                record_list.append(record_item)
-            file.close()
-        return record_list
+        if os.path.exists(record_path):
+            with open(record_path, 'r') as file:
+                reader = csv.reader(file)
+                header = next(reader)
+                for row in reader:
+                    record_item = {}
+                    accuracy = row[0]
+                    efficiency = row[1]
+                    record_item['record_accuracy'] = accuracy
+                    record_item['record_efficiency'] = efficiency
+                    record_list.append(record_item)
+                file.close()
+            return record_list
+        else:
+            return None
 
     def getLatestTaskDetails(self, user_id):
         latestTask = self.featureEngDao.queryLatestFeatureEngByUserId(user_id)

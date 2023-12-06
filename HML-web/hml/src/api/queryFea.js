@@ -138,5 +138,23 @@ export default {
       url: `/featureEng/importFeatureEng?featureEng_id=${id}`,
       method: 'GET'
     })
+  },
+  // 下载数据集
+  download (id) {
+    return request({
+      url: `/featureEng/download?dataset_id=${id}`,
+      method: 'GET',
+      responseType: 'blob'
+      // data: {
+      //   dataset_id: id
+      // }
+    })
+  },
+  // 获取数据集类型
+  queryDatasetType (id) {
+    return request({
+      url: `/featureEng/queryDatasetType?dataset_id=${id}`,
+      method: 'GET'
+    })
   }
 }

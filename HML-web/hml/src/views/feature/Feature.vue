@@ -102,7 +102,7 @@
                     <div slot="header" class="header">
                       <el-row type="flex" align="middle">
                         <el-col span="12">
-                          <span class="header-label" style="font-size: 18px; font-weight: bolder">初始效果</span>
+                          <span class="header-label" style="font-size: 18px; font-weight: bolder">当前效果</span>
                         </el-col>
                       </el-row>
                     </div>
@@ -113,14 +113,14 @@
                             <el-progress type="dashboard" :percentage="newResultForm.efficiency" :stroke-width="20" :width="165" style="font-weight: bolder; font-size: 20px;">
                             </el-progress>
                           </el-row>
-                          <span style="color: steelblue; font-size: 18px;">初始特征有效率</span>
+                          <span style="color: steelblue; font-size: 18px;">特征有效率</span>
                         </el-col>
                         <el-col span="12">
                           <el-row>
                             <el-progress type="dashboard" :percentage="newResultForm.accuracy" :stroke-width="20" :width="165" style="font-weight: bolder; font-size: 20px;">
                             </el-progress>
                           </el-row>
-                          <span style="color: steelblue; font-size: 18px;">初始任务准确率</span>
+                          <span style="color: steelblue; font-size: 18px;">任务准确率</span>
                         </el-col>
                       </el-row>
                       <el-row v-else>
@@ -250,7 +250,8 @@
                   </div>
                   <el-row>
                     <el-col span="3"><div style="border-radius: 4px;min-height: 36px;"></div></el-col>
-                    <el-button type="primary">继续学习</el-button>
+                    <el-col span="5"><el-button type="primary">继续学习</el-button></el-col>
+                    <el-col span="5"><el-button type="primary" style="margin-left: 30px">结束学习</el-button></el-col>
                   </el-row>
                 </el-card>
               </el-row>
@@ -275,7 +276,7 @@
                   </el-table>
                 </div>
               </el-card>
-              <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 550px">
+              <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 530px">
                 <div slot="header" class="header">
                   <el-row type="flex" align="middle">
                     <el-col span="12">
@@ -292,7 +293,7 @@
                   </div>
                 </el-row>
                 <div style="margin: 15px; text-align: center;">
-                  <div id="featureCharts" style="width: 550px; height: 600px; margin: 0 auto;"></div>
+                  <div id="featureCharts" style="width: 100%; height: 650px; margin: 0 auto;"></div>
                 </div>
               </el-card>
             </el-col>
@@ -355,7 +356,7 @@
                       <div slot="header" class="header">
                         <el-row type="flex" align="middle">
                           <el-col span="12">
-                            <span class="header-label" style="font-size: 18px; font-weight: bolder">初始效果</span>
+                            <span class="header-label" style="font-size: 18px; font-weight: bolder">当前效果</span>
                           </el-col>
                         </el-row>
                       </div>
@@ -366,14 +367,14 @@
                               <el-progress type="dashboard" :percentage="newResultForm.efficiency" :stroke-width="20" :width="165" style="font-weight: bolder; font-size: 20px;">
                               </el-progress>
                             </el-row>
-                            <span style="color: steelblue; font-size: 18px;">初始特征有效率</span>
+                            <span style="color: steelblue; font-size: 18px;">特征有效率</span>
                           </el-col>
                           <el-col span="12">
                             <el-row>
                               <el-progress type="dashboard" :percentage="newResultForm.accuracy" :stroke-width="20" :width="165" style="font-weight: bolder; font-size: 20px;">
                               </el-progress>
                             </el-row>
-                            <span style="color: steelblue; font-size: 18px;">初始任务准确率</span>
+                            <span style="color: steelblue; font-size: 18px;">任务准确率</span>
                           </el-col>
                         </el-row>
                         <el-row v-else>
@@ -434,7 +435,7 @@
                       <el-row><span style="color: darkgray">暂无记录</span></el-row>
                     </div>
                   </el-row>
-                  <div id="featureCharts" style="width: 550px; height: 600px; margin: 0 auto;"></div>
+                  <div id="featureCharts" style="width: 100%; height: 650px; margin: 0 auto;"></div>
                 </el-card>
               </el-col>
             </el-row>
@@ -491,7 +492,7 @@
                     <el-table-column label="结果">
                       <template slot-scope="scope">
                         <span>
-                          <el-button size="mini" @click="queryResult(scope.row)" :disabled="scope.row.operate_state==='交互中'">结果报告</el-button>
+                          <el-button size="mini" @click="queryResult(scope.row)" :disabled="scope.row.operate_state==='交互中' || scope.row.operate_state==='已停止'">结果报告</el-button>
                         </span>
                       </template>
                     </el-table-column>
@@ -614,6 +615,8 @@ export default {
       featureLibraryColumnsList: [{ label: '特征名', prop: 'name' },
         { label: '所属数据集', prop: 'dataset' },
         { label: '针对任务', prop: 'task' },
+        { label: '特征构建', prop: 'featureConstruct' },
+        { label: '特征生成', prop: 'featureGeneration' },
         { label: '特征解耦', prop: 'featureDecoupling' },
         { label: '特征学习', prop: 'featureLearning' },
         { label: '特征衍生', prop: 'featureDerivation' },
@@ -695,7 +698,7 @@ export default {
       })
     },
     getLatestTaskDetails () {
-      // 当前任务概况+初始效果
+      // 当前任务概况+当前效果
       this.displayType = 0
       featureEngApi.queryLatestResults().then(response => {
         const resp = response.data.data
@@ -713,19 +716,25 @@ export default {
             if (key === 'type') {
               if (this.newResultForm.taskDetails[i].value === '纯人工方法') {
                 this.displayType = 1
+                this.taskFeatureColumnsList = [{ label: '特征名', prop: 'name' }, { label: '所属数据集', prop: 'dataset' }, { label: '针对任务', prop: 'task' }, { label: '特征构建', prop: 'featureConstruct' }]
               } else if (this.newResultForm.taskDetails[i].value === '纯机器方法') {
                 this.displayType = 2
+                this.taskFeatureColumnsList = [{ label: '特征名', prop: 'name' }, { label: '所属数据集', prop: 'dataset' }, { label: '针对任务', prop: 'task' }, { label: '特征生成', prop: 'featureGeneration' }]
               }
             }
           }
-          const modules = resp.checkedModules.split(',')
-          for (let i = 0; i < modules.length; i = i + 1) {
-            this.newResultForm.checkedModules.push(modules[i])
-          }
-          if (this.newResultForm.checkedModules.length === 4) {
-            this.checkedAll = true
+          if (resp.checkedModules !== null && resp.checkedModules !== '') {
+            const modules = resp.checkedModules.split(',')
+            for (let i = 0; i < modules.length; i = i + 1) {
+              this.newResultForm.checkedModules.push(modules[i])
+            }
+            if (this.newResultForm.checkedModules.length === 4) {
+              this.checkedAll = true
+            }
           }
           this.getLatestFeatures()
+        } else {
+          this.getAllFeatureEngs()
         }
       })
     },
@@ -735,7 +744,7 @@ export default {
         console.log(resp)
         const upper = resp.length
         for (let i = 0; i < upper; i = i + 1) {
-          this.taskFeatureList.push({ name: resp[i].name, dataset: resp[i].dataset, task: resp[i].task, featureDecoupling: resp[i].featureDecoupling, featureLearning: resp[i].featureLearning, featureDerivation: resp[i].featureSelection, featureSelection: resp[i].featureSelection })
+          this.taskFeatureList.push({ name: resp[i].name, dataset: resp[i].dataset, task: resp[i].task, featureConstruct: resp[i].featureConstruct, featureGeneration: resp[i].featureGeneration, featureDecoupling: resp[i].featureDecoupling, featureLearning: resp[i].featureLearning, featureDerivation: resp[i].featureDerivation, featureSelection: resp[i].featureSelection })
         }
       })
       this.getAllFeatureEngs()
@@ -746,40 +755,45 @@ export default {
       featureEngApi.query().then(response => {
         const resp = response.data
         console.log(resp.data)
-        const upper = resp.data.length
-        let state = ''
-        let type = ''
-        for (let i = 0; i < upper; i = i + 1) {
-          if (resp.data[i].operate_state === '1') {
-            state = '交互中'
-          } else if (resp.data[i].operate_state === '2') {
-            state = '已完成'
-          } else if (resp.data[i].operate_state === '3') {
-            state = '已停止'
+        if (resp.data != null) {
+          const upper = resp.data.length
+          let state = ''
+          let type = ''
+          for (let i = 0; i < upper; i = i + 1) {
+            if (resp.data[i].operate_state === '1') {
+              state = '交互中'
+            } else if (resp.data[i].operate_state === '2') {
+              state = '已完成'
+            } else if (resp.data[i].operate_state === '3') {
+              state = '已停止'
+            }
+            if (resp.data[i].featureEng_type === 'HumanInLoop') {
+              type = '人机协同特征学习与衍生技术'
+            } else if (resp.data[i].featureEng_type === 'Machine') {
+              type = '纯机器方法'
+            } else {
+              type = '纯人工方法'
+            }
+            this.HumanFeaData.push({ featureEng_id: resp.data[i].featureEng_id, featureEng_name: resp.data[i].featureEng_name, featureEng_type: type, featureEng_accuracy: resp.data[i].FeatureEng_accuracy, featureEng_efficiency: resp.data[i].FeatureEng_efficiency, operate_state: state })
           }
-          if (resp.data[i].featureEng_type === 'HumanInLoop') {
-            type = '人机协同特征学习与衍生技术'
-          } else if (resp.data[i].featureEng_type === 'Machine') {
-            type = '纯机器方法'
-          } else {
-            type = '纯人工方法'
-          }
-          this.HumanFeaData.push({ featureEng_id: resp.data[i].featureEng_id, featureEng_name: resp.data[i].featureEng_name, featureEng_type: type, featureEng_accuracy: resp.data[i].FeatureEng_accuracy, featureEng_efficiency: resp.data[i].FeatureEng_efficiency, operate_state: state })
+          this.getFeatureLibrary()
         }
       })
-      this.getFeatureLibrary()
     },
     getFeatureLibrary () {
       //  特征库
+      this.featureLibraryList = []
       featureEngApi.queryFeatureLibrary().then(response => {
         const resp = JSON.parse(response.data.data)
         console.log(resp)
-        const upper = resp.length
-        for (let i = 0; i < upper; i = i + 1) {
-          this.featureLibraryList.push({ name: resp[i].name, dataset: resp[i].dataset, task: resp[i].task, featureDecoupling: resp[i].featureDecoupling, featureLearning: resp[i].featureLearning, featureDerivation: resp[i].featureSelection, featureSelection: resp[i].featureSelection })
+        if (resp != null) {
+          const upper = resp.length
+          for (let i = 0; i < upper; i = i + 1) {
+            this.featureLibraryList.push({ name: resp[i].name, dataset: resp[i].dataset, task: resp[i].task, featureConstruct: resp[i].featureConstruct, featureGeneration: resp[i].featureGeneration, featureDecoupling: resp[i].featureDecoupling, featureLearning: resp[i].featureLearning, featureDerivation: resp[i].featureDerivation, featureSelection: resp[i].featureSelection })
+          }
+          console.log('featureLibraryList')
+          console.log(this.featureLibraryList)
         }
-        console.log('featureLibraryList')
-        console.log(this.featureLibraryList)
       })
       console.log(this.checkedAll)
       if (this.checkedAll) {
@@ -814,6 +828,9 @@ export default {
           const value = resp.value
           // 指定图表的配置项和数据
           const option = {
+            grid: {
+              containLabel: true
+            },
             tooltip: {},
             dataZoom: [
               {
@@ -909,7 +926,11 @@ export default {
     // 跳转到人工特征工程页面
     goHumanFea () {
       // this.$emit('columns-get', this.columnsList)
-      this.$router.push('/feature/humanfea')
+      if (this.datasetId === '' || this.datasetName === '') {
+        this.$message.error('请选择数据集')
+      } else {
+        this.$router.push('/feature/humanfea')
+      }
     },
     // 点击查看特征工程按钮
     queryFeatureEng () {
