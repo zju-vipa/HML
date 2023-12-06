@@ -286,8 +286,9 @@ class GraphCNN(nn.Module):
         if (self.Is_dim == True):
             # node_embeddings = torch.stack(node_embeddings)
             # return node_embeddings
-            feature_last_layer = torch.stack(feature_last_layer)
-            return feature_last_layer
+            # feature_last_layer = torch.stack(feature_last_layer)
+            # return feature_last_layer
+            return graph_representation
         score = F.dropout(self.prediction(graph_representation), self.final_dropout, training=self.training)
 
         return score

@@ -31,6 +31,13 @@ export default {
       method: 'GET'
     })
   },
+  // 停止特征工程
+  stopTask (id) {
+    return request({
+      url: `/featureEng/stopTask?featureEng_id=${id}`,
+      method: 'GET'
+    })
+  },
   // 查询特征工程
   query () {
     return request({
@@ -123,6 +130,30 @@ export default {
   searchProgress (id) {
     return request({
       url: `/featureEng/task/operate/state?task_id=${id}`,
+      method: 'GET'
+    })
+  },
+  importFeatureEng (id) {
+    return request({
+      url: `/featureEng/importFeatureEng?featureEng_id=${id}`,
+      method: 'GET'
+    })
+  },
+  // 下载数据集
+  download (id) {
+    return request({
+      url: `/featureEng/download?dataset_id=${id}`,
+      method: 'GET',
+      responseType: 'blob'
+      // data: {
+      //   dataset_id: id
+      // }
+    })
+  },
+  // 获取数据集类型
+  queryDatasetType (id) {
+    return request({
+      url: `/featureEng/queryDatasetType?dataset_id=${id}`,
       method: 'GET'
     })
   }
