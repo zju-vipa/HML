@@ -806,11 +806,13 @@ export default {
       featureEngApi.queryLatestRecord().then(response => {
         const resp = JSON.parse(response.data.data)
         console.log(resp)
-        const upper = resp.length
-        for (let i = 0; i < upper; i = i + 1) {
-          this.IteractionRecord.push({ record_efficiency: resp[i].record_efficiency + '%', record_accuracy: resp[i].record_accuracy + '%' })
+        if (resp !== null) {
+          const upper = resp.length
+          for (let i = 0; i < upper; i = i + 1) {
+            this.IteractionRecord.push({ record_efficiency: resp[i].record_efficiency + '%', record_accuracy: resp[i].record_accuracy + '%' })
+          }
+          this.drawChart()
         }
-        this.drawChart()
       })
     },
     drawChart () {
