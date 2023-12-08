@@ -374,6 +374,7 @@ def learner_action_input():
 @bp.route('/learnerTest', methods=('GET', 'POST'))
 @login_required
 def learner_test():
+    # print('learner_test11')
     if request.method == 'GET':
         try:
             learner_id = request.args.get('learner_id')
@@ -383,23 +384,26 @@ def learner_test():
         if not learner_id:
             return get_error(RET.PARAMERR, 'Error: request lacks learner_id')
 
+        print('learner_id')
+        print(learner_id)
         learner = learnerService.queryLearnerById(learner_id)
-        dataset_id = learner.dataset_id
-        if not dataset_id:
-            return get_error(RET.PARAMERR, 'Error: request lacks dataset_id')
+        # dataset_id = learner.dataset_id
+        # if not dataset_id:
+        #     return get_error(RET.PARAMERR, 'Error: request lacks dataset_id')
 
-        dataset = datasetService.queryDatasetById(dataset_id)
+        # dataset = datasetService.queryDatasetById(dataset_id)
 
-        if not dataset:
-            return get_error(RET.PARAMERR, 'Error: dataset_id not exists')
+        # if not dataset:
+        #     return get_error(RET.PARAMERR, 'Error: dataset_id not exists')
 
-        dataset_file_path = datasetService.getDatasetFilePath(dataset)
+        # dataset_file_path = datasetService.getDatasetFilePath(dataset)
 
-        if not dataset_file_path:
-            return get_error(RET.FILEERR, 'Error: dataset file not exists')
-
-        learner_parameters = json.loads(learner.learner_parameters, ensure_ascii=False)
-        
+        # if not dataset_file_path:
+        #     return get_error(RET.FILEERR, 'Error: dataset file not exists')
+        # print('learner_test')
+        # learner_parameters = json.loads(learner.learner_parameters, ensure_ascii=False)
+        learner_parameters=None
+        dataset_file_path=None
         data = learnerService.modelTest(learner, learner_parameters, dataset_file_path)
 
 
