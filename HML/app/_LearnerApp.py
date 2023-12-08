@@ -7,6 +7,7 @@ from service import LearnerService
 from service import DatasetService
 import os
 import numpy
+import json as js
 import pandas as pd
 learnerService = LearnerService()
 datasetService = DatasetService()
@@ -401,12 +402,10 @@ def learner_test():
         # if not dataset_file_path:
         #     return get_error(RET.FILEERR, 'Error: dataset file not exists')
         # print('learner_test')
-        # learner_parameters = json.loads(learner.learner_parameters, ensure_ascii=False)
         learner_parameters=None
+        learner_parameters = js.loads(learner.learner_parameters)
         dataset_file_path=None
         data = learnerService.modelTest(learner, learner_parameters, dataset_file_path)
-
-
 
         return {'meta': {'msg': 'get state success', 'code': 200}, 'data': data}, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
