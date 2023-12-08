@@ -34,7 +34,7 @@ def query_train_methods_introductions():
     # 训练方法
     # trainMethod_HML_RL trainMethod_RFC trainMethod_LR trainMethod_SVM
     print('query_train_methods_introductions')
-    learnerTrainMethodsNames = ['HML_RL', 'RFC', 'LR', 'SVM']
+    learnerTrainMethodsNames = ['HML_RL', 'RFC', 'LR', 'SVM', 'HML_ML']
     if request.method == 'GET':
         try:
             trainName = request.args.get('trainName')
@@ -59,6 +59,9 @@ def query_train_methods_introductions():
         elif trainName==learnerTrainMethodsNames[3]:
           trainMethodsIntro['name']='支持向量机方法（SVM）'
           trainMethodsIntro['describe']='核心思想是找到能够最大化不同类别数据点间隔的分界线或超平面。在处理线性不可分数据时，SVM通过引入核技巧，将数据映射到更高维空间，以寻找合适的分隔超平面。这种方法对于小样本和高维数据表现出色，且具有良好的泛化能力。'
+        elif trainName==learnerTrainMethodsNames[4]:
+          trainMethodsIntro['name']='纯机器学习的近端策略优化强化学习方法'
+          trainMethodsIntro['describe']='近端策略优化强化学习方法是一种在策略空间中进行优化的纯机器学习方法，旨在解决策略梯度方法中的效率和稳定性问题。算法的关键特点之一是它引入了一个截断的概率比率，用于限制策略更新的幅度，这样可以避免在学习过程中进行过大的策略改变，导致性能急剧下降。这种方法使得其既能够保持足够的探索性，也能确保学习的稳定性和可靠性。'
         print('trainMethodsIntro3:', trainMethodsIntro)
           
         return {'meta': {'msg': 'query algorithm list success', 'code': 200}, 'data': trainMethodsIntro}, 200

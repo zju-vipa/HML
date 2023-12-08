@@ -41,3 +41,17 @@ class LearnerDao(BaseDao):
         learner.username = learner_bean.username
         learner.action = learner_bean.action
         self.db.session.commit()
+    # update task_id
+    def updateLearnerAll(self, learner_bean):
+        learner = Learner.query.filter_by(learner_id=learner_bean.learner_id).first()
+        learner.learner_name = learner_bean.learner_name
+        learner.learner_type = learner_bean.learner_type
+        learner.learner_parameters = learner_bean.learner_parameters
+        learner.train_state = learner_bean.train_state
+        learner.dataset_id = learner_bean.dataset_id
+        learner.user_id = learner_bean.user_id
+        learner.username = learner_bean.username
+        learner.action = learner_bean.action
+        learner.test_task_id = learner_bean.test_task_id
+        learner.task_id = learner_bean.task_id
+        self.db.session.commit()
