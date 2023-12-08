@@ -155,12 +155,12 @@ def train(args, learner_id):
     model.save(os.path.join('rl_model_final'))
 
 
-def main(flag = 'train', learner_id=None):
+def main(flag = 'train', learner_id=None, mode='human'):
     current_app.logger.info("RL train.main begin")
     class Parser():
         def __init__(self):
             self.env_id = 'case300'
-            self.mode = 'human'
+            self.mode = mode
             self.algo = 'ppo'
             self.total_timesteps = int(5e4)
             self.seeds = '[404]'
@@ -189,8 +189,8 @@ def main(flag = 'train', learner_id=None):
             train(args, learner_id)
 
 
-if __name__ == '__main__':
-    main('train')
+# if __name__ == '__main__':
+#     main('train')
 
 
 

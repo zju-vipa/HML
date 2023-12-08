@@ -1,4 +1,5 @@
 from app.db import db
+import json
 
 """
 database model
@@ -128,9 +129,18 @@ class Learner(db.Model):
     action = db.Column(db.Integer, nullable=True, info='动作')
 
     start_time = db.Column(db.DateTime, nullable=False, info='创建时间')
+    
+    test_task_id = db.Column(db.String(36), nullable=False, info='测试任务ID')
+    test_state = db.Column(db.String(1), nullable=False, default='0', info='测试状态')
     @property
     def serialize(self):
         return to_json(self, self.__class__)
+    @property
+    def serialize_all(self):
+        d = to_json(self, self.__class__)
+        v = getattr(self, 'learner_parameters')
+        d['learner_parameters'] = json.loads(v)
+        return d
 
 
 class Decision(db.Model):

@@ -61,6 +61,13 @@ export default {
       method: 'GET'
     })
   },
+  // 模型测试
+  learnerTest (id) {
+    return request({
+      url: `/learner/learnerTest?learner_id=${id}`,
+      method: 'GET'
+    })
+  },
   // 算法接口
   queryAlgorithm (algorithmCategory) {
     return request({

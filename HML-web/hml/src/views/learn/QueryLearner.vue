@@ -21,7 +21,7 @@
               <el-button  size="mini" plain @click="trainProgress(scope.row.task_id)" style="font-size: 16px">训练进度</el-button>
               <el-button size="mini" plain @click="handleDownLoadPrediction(scope.row)" style="font-size: 16px">下载预测结果</el-button>
               <el-button size="mini" plain @click="handleDownLoadReport(scope.row)" style="font-size: 16px">下载预测报告</el-button>
-              <el-button v-if="scope.row.train_state==='2'" size="mini" plain @click="handleModelTest(scope.row.learner_id)" style="font-size: 16px">模型测试</el-button>
+              <el-button v-if="scope.row.train_state==='2' && (scope.row.learner_parameters.train_name ==='HML_RL'|| scope.row.learner_parameters.train_name === 'HML_ML')" size="mini" plain @click="handleModelTest(scope.row.learner_id)" style="font-size: 16px">模型测试</el-button>
               <el-button  size="mini" type="danger" plain icon="el-icon-delete" @click="handleDelete(scope.row.learner_id)" style="font-size: 16px">删除</el-button>
               <!-- <el-button  size="mini" type="primary" plain  @click="taskProgress(scope.row.task_id)">操作进度</el-button>
               <el-button  size="mini" type="danger" plain  @click="handleDelete(scope.row.featureEng_id)">删除</el-button> -->
@@ -49,6 +49,11 @@
         <!-- 查看进度条的对话框 -->
     <el-dialog title="查看学习器训练进度" :visible.sync="queryProgressVisible" width="30%">
       <el-progress type="circle" :percentage="progress*100"></el-progress>
+    </el-dialog>
+        <!-- 模型测试的对话框 -->
+    <el-dialog title="查看学习器测试进度" :visible.sync="modelTestVisible" width="30%">
+      <el-progress v-if="modelTestVisible != 'SUCCESS'" type="circle" :percentage="modelTestProgress*100"></el-progress>
+      <div v-if="modelTestState === 'SUCCESS'" class = "basicGenPower" >平均reward为：{{ modelTestReward }}</div>
     </el-dialog>
     </div>
 </template>
@@ -102,6 +107,10 @@ export default {
       queryProgressVisible: false,
       progress: 0,
       progressStatus: '',
+      modelTestVisible: false,
+      modelTestState: '',
+      modelTestProgress: 0,
+      modelTestReward: 0,
       timer: null
     }
   },
@@ -155,6 +164,16 @@ export default {
     // 模型测试
     handleModelTest (rowId) {
       console.log(rowId)
+      this.modelTestVisible = true
+      learnApi.learnerTest(rowId).then(response => {
+        console.log(response)
+        const resp = response.data.data
+        this.modelTestProgress = resp.progress
+        this.modelTestState = resp.state
+        if (resp.state === 'SUCCESS') {
+          this.modelTestReward = resp.reward
+        }
+      })
     },
     // 查看分析任务进度
     trainProgress (rowId) {
@@ -180,6 +199,8 @@ export default {
     // 下载预测结果文件
     handleDownLoadPrediction (row) {
       console.log(row)
+      // console.log(row.learner_parameters)
+      // console.log(row.learner_parameters.train_name)
       if (row.train_state === '2') {
         learnApi.downloadPrediction(row.learner_id).then(response => {
           console.log(response)

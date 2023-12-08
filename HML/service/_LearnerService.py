@@ -7,6 +7,8 @@ import os
 import shutil
 import pandas as pd
 import time
+import json
+import numpy
 
 
 class LearnerService:
@@ -137,3 +139,53 @@ class LearnerService:
             }
 
         return data
+    # 模型测试：
+    def modelTest(self, learner, learner_parameters, dataset_file_path):
+      if learner.test_task_id is None:
+        test_task = LearnerTasks.test.apply_async((learner.serialize,
+                                               learner_parameters,
+                                               dataset_file_path), countdown=1)
+        learner.test_task_id = test_task.id
+        self.learnerDao.updateLearnerAll(learner)
+      else:
+        test_task = LearnerTasks.test.AsyncResult(learner.test_task_id)
+      print("test_task")
+      print(test_task.state)
+      print(test_task.info)
+      if test_task.state == 'PENDING':
+            data = {
+                'state': test_task.state,
+                'progress': 0.00,
+                'message': 'test_task pending or not exist'
+            }
+      elif test_task.state == 'FAILURE':
+          data = {
+              'state': test_task.state,
+              'progress': 1.00,
+              'message': str(test_task.info)
+          }
+      elif test_task.state == 'SUCCESS':
+          reward = self.getRewardFilePath()
+          data = {
+              'state': test_task.state,
+              'progress': 1.00,
+              'message': str(test_task.info),
+              'reward': reward
+          }
+      else:
+          data = {
+              'state': test_task.state,
+              # meta 中的数据，通过 task.info.get() 可以获得
+              'progress': test_task.info.get('progress', 0.00),
+              'message': test_task.info.get('message', '')
+          }
+
+      return data
+    # 获取测试数据
+    def getRewardFilePath(self, learner):
+        file_directory = os.path.join(current_app.config["SAVE_L_MODEL_PATH"], learner.learner_id)
+        file_name = 'test_info.npy'
+        file_path = os.path.join(file_directory, file_name)
+        file = numpy.load(file_path, allow_pickle=True).item()
+        
+        return file

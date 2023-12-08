@@ -88,7 +88,8 @@
             <el-button class="submitBtn" type="primary" @click="submitAllForm" style="font-size: 20px">开始训练</el-button>
             </el-form>
         </el-col>
-        <el-col v-if="(learnParamsForm.train_name === '')?false:true" align="left" :span="16">
+        <!-- <el-col v-if="(learnParamsForm.train_name === '')?false:true" align="left" :span="16"> -->
+        <el-col align="left" :span="16">
           <el-row align="center">
             <img :src="TrainMethodsIntroductions.image_url"  style="width: 1000px; height: 400px; object-fit: scale-down;">
           </el-row>
@@ -175,22 +176,28 @@ export default {
   },
   created () {
     this.addLearnerForm.learner_type = 'Machine'
-    this.learnParamsForm.train_name = 'HML_ML'
-    this.algorithm_parameters = [
-      {
-        introduction: '备注',
-        name: 'note',
-        select: 'single-select',
-        type: 'string'
-      }
-    ]
+    // this.learnParamsForm.train_name = 'HML_ML'
+    // this.algorithm_parameters = [
+    //   {
+    //     introduction: '备注',
+    //     name: 'note',
+    //     select: 'single-select',
+    //     type: 'string'
+    //   }
+    // ]
     this.getAlgorithm()
-    this.getAlgorithmTrainMethodsIntroductions(this.learnParamsForm.train_name)
+    this.getAlgorithmTrainMethodsIntroductions('HML_ML')
+    // this.getAlgorithmTrainMethodsIntroductions(this.learnParamsForm.train_name)
     this.getLearnerInfo()
+    // this.handleSelectLearnType()
     this.timer = setInterval(() => {
       this.getLearnerInfo()
     }, 2000)
   },
+  // mounted () {
+  //   this.learnParamsForm.train_name = 'HML_ML'
+  //   this.handleSelectTrainName()
+  // },
   destroyed () {
     clearInterval(this.timer)
   },
@@ -232,6 +239,8 @@ export default {
     },
     // 当学习器类型发生改变的时候
     handleSelectLearnType () {
+      console.log('handleSelectLearnType')
+      console.log(this.displayAlgorithm_Options)
       this.learnParamsForm.train_name = this.displayAlgorithm_Options[0].algorithm_name
       this.handleSelectTrainName()
     },
@@ -297,6 +306,10 @@ export default {
         this.algorithm_Options = response.data.data
         this.algorithm_name = response.data.data.map(item => item.algorithm_name)
         console.log(this.algorithm_Options)
+        this.learnParamsForm.train_name = 'HML_ML'
+        this.handleSelectTrainName()
+        // this.getAlgorithmTrainMethodsIntroductions('HML_ML')
+        this.getAlgorithmTrainMethodsIntroductions(this.learnParamsForm.train_name)
       })
     },
     // 获取学习器训练方法描述信息
