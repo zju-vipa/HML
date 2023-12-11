@@ -369,7 +369,7 @@ def run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, f
         return data_operator
     if featureEng_process['operate_name'] == 'FETCH':
         if type(data) == str:
-            data_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FactorGNN', 'data.csv')
+            data_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FETCH', 'grid_process.csv')
             data = pd.read_csv(data_path, delimiter=',', header=0, encoding='utf-8')
         else:
             data = data
@@ -523,8 +523,8 @@ def run_algorithm_test(self, data, process_idx, processes_num, featureEng_id, fe
             return data_factor
     if featureEng_process['operate_name'] == 'FETCH':
         if type(data) == str:
-            data_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FactorGNN',
-                                     'data.csv')
+            data_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FETCH',
+                                     'grid_process.csv')
             data = pd.read_csv(data_path, delimiter=',', header=0, encoding='utf-8')
         else:
             data = data
