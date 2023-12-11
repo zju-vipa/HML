@@ -85,14 +85,14 @@ class fetch():
         df_part = pd.read_csv(os.path.join(self.result_path, 'grid_process.csv'), delimiter=',', header=0, encoding='utf-8')
         part_columns = df_part.columns.tolist()
         part_columns.remove('label')
-
+        
         configs = {'mode': 'regression',
-                   'c_columns': part_columns,
-                   'd_columns': [],
-                   'target': 'label',
-                   "model": "lgb",
-                   "dataset_path": "data/grid.csv",
-                   "metric": "grid_score"}
+           'c_columns': part_columns,
+           'd_columns': [],
+           'target': 'label',
+           "model": "lgb",
+           "dataset_path": "data/grid.csv",
+           "metric": "grid_score"}
         data_configs = configs
         c_columns = data_configs['c_columns']
         d_columns = data_configs['d_columns']

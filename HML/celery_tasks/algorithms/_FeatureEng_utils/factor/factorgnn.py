@@ -40,7 +40,7 @@ class factorgnn(nn.Module):
                     open(os.path.join(self.result_path, 'line.pkl'), 'wb'))
         batched_graph_structure = batched_graph_structure.to('cpu')
         self.in_feats = dataset[0][0].ndata['feat'].shape[1]
-        self.hidden_feats = self.latent_dims
+        self.hidden_feats = 32
         self.out_feats = 1
         # num_latent=4, feat_drop=0
         model = FactorGNN(batched_graph_structure, self.in_feats, self.hidden_feats, self.out_feats, self.num_layers,
