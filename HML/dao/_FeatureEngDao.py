@@ -64,3 +64,8 @@ class FeatureEngDao(BaseDao):
     def queryFinishedFeatureEngListByUserId(self, user_id):
         featureEngs = FeatureEng.query.filter_by(user_id=user_id, operate_state='2').all()
         return featureEngs
+
+    def updateFeatureEngEfficiency(self, efficiency, featureEng_id):
+        featureEng = FeatureEng.query.filter_by(featureEng_id=featureEng_id).first()
+        featureEng.FeatureEng_efficiency = efficiency
+        self.db.session.commit()

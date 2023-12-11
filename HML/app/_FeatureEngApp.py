@@ -228,8 +228,9 @@ def queryLatestResult():
             taskDetails['network'] = '300节点电网'
             taskDetails['checkedModules'] = featureEng.featureEng_modules
             if featureEng.FeatureEng_efficiency:
-                taskDetails['original_efficiency'] = round(float(featureEng.FeatureEng_efficiency), 2)
+                taskDetails['original_efficiency'] = round(float(taskDetails['effective_feature_num'] / all_feature_num) * 100, 2)
                 taskDetails['original_accuracy'] = round(float(featureEng.FeatureEng_accuracy), 2)
+                featureEngService.updateEfficiency(taskDetails['original_efficiency'], featureEng.featureEng_id)
             else:
                 taskDetails['original_efficiency'] = None
                 taskDetails['original_accuracy'] = None
@@ -453,8 +454,9 @@ def querySelectedTaskResults():
             taskDetails['network'] = '300节点电网'
             taskDetails['checkedModules'] = featureEng.featureEng_modules
             if featureEng.FeatureEng_efficiency:
-                taskDetails['original_efficiency'] = round(float(featureEng.FeatureEng_efficiency), 2)
+                taskDetails['original_efficiency'] = round(float(taskDetails['effective_feature_num'] / all_feature_num) * 100, 2)
                 taskDetails['original_accuracy'] = round(float(featureEng.FeatureEng_accuracy), 2)
+                featureEngService.updateEfficiency(taskDetails['original_efficiency'], featureEng_id)
             else:
                 taskDetails['original_efficiency'] = None
                 taskDetails['original_accuracy'] = None

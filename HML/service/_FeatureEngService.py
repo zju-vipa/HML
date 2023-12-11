@@ -119,7 +119,7 @@ class FeatureEngService:
                 featureEng['FeatureEng_accuracy'] = None
                 featureEng['FeatureEng_efficiency'] = None
             featureEng['operate_state'] = featureEngs[i].operate_state
-            featureEng['start_time'] = featureEngs[i].start_time
+            featureEng['start_time'] = str(featureEngs[i].start_time)
             if featureEngs[i].end_time:
                 duration = featureEngs[i].end_time - featureEngs[i].start_time
                 days = duration.days
@@ -169,8 +169,12 @@ class FeatureEngService:
             featureEng['featureEng_name'] = featureEngs[i].featureEng_name
             featureEng['task'] = new_dataset_introduction
             featureEng['featureEng_type'] = featureEngs[i].featureEng_type
-            featureEng['FeatureEng_accuracy'] = round(float(featureEngs[i].FeatureEng_accuracy), 2)
-            featureEng['FeatureEng_efficiency'] = round(float(featureEngs[i].FeatureEng_efficiency), 2)
+            if featureEngs[i].FeatureEng_accuracy:
+                featureEng['FeatureEng_accuracy'] = round(float(featureEngs[i].FeatureEng_accuracy), 2)
+                featureEng['FeatureEng_efficiency'] = round(float(featureEngs[i].FeatureEng_efficiency), 2)
+            else:
+                featureEng['FeatureEng_accuracy'] = None
+                featureEng['FeatureEng_efficiency'] = None
             featureEngList.append(featureEng)
         if len(featureEngList) != 0:
             return featureEngList
@@ -260,7 +264,9 @@ class FeatureEngService:
         featureEng_processes = featureEng.featureEng_processes
         featureEng_processes = json.loads(featureEng_processes)
         new_dataset_id = featureEng.new_dataset_id
+        original_dataset_id = featureEng.original_dataset_id
         new_dataset = self.datasetDao.queryDatasetById(new_dataset_id)
+        original_dataset = self.datasetDao.queryDatasetById(original_dataset_id)
         new_dataset_name = new_dataset.dataset_name
         new_dataset_introduction = new_dataset.introduction
         new_dataset_file_type = new_dataset.file_type
@@ -297,32 +303,36 @@ class FeatureEngService:
             if os.path.exists(data_path):
                 columns = pd.read_csv(data_path, delimiter=',', encoding='utf-8').columns.tolist()
                 score_file_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'score.csv')
-                with open(score_file_path, 'r') as file:
-                    reader = csv.reader(file)
-                    header = next(reader)
-                    data = [row for row in reader]
-                    data_num = len(columns) - 1
-                    effective_data_num = int(data_num * float(featureEng.FeatureEng_efficiency) / 100)
-                    sorted_data = data[:effective_data_num]
-                    key = []
-                    for row in sorted_data:
-                        key.append(row[0])
-                    file.close()
+                key = []
+                if os.path.exists(score_file_path):
+                    with open(score_file_path, 'r') as file:
+                        reader = csv.reader(file)
+                        header = next(reader)
+                        data = [row for row in reader]
+                        data_num = len(columns) - 1
+                        effective_data_num = int(data_num * float(featureEng.FeatureEng_efficiency) / 100)
+                        sorted_data = data[:effective_data_num]
+                        for row in sorted_data:
+                            key.append(row[0])
+                        file.close()
                 for k in range(len(columns)-1):
                     feature_item = {}
                     feature_item['name'] = columns[k]
                     feature_item['dataset'] = new_dataset_name
-                    feature_item['task'] = new_dataset_introduction
+                    feature_item['task'] = original_dataset.introduction
                     feature_item['featureConstruct'] = feature_construct
                     feature_item['featureGeneration'] = feature_generation
                     feature_item['featureDecoupling'] = feature_decoupling
                     feature_item['featureLearning'] = feature_learning
                     feature_item['featureDerivation'] = feature_derive
                     feature_item['featureSelection'] = feature_selection
-                    if columns[k] in key:
-                        feature_item['effective'] = '是'
+                    if len(key) == 0:
+                        feature_item['effective'] = '暂无'
                     else:
-                        feature_item['effective'] = '否'
+                        if columns[k] in key:
+                            feature_item['effective'] = '是'
+                        else:
+                            feature_item['effective'] = '否'
                     featureList.append(feature_item)
             else:
                 return None
@@ -470,3 +480,7 @@ class FeatureEngService:
             running_message['progress'] = 1.0
             running_message['message'] = '完成！'
         return running_message
+
+    def updateEfficiency(self, efficiency, featureEng_id):
+        self.featureEngDao.updateFeatureEngEfficiency(efficiency, featureEng_id)
+        return 'SUCCESS'

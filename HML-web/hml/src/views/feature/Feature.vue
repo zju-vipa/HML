@@ -161,18 +161,12 @@
                       </el-row>
                     </div>
                     <div style="margin: 15px; text-align: center; height: 300px">
-                      <el-row v-if="newResultForm.efficiency != null">
-                        <el-col span="6">
-                          <h3 style="text-align: left">{{newResultForm.taskDetails[6].label}}</h3>
+                      <el-row v-if="newResultForm.efficiency != null" style="text-align: center">
+                        <el-col span="12" style="text-align: center">
+                          <h3 style="text-align: center; font-size: 20px">{{newResultForm.taskDetails[6].label}}：{{newResultForm.taskDetails[6].value}}</h3>
                         </el-col>
-                        <el-col span="6" style="text-align: left">
-                          <h4 style="font-weight: lighter">{{newResultForm.taskDetails[6].value}}</h4>
-                        </el-col>
-                        <el-col span="6">
-                          <h3 style="text-align: left">{{newResultForm.taskDetails[7].label}}</h3>
-                        </el-col>
-                        <el-col span="6" style="text-align: left">
-                          <h4 style="font-weight: lighter">{{newResultForm.taskDetails[7].value}}</h4>
+                        <el-col span="12" style="text-align: center">
+                          <h3 style="text-align: center; font-size: 20px">{{newResultForm.taskDetails[7].label}}：{{newResultForm.taskDetails[7].value}}</h3>
                         </el-col>
                       </el-row>
                       <el-row v-if="newResultForm.efficiency != null">
@@ -480,18 +474,12 @@
                         </el-row>
                       </div>
                       <div style="margin: 15px; text-align: center; height: 300px">
-                        <el-row v-if="newResultForm.efficiency != null">
-                          <el-col span="6">
-                            <h3 style="text-align: left">{{newResultForm.taskDetails[6].label}}</h3>
+                        <el-row v-if="newResultForm.efficiency != null" style="text-align: center">
+                          <el-col span="12" style="text-align: center">
+                            <h3 style="text-align: center; font-size: 20px">{{newResultForm.taskDetails[6].label}}：{{newResultForm.taskDetails[6].value}}</h3>
                           </el-col>
-                          <el-col span="6" style="text-align: left">
-                            <h4 style="font-weight: lighter">{{newResultForm.taskDetails[6].value}}</h4>
-                          </el-col>
-                          <el-col span="6">
-                            <h3 style="text-align: left">{{newResultForm.taskDetails[7].label}}</h3>
-                          </el-col>
-                          <el-col span="6" style="text-align: left">
-                            <h4 style="font-weight: lighter">{{newResultForm.taskDetails[7].value}}</h4>
+                          <el-col span="12" style="text-align: center">
+                            <h3 style="text-align: center; font-size: 20px">{{newResultForm.taskDetails[7].label}}：{{newResultForm.taskDetails[7].value}}</h3>
                           </el-col>
                         </el-row>
                         <el-row v-if="newResultForm.efficiency != null">
