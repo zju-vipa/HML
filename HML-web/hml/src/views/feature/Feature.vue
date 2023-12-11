@@ -344,7 +344,7 @@
                   </el-table>
                 </div>
               </el-card>
-              <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 530px">
+              <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 570px">
                 <div slot="header" class="header">
                   <el-row type="flex" align="middle">
                     <el-col span="12">
@@ -361,7 +361,7 @@
                   </div>
                 </el-row>
                 <div style="margin: 15px; text-align: center;">
-                  <div id="featureCharts" style="width: 100%; height: 650px; margin: 0 auto;"></div>
+                  <div id="featureCharts" style="width: 100%; height: 510px; margin: 0 auto;"></div>
                 </div>
               </el-card>
             </el-col>
@@ -618,8 +618,7 @@
                     <el-table-column prop="operate_state" label="状态" style="text-align: center">
                       <template slot-scope="scope">
                         <span v-if="scope.row.operate_state==='已完成'" style="color: green">已完成</span>
-                        <span v-else-if="scope.row.operate_state==='交互中'"  style="color: orange">交互中</span>
-                        <span v-else-if="scope.row.operate_state==='交互中'"  style="color: gray">{{ scope.row.task_progress }}</span>
+                        <span v-else-if="scope.row.operate_state==='交互中'"  style="color: orange">交互中<br>{{ scope.row.task_progress }}%</span>
                         <span v-else-if="scope.row.operate_state==='已停止'"  style="color: red">已停止</span>
                       </template>
                     </el-table-column>
@@ -925,7 +924,7 @@ export default {
             } else {
               type = '纯人工方法'
             }
-            this.HumanFeaData.push({ featureEng_id: resp[i].featureEng_id, featureEng_name: resp[i].featureEng_name, featureEng_type: type, featureEng_accuracy: resp[i].FeatureEng_accuracy, featureEng_efficiency: resp[i].FeatureEng_efficiency, operate_state: state, start_time: resp[i].start_time, spent_time: resp[i].spent_time, task_progress: resp.task_progress })
+            this.HumanFeaData.push({ featureEng_id: resp[i].featureEng_id, featureEng_name: resp[i].featureEng_name, featureEng_type: type, featureEng_accuracy: resp[i].FeatureEng_accuracy, featureEng_efficiency: resp[i].FeatureEng_efficiency, operate_state: state, start_time: resp[i].start_time, spent_time: resp[i].spent_time, task_progress: resp[i].task_progress })
           }
           console.log(this.HumanFeaData)
           if (this.newResultForm.isNewResult) {
@@ -963,8 +962,8 @@ export default {
           for (let i = 0; i < upper; i = i + 1) {
             this.IteractionRecord.push({ record_efficiency: resp[i].record_efficiency + '%', record_accuracy: resp[i].record_accuracy + '%' })
           }
-          this.drawChart()
         }
+        this.drawChart()
       })
     },
     drawChart () {

@@ -305,7 +305,7 @@
               </el-table>
             </div>
           </el-card>
-          <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 530px">
+          <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 570px">
             <div slot="header" class="header">
               <el-row type="flex" align="middle">
                 <el-col span="12">
@@ -322,7 +322,7 @@
               </div>
             </el-row>
             <div style="margin: 15px; text-align: center;">
-              <div id="featureCharts" style="width: 100%; height: 650px; margin: 0 auto"></div>
+              <div id="featureCharts" style="width: 100%; height: 510px; margin: 0 auto"></div>
             </div>
           </el-card>
         </el-col>

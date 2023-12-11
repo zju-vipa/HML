@@ -145,10 +145,11 @@ class FeatureEngService:
                 featureEng['spent_time'] = None
             task_id = featureEngs[i].task_id
             message = self.getTaskStatus(task_id)
+            current_app.logger.info(message['progress'])
             if len(message) == 0:
                 task_progress = None
             else:
-                task_progress = message['progress']
+                task_progress = int(message['progress'] * 100)
             featureEng['task_progress'] = task_progress
             featureEngList.append(featureEng)
         if len(featureEngList) != 0:

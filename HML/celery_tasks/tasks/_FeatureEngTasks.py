@@ -422,12 +422,12 @@ def run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, f
                 for i in range(len(data_columns)):
                     data_select_columns.append('select_{}'.format(i))
             data_select.columns = data_select_columns
-            select_columns = []
-            for i in range(10):
-                select_columns.append('select_{}'.format(i))
-            select_columns.append('label')
-            data_select = data_select[select_columns]
-            current_app.logger.info(data_select)
+            # select_columns = []
+            # for i in range(10):
+            #     select_columns.append('select_{}'.format(i))
+            # select_columns.append('label')
+            # data_select = data_select[select_columns]
+            # current_app.logger.info(data_select)
             return data_select
         # 传入的为dataframe
         else:
@@ -441,11 +441,11 @@ def run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, f
                 for i in range(len(data_columns)):
                     data_select_columns.append('select_{}'.format(i))
             data.columns = data_select_columns
-            select_columns = []
-            for i in range(10):
-                select_columns.append('select_{}'.format(i))
-            select_columns.append('label')
-            data = data[select_columns]
+            # select_columns = []
+            # for i in range(10):
+            #     select_columns.append('select_{}'.format(i))
+            # select_columns.append('label')
+            # data = data[select_columns]
             return data
     return data
 
@@ -573,12 +573,12 @@ def run_algorithm_test(self, data, process_idx, processes_num, featureEng_id, fe
                 for i in range(len(data_columns)):
                     data_select_columns.append('select_{}'.format(i))
             data_select.columns = data_select_columns
-            select_columns = []
-            for i in range(10):
-                select_columns.append('select_{}'.format(i))
-            select_columns.append('label')
-            data_select = data_select[select_columns]
-            current_app.logger.info(data_select)
+            # select_columns = []
+            # for i in range(10):
+            #     select_columns.append('select_{}'.format(i))
+            # select_columns.append('label')
+            # data_select = data_select[select_columns]
+            # current_app.logger.info(data_select)
             return data_select
         # 传入的为dataframe
         else:
@@ -592,11 +592,11 @@ def run_algorithm_test(self, data, process_idx, processes_num, featureEng_id, fe
                 for i in range(len(data_columns)):
                     data_select_columns.append('select_{}'.format(i))
             data.columns = data_select_columns
-            select_columns = []
-            for i in range(10):
-                select_columns.append('select_{}'.format(i))
-            select_columns.append('label')
-            data = data[select_columns]
+            # select_columns = []
+            # for i in range(10):
+            #     select_columns.append('select_{}'.format(i))
+            # select_columns.append('label')
+            # data = data[select_columns]
             return data
     return data
 
