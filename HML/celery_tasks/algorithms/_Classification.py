@@ -44,3 +44,42 @@ def algorithm_RFC_test(x, model_enc, model_rfc):
 
     return y_prediction
 
+
+from sklearn.svm import SVC
+
+def algorithm_SVM_train(x, y, n_estimators):
+    model_enc = LabelEncoder()
+    model_enc.fit(y)
+    y = model_enc.transform(y)
+
+    model_svm = SVC()
+    model_svm.fit(x, y)
+
+    y_prediction = model_svm.predict(x)
+    report = classification_report(y, y_prediction)
+
+    y_prediction = model_enc.inverse_transform(y_prediction)
+
+    y_prediction = pd.Series(y_prediction, name='label')
+
+    return model_enc, model_svm, y_prediction, report
+
+from sklearn.linear_model import LogisticRegression
+
+def algorithm_LR_train(x, y, n_estimators):
+    model_enc = LabelEncoder()
+    model_enc.fit(y)
+    y = model_enc.transform(y)
+
+    model_lr = LogisticRegression()
+    model_lr.fit(x, y)
+
+    y_prediction = model_lr.predict(x)
+    report = classification_report(y, y_prediction)
+
+    y_prediction = model_enc.inverse_transform(y_prediction)
+
+    y_prediction = pd.Series(y_prediction, name='label')
+
+    return model_enc, model_lr, y_prediction, report
+

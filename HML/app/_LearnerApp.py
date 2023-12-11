@@ -21,7 +21,7 @@ def query_learner_list():
         user_id = g.user_id
         learners = learnerService.queryLearnerListByUserId(user_id)
         if learners:
-            learners = [learner.serialize for learner in learners]
+            learners = [learner.serialize_all for learner in learners]
         else:
             learners = None
         return {'meta': {'msg': 'query learner list success', 'code': 200}, 'data': learners}, 200
@@ -370,3 +370,44 @@ def learner_action_input():
 
         return {'meta': {'msg': msg, 'code': code}}, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
+
+@bp.route('/learnerTest', methods=('GET', 'POST'))
+@login_required
+def learner_test():
+    # print('learner_test11')
+    if request.method == 'GET':
+        try:
+            learner_id = request.args.get('learner_id')
+        except Exception:
+            return get_error(RET.PARAMERR, 'Error: no request')
+
+        if not learner_id:
+            return get_error(RET.PARAMERR, 'Error: request lacks learner_id')
+
+        print('learner_id')
+        print(learner_id)
+        learner = learnerService.queryLearnerById(learner_id)
+        # dataset_id = learner.dataset_id
+        # if not dataset_id:
+        #     return get_error(RET.PARAMERR, 'Error: request lacks dataset_id')
+
+        # dataset = datasetService.queryDatasetById(dataset_id)
+
+        # if not dataset:
+        #     return get_error(RET.PARAMERR, 'Error: dataset_id not exists')
+
+        # dataset_file_path = datasetService.getDatasetFilePath(dataset)
+
+        # if not dataset_file_path:
+        #     return get_error(RET.FILEERR, 'Error: dataset file not exists')
+        # print('learner_test')
+        # learner_parameters = json.loads(learner.learner_parameters, ensure_ascii=False)
+        learner_parameters=None
+        dataset_file_path=None
+        data = learnerService.modelTest(learner, learner_parameters, dataset_file_path)
+
+
+
+        return {'meta': {'msg': 'get state success', 'code': 200}, 'data': data}, 200
+    return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
+

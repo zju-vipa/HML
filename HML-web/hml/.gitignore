@@ -12,7 +12,7 @@ HML/utils/model
 *.pkl
 # data
 *.rar
-*.zip
+# *.zip
 
 # local env files
 .env.local
