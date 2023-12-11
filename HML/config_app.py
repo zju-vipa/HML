@@ -5,6 +5,7 @@ SECRET_KEY = 'vipa-hml'
 
 # Database config
 # db_host = '10.214.211.205'
+# db_host = '192.168.1.118'
 db_host = '10.214.211.137'
 # db_host = '192.168.137.8'
 db_port = 8023
@@ -22,6 +23,7 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 ROOT_PATH = '/root/HML'
 ROOT_FILE_PATH = '/root/HML/Data'
 ROOT_MODEL_PATH = '/root/HML/Decision'
+PRETRAINED_MODEL_PATH = '/root/HML/celery_tasks/algorithms/_FeatureEng_utils'
 
 SAVE_DATASET_PATH = os.path.join(ROOT_FILE_PATH, 'dataset')
 SAVE_TMP_DATASET_PATH = os.path.join(ROOT_FILE_PATH, 'tmp_dataset')

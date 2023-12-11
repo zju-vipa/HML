@@ -309,8 +309,10 @@ class AutoFE:
                     self.workers_top5[i] = test_one_worker(args, self.workers_top5[i], c_columns, d_columns, target,
                                                            mode,
                                                            model, metric, self.dfs_['FE_train'], self.dfs_['FE_test'])
-                print(type(self.workers_top5[i].features[0][0]))
-                self.output = self.workers_top5[i].features[0][0]
+                # print(type(self.workers_top5[i].features[0][0]))
+                # self.output = self.workers_top5[i].features[0][0]
+            workers_top5_features = self.workers_top5[0].features
+            self.output = pd.DataFrame(workers_top5_features[0][-1])
             if df_c_encode.shape[0]:
                 self.ppo.update_c(workers_c)
             if args.combine:

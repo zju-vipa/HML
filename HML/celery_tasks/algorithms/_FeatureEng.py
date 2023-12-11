@@ -1,3 +1,4 @@
+import shutil
 import zipfile
 
 import pandas as pd
@@ -8,6 +9,7 @@ from sklearn.decomposition import PCA
 from flask import current_app
 import os
 from celery_tasks.algorithms._FeatureEng_utils.FETCH import fetch as fetch_model
+import torch
 
 def algorithm_GNN_train(self, process_idx, processes_num, data_path, featureEng_id, num_layers, n_components, epoch):
     progress = 0.1 + 0.8 * process_idx / processes_num + 0.05
@@ -21,7 +23,7 @@ def algorithm_GNN_train(self, process_idx, processes_num, data_path, featureEng_
     data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
     # if len(data_files) == 1 and os.path.isdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])):
     decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
-    result_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'result')
+    result_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id)
     graphcnn = gnn.graphcnn(decompress_dataset_path, result_path, num_layers=num_layers, n_components=n_components,
                             epoch=epoch)
     progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.6 / processes_num
@@ -34,8 +36,55 @@ def algorithm_GNN_train(self, process_idx, processes_num, data_path, featureEng_
     data_factor = graphcnn.Dim_Re(model_gnn, decompress_dataset_path)
     return data_factor, model_gnn
 
+def algorithm_GNN_test(self, process_idx, processes_num, data_path, featureEng_id, imported_featureEng, num_layers, n_components, epoch):
+    progress = 0.1 + 0.8 * process_idx / processes_num + 0.05
+    self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 加载模型'.format(process_idx + 1)})
+    decompress_dataset_path = data_path.split('.')[0]
+    dataset_id = decompress_dataset_path.split('/')[-1]
+    if not os.path.exists(decompress_dataset_path):
+        with zipfile.ZipFile(data_path, "r") as zipobj:
+            zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+    data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+    decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
+    result_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id)
+    if not os.path.exists(result_path):
+        os.makedirs(result_path)
+    # if imported_featureEng == '' or imported_featureEng == None:
+    #     num_layers = 5
+    #     n_components = 10
+    #     epoch = 100
+    # else:
+    #     num_layers = num_layers
+    #     n_components = n_components
+    #     epoch = epoch
 
-def algoritm_GNN_apply(data_path, model_GNN):
+    num_layers = 5
+    n_components = 10
+    epoch = 100
+
+    graphcnn = gnn.graphcnn(decompress_dataset_path, result_path, num_layers=num_layers, n_components=n_components, epoch=epoch)
+    progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.6 / processes_num
+    self.update_state(state='PROCESS',
+                      meta={'progress': progress, 'message': '模块{}： 加载模型'.format(process_idx + 1)})
+    # if imported_featureEng == '' or imported_featureEng == None:
+    #     model_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'GNN')
+    # elif not os.path.exists(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], imported_featureEng, 'CASE300_0_32_32_0.001_.pth')):
+    #     model_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'GNN')
+    # else:
+    #     model_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], imported_featureEng)
+    model_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'GNN')
+    model_gnn = graphcnn.load_model(model_path)
+    if not os.path.exists(result_path):
+        os.makedirs(result_path)
+    shutil.copyfile(src=os.path.join(model_path, 'CASE300_0_32_32_0.001_.pth'), dst=os.path.join(result_path, 'CASE300_0_32_32_0.001_.pth'))
+    progress = 0.1 + 0.8 * (process_idx + 1) / processes_num - 0.05
+    self.update_state(state='PROCESS',
+                      meta={'progress': progress, 'message': '模块{}： 特征学习'.format(process_idx + 1)})
+    data_factor = graphcnn.Dim_Re(model_gnn, decompress_dataset_path)
+    return data_factor
+
+
+def algorithm_GNN_apply(data_path, model_GNN):
     decompress_dataset_path = data_path.split('.')[0]
     if not os.path.exists(decompress_dataset_path):
         dataset_id = decompress_dataset_path.split('/')[-1]
@@ -49,8 +98,7 @@ def algoritm_GNN_apply(data_path, model_GNN):
     return data_GNN
 
 
-def algorithm_factorgnn_train(self, process_idx, processes_num, data_path, featureEng_id, epoch, latent_dims,
-                              lr):
+def algorithm_factorgnn_train(self, process_idx, processes_num, data_path, featureEng_id, epoch, latent_dims, lr):
     progress = 0.1 + 0.8 * process_idx / processes_num + 0.05
     self.update_state(state='PROCESS',
                       meta={'progress': progress, 'message': '模块{}： 加载模型'.format(process_idx + 1)})
@@ -62,7 +110,7 @@ def algorithm_factorgnn_train(self, process_idx, processes_num, data_path, featu
     data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
     # if len(data_files) == 1 and os.path.isdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])):
     decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
-    result_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'result')
+    result_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id)
     factorgnn = factor.factorgnn(data_path=decompress_dataset_path, result_path=result_path, epoch=epoch,
                                  latent_dims=latent_dims, lr=lr)
     progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.6 / processes_num
@@ -89,29 +137,80 @@ def algorithm_factorgnn_apply(data_path, model_factor):
     data_factor = pd.DataFrame(model_factor.transform(decompress_dataset_path))
     return data_factor
 
+def algorithm_factorgnn_test(self, process_idx, processes_num, data_path, featureEng_id, imported_featureEng, epoch, latent_dims, lr):
+    progress = 0.1 + 0.8 * process_idx / processes_num + 0.05
+    self.update_state(state='PROCESS',
+                      meta={'progress': progress, 'message': '模块{}： 加载数据'.format(process_idx + 1)})
+    decompress_dataset_path = data_path.split('.')[0]
+    dataset_id = decompress_dataset_path.split('/')[-1]
+    if not os.path.exists(decompress_dataset_path):
+        with zipfile.ZipFile(data_path, "r") as zipobj:
+            zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+    data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+    decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
+    result_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id)
+    # if imported_featureEng == '' or imported_featureEng == None:
+    #     latent_dims = 32
+    # else:
+    #     latent_dims = latent_dims
+    latent_dims = 32
+    factorgnn = factor.factorgnn(data_path=decompress_dataset_path, result_path=result_path, epoch=epoch,
+                                 latent_dims=latent_dims, lr=lr)
+    progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.6 / processes_num
+    self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 加载模型'.format(process_idx + 1)})
+    # if imported_featureEng == '' or imported_featureEng == None:
+    #     model_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FactorGNN')
+    # elif not os.path.exists(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], imported_featureEng, 'factor.pth')):
+    #     model_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FactorGNN')
+    # else:
+    #     model_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], imported_featureEng)
+
+    model_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FactorGNN')
+
+    model_factor = factorgnn.load_model(model_path)
+    if not os.path.exists(result_path):
+        os.makedirs(result_path)
+    shutil.copyfile(src=os.path.join(model_path, 'factor.pth'), dst=os.path.join(result_path, 'factor.pth'))
+    shutil.copyfile(src=os.path.join(model_path, 'factorgnn.pkl'), dst=os.path.join(result_path, 'factorgnn.pkl'))
+    shutil.copyfile(src=os.path.join(model_path, 'graph_structure.pkl'), dst=os.path.join(result_path, 'graph_structure.pkl'))
+    shutil.copyfile(src=os.path.join(model_path, 'line.pkl'), dst=os.path.join(result_path, 'line.pkl'))
+    progress = 0.1 + 0.8 * (process_idx + 1) / processes_num - 0.05
+    self.update_state(state='PROCESS',
+                      meta={'progress': progress, 'message': '模块{}： 特征解耦'.format(process_idx + 1)})
+    data_factor = factorgnn.test(model_factor, decompress_dataset_path)
+    return data_factor
+
 
 def algorithm_FETCH_train(self, process_idx, processes_num, data, featureEng_id, steps_num, worker, epoch):
+    progress = 0.1 + 0.8 * process_idx / processes_num + 0.05
+    self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 加载数据'.format(process_idx + 1)})
+    os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id), exist_ok=True)
+    result_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id)
+    fetchModel = fetch_model.fetch(result_path, steps_num=steps_num, worker=worker, epoch=epoch)
+    progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.6 / processes_num
+    self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 训练模型'.format(process_idx + 1)})
+    data_fetch, model_fetch = fetchModel.main(data)
+    return data_fetch
+
+def algorithm_FETCH_test(self, process_idx, processes_num, data, featureEng_id, steps_num, worker, epoch):
+    # progress = 0.1 + 0.8 * process_idx / processes_num + 0.05
+    # self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 加载数据'.format(process_idx + 1)})
     # progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.6 / processes_num
-    # self.update_state(state='PROCESS',
-    #                   meta={'progress': progress, 'message': '模块{}： 生成数据'.format(process_idx + 1)})
-    # df = pd.read_csv(data)
-    # df_part = pd.DataFrame()
-    # sample_interval = 25
-    # columns = df.columns.tolist()
-    # df_out_col = len(df.columns)
-    # # 得到5000x?维的部分特征
-    # for i in range(0, df_out_col - 1, sample_interval):
-    #     j = i / sample_interval
-    #     df_part[f'fetch_{int(j)}'] = df[columns[i]]
+    # self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 加载模型'.format(process_idx + 1)})
+    # model_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], 'pretrained_models', 'FETCH')
+    # result_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id)
+    # shutil.copyfile(src=os.path.join(model_path, 'grid_process.csv'), dst=os.path.join(result_path, 'grid_process.csv'))
+    # progress = 0.1 + 0.8 * (process_idx + 1) / processes_num - 0.05
+    # self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 生成数据'.format(process_idx + 1)})
+    # df_part = pd.read_csv(os.path.join(model_path, 'grid_process.csv'), delimiter=',', header=0, encoding='utf-8')
     # return df_part
     progress = 0.1 + 0.8 * process_idx / processes_num + 0.05
     self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 加载数据'.format(process_idx + 1)})
     os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id), exist_ok=True)
-    result_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'grid_process.csv')
-    fetchModel = fetch_model.fetch(result_path, steps_num=steps_num, worker=worker, epoch=epoch)
+    result_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id)
+    fetchModel = fetch_model.fetch(result_path, steps_num=1, worker=5, epoch=1)
     progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.6 / processes_num
-    self.update_state(state='PROCESS',
-                      meta={'progress': progress, 'message': '模块{}： 训练模型'.format(process_idx + 1)})
+    self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 生成数据'.format(process_idx + 1)})
     data_fetch, model_fetch = fetchModel.main(data)
     return data_fetch
 

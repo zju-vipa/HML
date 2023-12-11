@@ -45,6 +45,7 @@ class FeatureEngDao(BaseDao):
         featureEng.FeatureEng_accuracy = featureEng_bean.FeatureEng_accuracy
         featureEng.featureEng_operationMode = featureEng_bean.featureEng_operationMode
         featureEng.start_time = featureEng_bean.start_time
+        featureEng.end_time = featureEng_bean.end_time
         self.db.session.commit()
 
     def updateTaskStatus(self, featureEng_id):

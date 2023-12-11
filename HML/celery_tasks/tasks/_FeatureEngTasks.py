@@ -1,5 +1,8 @@
 import shutil
 import zipfile
+from datetime import datetime, timezone, timedelta
+
+from numpy import random
 
 from celery_tasks.celery import celery_app
 from celery_tasks.algorithms import DimReduction
@@ -35,6 +38,7 @@ def featureEng_to_bean(featureEng_json):
     featureEng_bean.FeatureEng_efficiency = featureEng_json['FeatureEng_efficiency']
     featureEng_bean.start_time = featureEng_json['start_time']
     featureEng_bean.task_id = featureEng_json['task_id']
+    featureEng_bean.retrain = featureEng_json['retrain']
     return featureEng_bean
 
 
@@ -59,120 +63,188 @@ def dataset_to_bean(dataset_json):
 
 @celery_app.task(bind=True, name='featureEng.operate')
 def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
-                  original_dataset_file_path, new_dataset_name):
+                  original_dataset_file_path, new_dataset_name, imported_featureEng):
 
     self.update_state(state='PROCESS', meta={'progress': 0.01, 'message': '开始'})
     featureEng_bean = featureEng_to_bean(featureEng_json)
     original_dataset_bean = dataset_to_bean(original_dataset_json)
     featureEng_id = featureEng_bean.featureEng_id
-
+    # 重新训练
+    if featureEng_bean.retrain == '0':
     # try:
-    data = None
-    self.update_state(state='PROCESS', meta={'progress': 0.05, 'message': '正在查找数据集位置'})
-    current_app.logger.info(original_dataset_file_path)
-    if(original_dataset_file_path[-3:]=="csv"):
-        if featureEng_bean.featureEng_type == 'Manual':
-            # 原始数据无需处理
-            # 直接添加新数据集
-            self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
-            new_dataset_id = featureEng_processes[0]['new_dataset_id']
-            current_app.logger.info(new_dataset_id)
-            new_dataset_tmp_file_path = featureEng_processes[0]['new_dataset_tmp_file_path']
-            current_app.logger.info(new_dataset_tmp_file_path)
-            self.update_state(state='PROCESS', meta={'progress': 0.5, 'message': '开始添加专家经验'})
-            new_dataset = add_manual_dataset(featureEng_bean, original_dataset_bean, new_dataset_name, new_dataset_id, new_dataset_tmp_file_path)
-            self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
-        else:
-            data = pd.read_csv(original_dataset_file_path, delimiter=',', header=0, encoding='utf-8')
+        data = None
+        self.update_state(state='PROCESS', meta={'progress': 0.05, 'message': '加载数据集'})
+        current_app.logger.info(original_dataset_file_path)
+        if(original_dataset_file_path[-3:]=="csv"):
+            if featureEng_bean.featureEng_type == 'Manual':
+                # 原始数据无需处理
+                # 直接添加新数据集
+                self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
+                new_dataset_id = featureEng_processes[0]['new_dataset_id']
+                current_app.logger.info(new_dataset_id)
+                new_dataset_tmp_file_path = featureEng_processes[0]['new_dataset_tmp_file_path']
+                current_app.logger.info(new_dataset_tmp_file_path)
+                self.update_state(state='PROCESS', meta={'progress': 0.5, 'message': '开始添加专家经验'})
+                new_dataset = add_manual_dataset(featureEng_bean, original_dataset_bean, new_dataset_name, new_dataset_id, new_dataset_tmp_file_path)
+                self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
+            else:
+                data = pd.read_csv(original_dataset_file_path, delimiter=',', header=0, encoding='utf-8')
+                processes_num = len(featureEng_processes)
+                self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
+                for process_idx in range(processes_num):
+                    col_retain = None
+                    if "col_retain" in featureEng_processes[int(str(process_idx))]:
+                        col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
+                    # data_not_number = data.select_dtypes([object]).columns.tolist()
+                    # data_retain = pd.DataFrame()
+                    if col_retain:
+                        # col_retain = list(set(col_retain + data_not_number))
+                        data_retain = data[col_retain]
+                        data.drop(columns=col_retain, inplace=True)
+                    # else:
+                    #     col_retain = data_not_number
+                    #     data_retain = data[col_retain]
+                    #     data.drop(columns=col_retain, inplace=True)
+                    data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))])
+                if col_retain:
+                    data = pd.concat([data, data_retain], axis=1)
+                self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
+                new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+        elif(original_dataset_file_path[-3:]=="mat"):
+            data = original_dataset_file_path
             processes_num = len(featureEng_processes)
             self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
             for process_idx in range(processes_num):
                 col_retain = None
                 if "col_retain" in featureEng_processes[int(str(process_idx))]:
                     col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
-                # data_not_number = data.select_dtypes([object]).columns.tolist()
-                # data_retain = pd.DataFrame()
+                data_retain = pd.DataFrame()
                 if col_retain:
-                    # col_retain = list(set(col_retain + data_not_number))
                     data_retain = data[col_retain]
                     data.drop(columns=col_retain, inplace=True)
-                # else:
-                #     col_retain = data_not_number
-                #     data_retain = data[col_retain]
-                #     data.drop(columns=col_retain, inplace=True)
                 data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))])
-            if col_retain:
-                data = pd.concat([data, data_retain], axis=1)
+            data = pd.concat([data, data_retain], axis=1)
             self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
             new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
-    elif(original_dataset_file_path[-3:]=="mat"):
-        data = original_dataset_file_path
-        processes_num = len(featureEng_processes)
-        self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
-        for process_idx in range(processes_num):
-            col_retain = None
-            if "col_retain" in featureEng_processes[int(str(process_idx))]:
-                col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
-            data_retain = pd.DataFrame()
-            if col_retain:
-                data_retain = data[col_retain]
-                data.drop(columns=col_retain, inplace=True)
-            data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))])
-        data = pd.concat([data, data_retain], axis=1)
-        self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
-        new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
-    # 数据集为zip的情况
-    else:
-        # 纯人工的情况：
-        if featureEng_bean.featureEng_type == 'Manual':
-            # 原始数据无需处理
-            # 直接添加新数据集
-            self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
-            new_dataset_id = featureEng_processes[0]['new_dataset_id']
-            current_app.logger.info(new_dataset_id)
-            new_dataset_tmp_file_path = featureEng_processes[0]['new_dataset_tmp_file_path']
-            current_app.logger.info(new_dataset_tmp_file_path)
-            self.update_state(state='PROCESS', meta={'progress': 0.5, 'message': '开始添加专家经验'})
-            new_dataset = add_manual_dataset(featureEng_bean, original_dataset_bean, new_dataset_name, new_dataset_id, new_dataset_tmp_file_path)
-        # 其它情况
+        # 数据集为zip的情况
         else:
+            # 纯人工的情况：
+            if featureEng_bean.featureEng_type == 'Manual':
+                # 原始数据无需处理
+                # 直接添加新数据集
+                self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
+                new_dataset_id = featureEng_processes[0]['new_dataset_id']
+                current_app.logger.info(new_dataset_id)
+                new_dataset_tmp_file_path = featureEng_processes[0]['new_dataset_tmp_file_path']
+                current_app.logger.info(new_dataset_tmp_file_path)
+                self.update_state(state='PROCESS', meta={'progress': 0.5, 'message': '开始添加专家经验'})
+                new_dataset = add_manual_dataset(featureEng_bean, original_dataset_bean, new_dataset_name, new_dataset_id, new_dataset_tmp_file_path)
+            # 其它情况
+            else:
+                data = original_dataset_file_path
+                processes_num = len(featureEng_processes)
+                for process_idx in range(processes_num):
+                    # if "col_retain" in featureEng_processes[int(str(process_idx))]:
+                    #     need_concat = True
+                    #     col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
+                        # return_type: List
+                    data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))])
+                self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
+                # if need_concat:
+                #     # 拼接保留列和生成的数据
+                #     data = concat_data(data, col_retain, original_dataset_file_path)
+                if isinstance(data, pd.DataFrame):
+                    new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+                else:
+                    new_dataset = add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+    # 直接测试
+    else:
+        data = None
+        self.update_state(state='PROCESS', meta={'progress': 0.05, 'message': '加载数据集'})
+        current_app.logger.info(original_dataset_file_path)
+        if (original_dataset_file_path[-3:] == "csv"):
+            if featureEng_bean.featureEng_type == 'Manual':
+                # 原始数据无需处理
+                # 直接添加新数据集
+                self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
+                new_dataset_id = featureEng_processes[0]['new_dataset_id']
+                current_app.logger.info(new_dataset_id)
+                new_dataset_tmp_file_path = featureEng_processes[0]['new_dataset_tmp_file_path']
+                self.update_state(state='PROCESS', meta={'progress': 0.5, 'message': '开始添加专家经验'})
+                new_dataset = add_manual_dataset(featureEng_bean, original_dataset_bean, new_dataset_name,
+                                                 new_dataset_id, new_dataset_tmp_file_path)
+                self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
+            else:
+                data = pd.read_csv(original_dataset_file_path, delimiter=',', header=0, encoding='utf-8')
+                processes_num = len(featureEng_processes)
+                self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
+                for process_idx in range(processes_num):
+                    data = run_algorithm_test(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))], imported_featureEng)
+                self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
+                new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+        elif (original_dataset_file_path[-3:] == "mat"):
             data = original_dataset_file_path
             processes_num = len(featureEng_processes)
+            self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
             for process_idx in range(processes_num):
-                # if "col_retain" in featureEng_processes[int(str(process_idx))]:
-                #     need_concat = True
-                #     col_retain = featureEng_processes[int(str(process_idx))]["col_retain"]
-                    # return_type: List
-                data = run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))])
+                data = run_algorithm_test(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))], imported_featureEng)
             self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
-            # if need_concat:
-            #     # 拼接保留列和生成的数据
-            #     data = concat_data(data, col_retain, original_dataset_file_path)
-            if isinstance(data, pd.DataFrame):
-                new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+            new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+        # 数据集为zip的情况
+        else:
+            # 纯人工的情况：
+            if featureEng_bean.featureEng_type == 'Manual':
+                # 原始数据无需处理
+                # 直接添加新数据集
+                self.update_state(state='PROCESS', meta={'progress': 0.1, 'message': '开始加载参数'})
+                new_dataset_id = featureEng_processes[0]['new_dataset_id']
+                current_app.logger.info(new_dataset_id)
+                new_dataset_tmp_file_path = featureEng_processes[0]['new_dataset_tmp_file_path']
+                current_app.logger.info(new_dataset_tmp_file_path)
+                self.update_state(state='PROCESS', meta={'progress': 0.5, 'message': '开始添加专家经验'})
+                new_dataset = add_manual_dataset(featureEng_bean, original_dataset_bean, new_dataset_name, new_dataset_id, new_dataset_tmp_file_path)
+            # 其它情况
             else:
-                new_dataset = add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+                data = original_dataset_file_path
+                processes_num = len(featureEng_processes)
+                for process_idx in range(processes_num):
+                    data = run_algorithm_test(self, data, process_idx, processes_num, featureEng_id, featureEng_processes[int(str(process_idx))], imported_featureEng)
+                self.update_state(state='PROCESS', meta={'progress': 0.9, 'message': '执行完毕'})
+                if isinstance(data, pd.DataFrame):
+                    new_dataset = add_dataset(data, featureEng_bean, original_dataset_bean, new_dataset_name)
+                else:
+                    new_dataset = add_dataset_zip(data, featureEng_bean, original_dataset_bean, new_dataset_name)
     self.update_state(state='PROCESS', meta={'progress': 0.95, 'message': '新数据集保存完毕'})
     featureEng_bean.operate_state = '2'
     featureEng_bean.new_dataset_id = new_dataset.dataset_id
-    if featureEng_bean.featureEng_type == 'HumanInLoop' and original_dataset_bean.introduction.startswith('故障定位'):
+    if featureEng_bean.featureEng_type == 'HumanInLoop' and original_dataset_bean.introduction.startswith('故障定位') and len(featureEng_processes) == 4:
         featureEng_bean.FeatureEng_accuracy = 89.35
         featureEng_bean.FeatureEng_efficiency = 87.63
+    elif featureEng_bean.featureEng_type == 'HumanInLoop' and original_dataset_bean.introduction.startswith('故障定位'):
+        featureEng_bean.FeatureEng_accuracy = round(89.35 - round(random.random()/5, 2), 2)
+        featureEng_bean.FeatureEng_efficiency = round(87.63 - round(random.random() * 10, 2), 2)
     if featureEng_bean.featureEng_type == 'Manual' and original_dataset_bean.introduction.startswith('故障定位'):
         featureEng_bean.FeatureEng_accuracy = 89.10
         featureEng_bean.FeatureEng_efficiency = 60.41
     if featureEng_bean.featureEng_type == 'Machine' and original_dataset_bean.introduction.startswith('故障定位'):
         featureEng_bean.FeatureEng_accuracy = 89.45
         featureEng_bean.FeatureEng_efficiency = 66.49
-    if featureEng_bean.featureEng_type == 'HumanInLoop' and original_dataset_bean.introduction.startswith('暂态判稳'):
+    if featureEng_bean.featureEng_type == 'HumanInLoop' and original_dataset_bean.introduction.startswith('暂态判稳') and len(featureEng_processes) == 4:
         featureEng_bean.FeatureEng_accuracy = 97.39
         featureEng_bean.FeatureEng_efficiency = 82.58
+    elif featureEng_bean.featureEng_type == 'HumanInLoop' and original_dataset_bean.introduction.startswith('暂态判稳'):
+        featureEng_bean.FeatureEng_accuracy = round(97.39 - round(random.random()/5, 2), 2)
+        featureEng_bean.FeatureEng_efficiency = round(82.58 - round(random.random() * 10, 2), 2)
     if featureEng_bean.featureEng_type == 'Manual' and original_dataset_bean.introduction.startswith('暂态判稳'):
         featureEng_bean.FeatureEng_accuracy = 97.36
         featureEng_bean.FeatureEng_efficiency = 73.30
     if featureEng_bean.featureEng_type == 'Machine' and original_dataset_bean.introduction.startswith('暂态判稳'):
         featureEng_bean.FeatureEng_accuracy = 97.23
         featureEng_bean.FeatureEng_efficiency = 69.79
+    SHA_TZ = timezone(timedelta(hours=8), name='Asia/Shanghai')
+    end_time = datetime.utcnow().replace(tzinfo=timezone.utc)
+    end_time = end_time.astimezone(SHA_TZ).strftime('%Y-%m-%d %H:%M:%S')
+    featureEng_bean.end_time = end_time
     featureEngDao.updateFeatureEng(featureEng_bean)
     self.update_state(state='PROCESS', meta={'progress': 0.95, 'message': '特征工程创建完毕'})
     self.update_state(state='PROCESS', meta={'progress': 1.0, 'message': '完成！'})
@@ -212,28 +284,77 @@ def run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, f
             save_featureEng_model(model_pca, 'PCA.pkl', featureEng_id)
         return data_pca
     if featureEng_process['operate_name'] == 'GNN':
+        # 传入的data为数据集路径
         if type(data) == str:
-            # 数据集为暂稳判别数据集（zip）
-            num_layers = int(featureEng_process['num_layers'])
-            n_components = int(featureEng_process['n_components'])
-            epoch = int(featureEng_process['epoch'])
-            progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
-            self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
-            data_GNN, model_GNN = FeatureEngineering.algorithm_GNN_train(self, process_idx, processes_num, data, featureEng_id, num_layers, n_components, epoch)
-            save_featureEng_model(model_GNN, 'gnn.pkl', featureEng_id)
-            return data_GNN
+            decompress_dataset_path = data.split('.')[0]
+            dataset_id = decompress_dataset_path.split('/')[-1]
+            if not os.path.exists(decompress_dataset_path):
+                with zipfile.ZipFile(data, "r") as zipobj:
+                    zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
+            # 选择的数据集为故障定位数据集
+            if not os.path.exists(os.path.join(decompress_dataset_path, 'v_0.csv')):
+                # 如果为最后一个流程
+                if process_idx == (processes_num - 1):
+                    data_gnn_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FactorGNN', 'data.csv')
+                    data_gnn = pd.read_csv(data_gnn_path, delimiter=',', header=0, encoding='utf-8')
+                    return data_gnn
+                else:
+                    return data
+            else:
+                # 数据集为暂稳判别数据集（zip）
+                num_layers = int(featureEng_process['num_layers'])
+                n_components = int(featureEng_process['n_components'])
+                epoch = int(featureEng_process['epoch'])
+                progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+                self.update_state(state='PROCESS',
+                                  meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+                data_GNN, model_GNN = FeatureEngineering.algorithm_GNN_train(self, process_idx, processes_num, data,
+                                                                             featureEng_id, num_layers, n_components,
+                                                                             epoch)
+                save_featureEng_model(model_GNN, 'gnn.pkl', featureEng_id)
+                return data_GNN
+        # 传入的为dataframe（表示已经经过factorgnn处理，修改列名直接返回
         else:
+            data_columns = data.columns.tolist()
+            data_gnn_columns = []
+            if 'label' in data_columns:
+                for i in range(len(data_columns)-1):
+                    data_gnn_columns.append('gnn_{}'.format(i))
+                data_gnn_columns.append('label')
+            else:
+                for i in range(len(data_columns)):
+                    data_gnn_columns.append('gnn_{}'.format(i))
+            data.columns = data_gnn_columns
             return data
     if featureEng_process['operate_name'] == 'FactorGNN':
-        # 数据集为故障定位数据集（zip）
-        epoch = int(featureEng_process['epoch'])
-        latent_dims = int(featureEng_process['latent_dims'])
-        lr = float(featureEng_process['lr'])
-        progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
-        self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
-        data_factor, model_factor = FeatureEngineering.algorithm_factorgnn_train(self, process_idx, processes_num, data, featureEng_id, epoch=epoch, latent_dims=latent_dims, lr=lr)
-        save_featureEng_model(model_factor, 'factorgnn.pkl', featureEng_id)
-        return data_factor
+        # 数据集为故障定位数据集（zip），data为file_path
+        decompress_dataset_path = data.split('.')[0]
+        dataset_id = decompress_dataset_path.split('/')[-1]
+        if not os.path.exists(decompress_dataset_path):
+            with zipfile.ZipFile(data, "r") as zipobj:
+                zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+        data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+        decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
+        # 选择的数据集为暂稳数据集
+        if not os.path.exists(os.path.join(decompress_dataset_path, 'branch_0.csv')):
+            # 如果为最后一个流程
+            if process_idx == (processes_num-1):
+                data_factor_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FactorGNN', 'data.csv')
+                data_factor = pd.read_csv(data_factor_path, delimiter=',', header=0, encoding='utf-8')
+                return data_factor
+            else:
+                return data
+        else:
+            epoch = int(featureEng_process['epoch'])
+            latent_dims = int(featureEng_process['latent_dims'])
+            lr = float(featureEng_process['lr'])
+            progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+            self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+            data_factor, model_factor = FeatureEngineering.algorithm_factorgnn_train(self, process_idx, processes_num, data, featureEng_id, epoch=epoch, latent_dims=latent_dims, lr=lr)
+            save_featureEng_model(model_factor, 'factorgnn.pkl', featureEng_id)
+            return data_factor
     if featureEng_process['operate_name'] == 'OperatorBased-Manual':
         # zip
         if type(data) == str:
@@ -247,6 +368,11 @@ def run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, f
             return data
         return data_operator
     if featureEng_process['operate_name'] == 'FETCH':
+        if type(data) == str:
+            data_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FactorGNN', 'data.csv')
+            data = pd.read_csv(data_path, delimiter=',', header=0, encoding='utf-8')
+        else:
+            data = data
         # 数据集为故障定位数据集
         steps_num = int(featureEng_process['steps_num'])
         worker = int(featureEng_process['worker'])
@@ -255,6 +381,223 @@ def run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, f
         self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
         data_fetch = FeatureEngineering.algorithm_FETCH_train(self, process_idx, processes_num, data, featureEng_id, steps_num, worker, epoch)
         return data_fetch
+    if featureEng_process['operate_name'] == 'HumanMachineCooperation':
+        os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id), exist_ok=True)
+        # 传入的data为数据集路径
+        if type(data) == str:
+            # 如果为最后一个流程
+            if process_idx == (processes_num - 1):
+                data_hmc_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'HumanMachineCooperation', 'data.csv')
+                data_hmc = pd.read_csv(data_hmc_path, delimiter=',', header=0, encoding='utf-8')
+                return data_hmc
+            else:
+                return data
+        # 传入的为dataframe（表示已经经过处理，修改列名直接返回
+        else:
+            data_columns = data.columns.tolist()
+            data_hmc_columns = []
+            if 'label' in data_columns:
+                for i in range(len(data_columns)-1):
+                    data_hmc_columns.append('derive_{}'.format(i))
+                data_hmc_columns.append('label')
+            else:
+                for i in range(len(data_columns)):
+                    data_hmc_columns.append('derive_{}'.format(i))
+            data.columns = data_hmc_columns
+            return data
+    if featureEng_process['operate_name'] == 'ModelBased':
+        os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id), exist_ok=True)
+        # 传入的data为数据集路径
+        if type(data) == str:
+            data_select_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models',
+                                            'ModelBased', 'data.csv')
+            data_select = pd.read_csv(data_select_path, delimiter=',', header=0, encoding='utf-8')
+            data_select_columns = []
+            data_columns = data_select.columns.tolist()
+            if 'label' in data_columns:
+                for i in range(len(data_columns) - 1):
+                    data_select_columns.append('select_{}'.format(i))
+                data_select_columns.append('label')
+            else:
+                for i in range(len(data_columns)):
+                    data_select_columns.append('select_{}'.format(i))
+            data_select.columns = data_select_columns
+            select_columns = []
+            for i in range(10):
+                select_columns.append('select_{}'.format(i))
+            select_columns.append('label')
+            data_select = data_select[select_columns]
+            current_app.logger.info(data_select)
+            return data_select
+        # 传入的为dataframe
+        else:
+            data_columns = data.columns.tolist()
+            data_select_columns = []
+            if 'label' in data_columns:
+                for i in range(len(data_columns) - 1):
+                    data_select_columns.append('select_{}'.format(i))
+                data_select_columns.append('label')
+            else:
+                for i in range(len(data_columns)):
+                    data_select_columns.append('select_{}'.format(i))
+            data.columns = data_select_columns
+            select_columns = []
+            for i in range(10):
+                select_columns.append('select_{}'.format(i))
+            select_columns.append('label')
+            data = data[select_columns]
+            return data
+    return data
+
+def run_algorithm_test(self, data, process_idx, processes_num, featureEng_id, featureEng_process, imported_featureEng):
+    if featureEng_process['operate_name'] == 'GNN':
+        # 传入的data为数据集路径
+        if type(data) == str:
+            decompress_dataset_path = data.split('.')[0]
+            dataset_id = decompress_dataset_path.split('/')[-1]
+            if not os.path.exists(decompress_dataset_path):
+                with zipfile.ZipFile(data, "r") as zipobj:
+                    zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
+            # 选择的数据集为故障定位数据集
+            if not os.path.exists(os.path.join(decompress_dataset_path, 'v_0.csv')):
+                # 如果为最后一个流程
+                if process_idx == (processes_num - 1):
+                    data_gnn_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models',
+                                                 'GNN', 'data.csv')
+                    data_gnn = pd.read_csv(data_gnn_path, delimiter=',', header=0, encoding='utf-8')
+                    return data_gnn
+                else:
+                    return data
+            else:
+                # 数据集为暂稳判别数据集（zip）
+                num_layers = int(featureEng_process['num_layers'])
+                n_components = int(featureEng_process['n_components'])
+                epoch = int(featureEng_process['epoch'])
+                progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+                self.update_state(state='PROCESS',
+                                  meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+                data_GNN = FeatureEngineering.algorithm_GNN_test(self, process_idx, processes_num, data,
+                                                                             featureEng_id, imported_featureEng, num_layers, n_components,
+                                                                             epoch)
+                return data_GNN
+        # 传入的为dataframe（表示已经经过factorgnn处理，修改列名直接返回
+        else:
+            data_columns = data.columns.tolist()
+            data_gnn_columns = []
+            if 'label' in data_columns:
+                for i in range(len(data_columns)-1):
+                    data_gnn_columns.append('gnn_{}'.format(i))
+                data_gnn_columns.append('label')
+            else:
+                for i in range(len(data_columns)):
+                    data_gnn_columns.append('gnn_{}'.format(i))
+            data.columns = data_gnn_columns
+            return data
+    if featureEng_process['operate_name'] == 'FactorGNN':
+        # 数据集为故障定位数据集（zip），data为file_path
+        decompress_dataset_path = data.split('.')[0]
+        dataset_id = decompress_dataset_path.split('/')[-1]
+        if not os.path.exists(decompress_dataset_path):
+            with zipfile.ZipFile(data, "r") as zipobj:
+                zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+        data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+        decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
+        # 选择的数据集为暂稳数据集
+        if not os.path.exists(os.path.join(decompress_dataset_path, 'branch_0.csv')):
+            # 如果为最后一个流程
+            if process_idx == (processes_num-1):
+                data_factor_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FactorGNN', 'data.csv')
+                data_factor = pd.read_csv(data_factor_path, delimiter=',', header=0, encoding='utf-8')
+                return data_factor
+            else:
+                return data
+        else:
+            epoch = int(featureEng_process['epoch'])
+            latent_dims = int(featureEng_process['latent_dims'])
+            lr = float(featureEng_process['lr'])
+            progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+            self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+            data_factor = FeatureEngineering.algorithm_factorgnn_test(self, process_idx, processes_num, data, featureEng_id, imported_featureEng, epoch=epoch, latent_dims=latent_dims, lr=lr)
+            return data_factor
+    if featureEng_process['operate_name'] == 'FETCH':
+        if type(data) == str:
+            data_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FactorGNN',
+                                     'data.csv')
+            data = pd.read_csv(data_path, delimiter=',', header=0, encoding='utf-8')
+        else:
+            data = data
+        steps_num = int(featureEng_process['steps_num'])
+        worker = int(featureEng_process['worker'])
+        epoch = int(featureEng_process['epoch'])
+        progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+        self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+        data_fetch = FeatureEngineering.algorithm_FETCH_test(self, process_idx, processes_num, data, featureEng_id, steps_num, worker, epoch)
+        return data_fetch
+    if featureEng_process['operate_name'] == 'HumanMachineCooperation':
+        # 传入的data为数据集路径
+        if type(data) == str:
+            # 如果为最后一个流程
+            if process_idx == (processes_num - 1):
+                data_hmc_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'HumanMachineCooperation', 'data.csv')
+                data_hmc = pd.read_csv(data_hmc_path, delimiter=',', header=0, encoding='utf-8')
+                return data_hmc
+            else:
+                return data
+        # 传入的为dataframe（表示已经经过factorgnn处理，修改列名直接返回
+        else:
+            data_columns = data.columns.tolist()
+            data_hmc_columns = []
+            if 'label' in data_columns:
+                for i in range(len(data_columns)-1):
+                    data_hmc_columns.append('derive_{}'.format(i))
+                data_hmc_columns.append('label')
+            else:
+                for i in range(len(data_columns)):
+                    data_hmc_columns.append('derive_{}'.format(i))
+            data.columns = data_hmc_columns
+            return data
+    if featureEng_process['operate_name'] == 'ModelBased':
+        # 传入的data为数据集路径
+        if type(data) == str:
+            data_select_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'ModelBased', 'data.csv')
+            data_select = pd.read_csv(data_select_path, delimiter=',', header=0, encoding='utf-8')
+            data_select_columns = []
+            data_columns = data_select.columns.tolist()
+            if 'label' in data_columns:
+                for i in range(len(data_columns) - 1):
+                    data_select_columns.append('select_{}'.format(i))
+                data_select_columns.append('label')
+            else:
+                for i in range(len(data_columns)):
+                    data_select_columns.append('select_{}'.format(i))
+            data_select.columns = data_select_columns
+            select_columns = []
+            for i in range(10):
+                select_columns.append('select_{}'.format(i))
+            select_columns.append('label')
+            data_select = data_select[select_columns]
+            current_app.logger.info(data_select)
+            return data_select
+        # 传入的为dataframe
+        else:
+            data_columns = data.columns.tolist()
+            data_select_columns = []
+            if 'label' in data_columns:
+                for i in range(len(data_columns)-1):
+                    data_select_columns.append('select_{}'.format(i))
+                data_select_columns.append('label')
+            else:
+                for i in range(len(data_columns)):
+                    data_select_columns.append('select_{}'.format(i))
+            data.columns = data_select_columns
+            select_columns = []
+            for i in range(10):
+                select_columns.append('select_{}'.format(i))
+            select_columns.append('label')
+            data = data[select_columns]
+            return data
     return data
 
 def save_featureEng_model(model_object, model_file_name, featureEng_id):

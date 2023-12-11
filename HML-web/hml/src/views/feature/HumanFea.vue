@@ -13,18 +13,23 @@
               <el-input clearable style="width:610px" v-model="addFeatureForm.featureEng_name" placeholder="请填写特征工程名"></el-input>
             </el-form-item>
             <el-form-item class="label" label="所属运行方式" prop="run_mode" style="width:610px">
-              <el-select v-model="addFeatureForm.run_mode" placeholder="请选择">
+              <el-select v-model="addFeatureForm.run_mode" placeholder="请选择" :disabled="disableSettings === true">
                 <el-option v-for="(option, index) in runModeOptions" :key="index" :label="option.label" :value="option.value">
                 </el-option>
               </el-select>
             </el-form-item>
             <el-form-item class="label" label="特征工程类型" prop="featureEng_type">
-              <el-radio-group v-model="addFeatureForm.featureEng_type" style="width:610px">
+              <el-radio-group v-model="addFeatureForm.featureEng_type" style="width:610px" :disabled="disableSettings === true">
                 <el-radio v-for="(option, index) in featureEngTypeOptions" :key="index" :label="option.value" :value="option.value" @change="handleFeatureEngType">{{option.label}}</el-radio>
               </el-radio-group>
             </el-form-item>
+            <el-form-item v-if="addFeatureForm.featureEng_type !== 'Manual'" class="label" label="是否重新训练" prop="retrain">
+              <el-radio-group v-model="addFeatureForm.retrain" style="width:610px" :disabled="disableSettings === true">
+                <el-radio v-for="(option, index) in retrainOptions" :key="index" :label="option.value" :value="option.value" @change="handleRetrainSetting">{{option.label}}</el-radio>
+              </el-radio-group>
+            </el-form-item>
             <el-form-item v-if="addFeatureForm.featureEng_type === 'HumanInLoop'" class="label" label="功能模块选择" prop="featureEng_modules">
-              <el-checkbox-group v-model="addFeatureForm.checkedModules" @change="handleCheckedChange" :min="1">
+              <el-checkbox-group v-model="addFeatureForm.checkedModules" @change="handleCheckedChange" :min="1" :disabled="disableSettings === true">
                 <el-checkbox v-for="(item, index) in moduleOptions" :label="item.value" :key="index" :value="item.value">{{item.label}}</el-checkbox>
               </el-checkbox-group>
             </el-form-item>
@@ -41,7 +46,7 @@
                         <span>特征解耦</span>
                       </el-col>
                       <el-col span="14">
-                        <el-select v-model="processDecouplingForm.operate_name" placeholder="请选择方法" @change="handleselectTrainname" :disabled="!addFeatureForm.checkedModules.includes('1')">
+                        <el-select v-model="processDecouplingForm.operate_name" placeholder="请选择方法" @change="handleselectTrainname" :disabled="(!addFeatureForm.checkedModules.includes('1')) || disableSettings === true">
                           <el-option
                             v-for="(item,index) in algorithm_Options1" :key="index"
                             :label="item.introduction"
@@ -50,7 +55,7 @@
                          </el-select>
                       </el-col>
                       <el-col span="6">
-                        <el-button type="mini" :disabled="!addFeatureForm.checkedModules.includes('1')" @click="showDecouplingSetting">参数配置</el-button>
+                        <el-button type="mini" :disabled="(!addFeatureForm.checkedModules.includes('1')) || disableSettings === true" @click="showDecouplingSetting">参数配置</el-button>
                       </el-col>
                   </el-card>
                   </el-col>
@@ -60,7 +65,7 @@
                         <span>特征学习</span>
                       </el-col>
                       <el-col span="14">
-                        <el-select v-model="processLearningForm.operate_name" placeholder="请选择方法" @change="handleselectTrainname2" :disabled="!addFeatureForm.checkedModules.includes('2')">
+                        <el-select v-model="processLearningForm.operate_name" placeholder="请选择方法" @change="handleselectTrainname2" :disabled="(!addFeatureForm.checkedModules.includes('2')) || disableSettings === true">
                           <el-option
                             v-for="(item,index) in algorithm_Options2" :key="index"
                             :label="item.introduction"
@@ -69,7 +74,7 @@
                         </el-select>
                       </el-col>
                       <el-col span="6">
-                        <el-button type="mini" :disabled="!addFeatureForm.checkedModules.includes('2')" @click="showLearningSetting">参数配置</el-button>
+                        <el-button type="mini" :disabled="(!addFeatureForm.checkedModules.includes('2')) || disableSettings === true" @click="showLearningSetting">参数配置</el-button>
                       </el-col>
                     </el-card>
                   </el-col>
@@ -81,7 +86,7 @@
                         <span>特征衍生</span>
                       </el-col>
                       <el-col span="14">
-                        <el-select v-model="processDeriveForm.operate_name" placeholder="请选择方法" @change="handleselectTrainname3" :disabled="!addFeatureForm.checkedModules.includes('3')">
+                        <el-select v-model="processDeriveForm.operate_name" placeholder="请选择方法" @change="handleselectTrainname3" :disabled="(!addFeatureForm.checkedModules.includes('3')) || disableSettings === true">
                           <el-option
                             v-for="(item,index) in algorithm_Options3" :key="index"
                             :label="item.introduction"
@@ -90,7 +95,7 @@
                         </el-select>
                       </el-col>
                       <el-col span="6">
-                        <el-button type="mini" :disabled="!addFeatureForm.checkedModules.includes('3')" @click="showDeriveSetting">参数配置</el-button>
+                        <el-button type="mini" :disabled="(!addFeatureForm.checkedModules.includes('3')) || disableSettings === true" @click="showDeriveSetting">参数配置</el-button>
                       </el-col>
                     </el-card>
                   </el-col>
@@ -100,7 +105,7 @@
                         <span>特征选择</span>
                       </el-col>
                       <el-col span="14">
-                        <el-select v-model="processSelectionForm.operate_name" placeholder="请选择方法" @change="handleselectTrainname4" :disabled="!addFeatureForm.checkedModules.includes('4')">
+                        <el-select v-model="processSelectionForm.operate_name" placeholder="请选择方法" @change="handleselectTrainname4" :disabled="(!addFeatureForm.checkedModules.includes('4')) || disableSettings === true">
                           <el-option
                             v-for="(item,index) in algorithm_Options4" :key="index"
                             :label="item.introduction"
@@ -109,7 +114,7 @@
                         </el-select>
                       </el-col>
                       <el-col span="6">
-                        <el-button type="mini" :disabled="!addFeatureForm.checkedModules.includes('4')" @click="showSelectionSetting">参数配置</el-button>
+                        <el-button type="mini" :disabled="(!addFeatureForm.checkedModules.includes('4')) || disableSettings === true" @click="showSelectionSetting">参数配置</el-button>
                       </el-col>
                     </el-card>
                   </el-col>
@@ -122,7 +127,7 @@
                       <span>特征构建</span>
                     </el-col>
                     <el-col span="10">
-                      <el-select v-model="processConstructForm.operate_name" placeholder="请选择方法" @change="handleselectTrainname5">
+                      <el-select v-model="processConstructForm.operate_name" placeholder="请选择方法" @change="handleselectTrainname5" :disabled="disableSettings === true">
                         <el-option
                           v-for="(item,index) in algorithm_Options5" :key="index"
                           :label="item.introduction"
@@ -133,7 +138,7 @@
                     <el-col span="10">
                       <el-row>
                         <el-col span="8">
-                          <el-button type="mini" @click="downloadDataset">数据集下载</el-button>
+                          <el-button type="mini" @click="downloadDataset" :disabled="disableSettings === true">数据集下载</el-button>
                         </el-col>
                         <el-col span="16" style="text-align: left">
                           <el-upload  :action="uploadURL"
@@ -142,7 +147,7 @@
                                       :before-upload="beforeUpload"
                                       :on-remove="handleRemove"
                                       :on-success="handleSuccess">
-                            <el-button  type="mini" icon="el-icon-document-add">专家经验上传</el-button>
+                            <el-button  type="mini" icon="el-icon-document-add" :disabled="disableSettings === true">专家经验上传</el-button>
                           </el-upload>
                         </el-col>
                       </el-row>
@@ -176,7 +181,7 @@
                       <span>特征生成</span>
                     </el-col>
                     <el-col span="14">
-                      <el-select v-model="processGenerationForm.operate_name" placeholder="请选择方法" @change="handleselectTrainname7">
+                      <el-select v-model="processGenerationForm.operate_name" placeholder="请选择方法" @change="handleselectTrainname7" :disabled="disableSettings === true">
                         <el-option
                           v-for="(item,index) in algorithm_Options7" :key="index"
                           :label="item.introduction"
@@ -185,7 +190,7 @@
                       </el-select>
                     </el-col>
                     <el-col span="6">
-                      <el-button type="mini" @click="showGenerationSetting">参数配置</el-button>
+                      <el-button type="mini" @click="showGenerationSetting" :disabled="disableSettings === true">参数配置</el-button>
                     </el-col>
                   </el-card>
                 </el-row>
@@ -259,7 +264,6 @@
                 <el-button type="primary" @click="submitHumanForm">立即创建</el-button>
                 <el-button type="success" @click="showExistedFeatureEng"><i class="el-icon-upload el-icon--right"></i>导入已有特征工程</el-button>
               </el-row>
-
               <!-- <el-button>取消</el-button> -->
             </el-form-item>
       </el-form>
@@ -324,6 +328,7 @@
         solt="append">
         <el-table-column  label="序号" type="index" style="font-weight: bolder"> </el-table-column>
         <el-table-column prop="featureEng_name" label="特征工程名" style="font-weight: bolder"> </el-table-column>
+        <el-table-column prop="task" label="任务" style="font-weight: bolder"> </el-table-column>
         <el-table-column prop="featureEng_type" label="特征工程类型" style="font-weight: bolder"> </el-table-column>
         <el-table-column prop="featureEng_result" label="任务效果" style="font-weight: bolder">
           <template slot-scope="scope">
@@ -351,13 +356,6 @@
             <span v-else>
               暂无数据
             </span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="operate_state" label="状态">
-          <template slot-scope="scope">
-            <span v-if="scope.row.operate_state==='已完成'" style="color: green">已完成</span>
-            <span v-else-if="scope.row.operate_state==='交互中'"  style="color: orange">交互中</span>
-            <span v-else-if="scope.row.operate_state==='已停止'"  style="color: orange">交互中</span>
           </template>
         </el-table-column>
       </el-table>
@@ -523,7 +521,10 @@ const moduleOptions = [
   { value: '3', label: '特征衍生' },
   { value: '4', label: '特征选择' }
 ]
-
+const retrainOptions = [
+  { value: '0', label: '是' },
+  { value: '1', label: '否' }
+]
 export default {
   name: 'HumanFea',
   computed: {
@@ -548,17 +549,20 @@ export default {
         featureEng_name: '',
         // 特征工程类型
         featureEng_type: 'HumanInLoop',
+        retrain: '1',
         featureEng_processes: [],
         original_dataset_id: '',
         original_dataset_name: '',
         new_dataset_name: '',
         // 运行方式
         run_mode: '1',
-        checkedModules: ['1', '2', '3', '4']
+        checkedModules: ['1', '2', '3', '4'],
+        importedFeatureEng: ''
       },
       featureEngTypeOptions,
       runModeOptions,
       moduleOptions,
+      retrainOptions,
       operate_columnsValue1: [],
       operate_columnsValue2: [],
       operate_columnsValue3: [],
@@ -669,6 +673,7 @@ export default {
       totalPage_featureEngList: 5,
       countTotal_featureEngList: 15,
       percentageListen: null,
+      disableSettings: false,
       uploadURL: ''
       // uploadURL: 'http://10.214.211.137:8021/api/private/v1/featureEng/upload'
     }
@@ -856,34 +861,27 @@ export default {
       this.$router.back()
     },
     showExistedFeatureEng () {
-      console.log(this.HumanFeaData)
       // 导入已有特征工程
       this.HumanFeaData = []
       // 已有特征工程
-      featureEngApi.query().then(response => {
-        const resp = response.data
-        console.log(resp.data)
-        const upper = resp.data.length
-        let state = ''
+      featureEngApi.queryImportFeatureEng().then(response => {
+        const resp = JSON.parse(response.data.data)
+        console.log(resp)
         let type = ''
-        for (let i = 0; i < upper; i = i + 1) {
-          if (resp.data[i].operate_state === '1') {
-            state = '交互中'
-          } else if (resp.data[i].operate_state === '2') {
-            state = '已完成'
-          } else if (resp.data[i].operate_state === '3') {
-            state = '已停止'
+        if (resp != null) {
+          const upper = resp.length
+          for (let i = 0; i < upper; i = i + 1) {
+            if (resp[i].featureEng_type === 'HumanInLoop') {
+              type = '人机协同特征学习与衍生技术'
+            } else if (resp[i].featureEng_type === 'Machine') {
+              type = '纯机器方法'
+            } else {
+              type = '纯人工方法'
+            }
+            this.HumanFeaData.push({ featureEng_id: resp[i].featureEng_id, featureEng_name: resp[i].featureEng_name, task: resp[i].task, featureEng_type: type, featureEng_accuracy: resp[i].FeatureEng_accuracy, featureEng_efficiency: resp[i].FeatureEng_efficiency })
           }
-          if (resp.data[i].featureEng_type === 'HumanInLoop') {
-            type = '人机协同特征学习与衍生技术'
-          } else if (resp.data[i].featureEng_type === 'Machine') {
-            type = '纯机器方法'
-          } else {
-            type = '纯人工方法'
-          }
-          this.existedFeatureEng = true
-          this.HumanFeaData.push({ featureEng_id: resp.data[i].featureEng_id, featureEng_name: resp.data[i].featureEng_name, featureEng_type: type, featureEng_accuracy: resp.data[i].FeatureEng_accuracy, featureEng_efficiency: resp.data[i].FeatureEng_efficiency, operate_state: state })
         }
+        this.existedFeatureEng = true
       })
     },
     // 点击确定按钮，提交上传数据表单
@@ -892,6 +890,10 @@ export default {
         this.$refs.addFeatureFormRef.validate(valid => {
           if (valid) {
             this.addFeatureForm.featureEng_processes = []
+            // 表示是导入的特征工程
+            if (this.disableSettings === true) {
+              this.addFeatureForm.retrain = '1'
+            }
             if (this.addFeatureForm.checkedModules.includes('1')) {
               var process1 = {}
               this.processDecouplingForm.process_name = 'Feature_Decoupling'
@@ -952,6 +954,10 @@ export default {
         this.$refs.addFeatureFormRef.validate(valid => {
           if (valid) {
             this.addFeatureForm.featureEng_processes = []
+            // 表示是导入的特征工程
+            if (this.disableSettings === true) {
+              this.addFeatureForm.retrain = '1'
+            }
             this.addFeatureForm.checkedModules = ['1']
             var process5 = {}
             this.processConstructForm.process_name = 'Feature_Construct'
@@ -981,6 +987,10 @@ export default {
         this.$refs.addFeatureFormRef.validate(valid => {
           if (valid) {
             this.addFeatureForm.featureEng_processes = []
+            // 表示是导入的特征工程
+            if (this.disableSettings === true) {
+              this.addFeatureForm.retrain = '1'
+            }
             this.addFeatureForm.checkedModules = ['1']
             var process7 = {}
             this.processConstructForm.process_name = 'Feature_Generation'
@@ -1102,6 +1112,10 @@ export default {
       //   // this.algorithm_name2 = response.data.data.map(item => item.algorithm_name)
       //   console.log(this.algorithm_name3)
       // })
+    },
+    handleRetrainSetting () {
+      console.log('retrain setting')
+      console.log(this.addFeatureForm.retrain)
     },
     handleFeatureEngType () {
       this.algorithm_originalOptions1 = []
@@ -1401,15 +1415,13 @@ export default {
     // 导入特征工程
     importFeatureEng (row) {
       const id = row.featureEng_id
+      this.addFeatureForm.importedFeatureEng = id
       featureEngApi.importFeatureEng(id).then(response => {
         const resp = response.data.data
         this.addFeatureForm.featureEng_type = resp.featureEng_type
-        this.addFeatureForm.featureEng_name = resp.featureEng_name
-        this.addFeatureForm.original_dataset_id = resp.dataset_id
-        this.addFeatureForm.original_dataset_name = resp.dataset_name
-        this.addFeatureForm.new_dataset_name = resp.new_dataset_name
         this.addFeatureForm.run_mode = resp.featureEng_operationMode
         this.addFeatureForm.checkedModules = []
+        this.addFeatureForm.retrain = resp.retrain
         const modules = resp.checkedModules.split(',')
         for (let i = 0; i < modules.length; i = i + 1) {
           this.addFeatureForm.checkedModules.push(modules[i])
@@ -1435,6 +1447,7 @@ export default {
             this.processGenerationForm.operate_name = process[i].operate_name
           }
         }
+        this.disableSettings = true
         console.log(this.addFeatureForm)
       })
       this.existedFeatureEng = false
