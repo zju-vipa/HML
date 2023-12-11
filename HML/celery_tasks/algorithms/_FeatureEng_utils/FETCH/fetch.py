@@ -4,6 +4,8 @@ import os.path
 import pandas as pd
 import warnings
 
+from scipy.stats import pearsonr
+
 from celery_tasks.algorithms._FeatureEng_utils.FETCH.autofe import AutoFE
 
 warnings.filterwarnings("ignore")
@@ -53,30 +55,44 @@ class fetch():
     def main(self, data):
         args = Parser(self.steps_num, self.worker, self.epoch)
         df = data
-        df_part = pd.DataFrame()
-        sample_interval = 20
-        columns = df.columns.tolist()
-        df_out_col = len(df.columns)
-        if df_out_col > 40:
-            # 得到5000x?维的部分特征
-            for i in range(0, df_out_col - 1, sample_interval):
-                j = i / sample_interval
-                df_part[f'{int(j)}'] = df[columns[i]]
+        df_out_col = len(df.columns.tolist())
+
+        # 判断特征列数,若大于阈值，则进行特征选择, 采样前n个特征
+        feat_thre = 50
+        n = 5
+        if (df_out_col > feat_thre):
+            # pearson feature selections
+            corrs = []
+            for i in range(df_out_col - 1):
+                corr, p_value = pearsonr(df.iloc[:, i], df.iloc[:, -1])
+                corrs.append((i, corr))
+            sorted_corrs = sorted(corrs, key=lambda x: -x[1])
+            df_part = pd.DataFrame()
+            for i in range(n):
+                df_part[f'{i}'] = df.iloc[:, sorted_corrs[i][0]]
             df_part['label'] = df['label']
         else:
             df_part = df
-        df_part.to_csv(self.result_path, index=False)
-        df_part = pd.read_csv(self.result_path, delimiter=',', header=0, encoding='utf-8')
+        # if df_out_col > 40:
+        #     # 得到5000x?维的部分特征
+        #     for i in range(0, df_out_col - 1, sample_interval):
+        #         j = i / sample_interval
+        #         df_part[f'{int(j)}'] = df[columns[i]]
+        #     df_part['label'] = df['label']
+        # else:
+        #     df_part = df
+        df_part.to_csv(os.path.join(self.result_path, 'grid_process.csv'), index=False)
+        df_part = pd.read_csv(os.path.join(self.result_path, 'grid_process.csv'), delimiter=',', header=0, encoding='utf-8')
         part_columns = df_part.columns.tolist()
         part_columns.remove('label')
-
+        
         configs = {'mode': 'regression',
-                   'c_columns': part_columns,
-                   'd_columns': [],
-                   'target': 'label',
-                   "model": "lgb",
-                   "dataset_path": "data/grid.csv",
-                   "metric": "grid_score"}
+           'c_columns': part_columns,
+           'd_columns': [],
+           'target': 'label',
+           "model": "lgb",
+           "dataset_path": "data/grid.csv",
+           "metric": "grid_score"}
         data_configs = configs
         c_columns = data_configs['c_columns']
         d_columns = data_configs['d_columns']
