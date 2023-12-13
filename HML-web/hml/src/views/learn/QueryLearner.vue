@@ -18,7 +18,7 @@
           <el-table-column type="expand" v-if="!isLearnDialog">
             <template slot-scope="scope" >
               <el-button v-if="scope.row.action===-1" size="mini" plain @click="handleLearner(scope.row.learner_id)" style="font-size: 16px">待处理</el-button>
-              <el-button  size="mini" plain @click="trainProgress(scope.row.task_id)" style="font-size: 16px">训练进度</el-button>
+              <el-button size="mini" plain @click="trainProgress(scope.row.task_id)" style="font-size: 16px">训练进度</el-button>
               <el-button size="mini" plain @click="handleDownLoadPrediction(scope.row)" style="font-size: 16px">下载预测结果</el-button>
               <el-button size="mini" plain @click="handleDownLoadReport(scope.row)" style="font-size: 16px">下载预测报告</el-button>
               <el-button v-if="scope.row.train_state==='2' && (scope.row.learner_parameters.train_name ==='HML_RL'|| scope.row.learner_parameters.train_name === 'HML_ML')" size="mini" plain @click="handleModelTest(scope.row.learner_id)" style="font-size: 16px">模型测试</el-button>
@@ -32,7 +32,7 @@
           <el-table-column prop="learner_type" label="学习器类型" sortable :sort-method="sortByLearnerType">
             <template slot-scope="scope">{{scope.row.learner_type | learnerTypeTrans}}</template>
           </el-table-column>
-          <el-table-column prop="start_time" label="创建时间" sortable :sort-method="sortByLearnerStartTime"> </el-table-column>
+          <el-table-column prop="start_time" label="创建时间" :formatter='formatTime' sortable :sort-method="sortByLearnerStartTime"> </el-table-column>
           <el-table-column prop="train_state" label="训练状态" sortable :sort-method="sortByTrainState">
             <template slot-scope="scope">{{scope.row.train_state | trainTypeTrans(scope)}}</template>
           </el-table-column>
@@ -52,8 +52,19 @@
     </el-dialog>
         <!-- 模型测试的对话框 -->
     <el-dialog title="查看学习器测试进度" :visible.sync="modelTestVisible" width="30%">
-      <el-progress v-if="modelTestVisible != 'SUCCESS'" type="circle" :percentage="modelTestProgress*100"></el-progress>
-      <div v-if="modelTestState === 'SUCCESS'" class = "basicGenPower" >平均reward为：{{ modelTestReward }}</div>
+      <!-- <el-progress v-if="modelTestState != 'SUCCESS'" type="circle" :percentage="modelTestProgress*100"></el-progress> -->
+      <el-progress type="circle" :percentage="modelTestProgress*100"></el-progress>
+      <div v-if="modelTestState === 'SUCCESS'">
+        <el-table :data="modelTestReward.data" border stripe :row-style="{height:'30px'}" style="font-size: 14px" :cell-style="cellStyle">
+          <el-table-column label="轮数" type="index"> </el-table-column>
+          <el-table-column prop="value" label="reward"> </el-table-column>
+          <el-table-column prop="wave"  :formatter="formatWave" label="波动值"> </el-table-column>
+        </el-table>
+        <!-- <div v-for = "(item, index) in modelTestReward.data" :key="index" > 第{{ index + 1 }}轮的reward为：{{ item.value }} 波动值为：{{ formatWave(item.wave) }}  </div> -->
+        <div style="font-size: 18px"  >
+          平均reward为：{{ modelTestReward.rewards_mean }} 平均波动值为：{{ formatWaveMean(modelTestReward.wave_mean) }}
+        </div>
+      </div>
     </el-dialog>
     </div>
 </template>
@@ -80,7 +91,7 @@ export default {
       return obj ? obj.name : null
     },
     trainTypeTrans (type, ss) {
-      console.log(ss)
+      // console.log(ss)
       const obj = trainStatus.find(item => item.type === type)
       if (obj) {
         if (obj.type === '1' && ss.row.action === -1) {
@@ -152,6 +163,22 @@ export default {
       var date2 = new Date(obj2.start_time)
       return (date1.getTime() - date2.getTime())
     },
+    // 调整显示的日期格式
+    formatTime (obj) {
+      var date = new Date(obj.start_time)
+      var y = date.getFullYear() // 年
+      var MM = date.getMonth() + 1 // 月
+      MM = MM < 10 ? ('0' + MM) : MM
+      var d = date.getDate() // 日
+      d = d < 10 ? ('0' + d) : d
+      var h = date.getHours() // 时
+      h = h < 10 ? ('0' + h) : h
+      let m = date.getMinutes()// 分
+      m = m < 10 ? ('0' + m) : m
+      let s = date.getSeconds()// 秒
+      s = s < 10 ? ('0' + s) : s
+      return y + '年' + MM + '月' + d + '日 ' + h + ':' + m + ':' + s
+    },
     // 待处理
     handleLearner (rowId) {
       console.log(rowId)
@@ -175,6 +202,24 @@ export default {
         }
       })
     },
+    // 模型测试reward求平均和波动值ArrayWave formatWave
+    formatWave (row) {
+      return Number(row.wave * 100).toFixed(2) + '%'
+    },
+    formatWaveMean (num) {
+      return Number(num * 100).toFixed(2) + '%'
+    },
+    // 模型测试reward求平均和波动值ArrayWave formatWave
+    // ArrayAvg (array) {
+    //   console.log(array)
+    //   var i = 0
+    //   var summ = 0
+    //   var ArrayLen = array.length
+    //   while (i < ArrayLen) {
+    //     summ = summ + array[i++]
+    //   }
+    //   return '平均reward为：' + summ / ArrayLen + '波动值'
+    // },
     // 查看分析任务进度
     trainProgress (rowId) {
       console.log(rowId)

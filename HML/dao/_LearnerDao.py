@@ -40,6 +40,7 @@ class LearnerDao(BaseDao):
         learner.user_id = learner_bean.user_id
         learner.username = learner_bean.username
         learner.action = learner_bean.action
+        print(learner_bean.action)
         self.db.session.commit()
     # update task_id
     def updateLearnerAll(self, learner_bean):
