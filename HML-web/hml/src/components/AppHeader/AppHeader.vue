@@ -54,26 +54,34 @@ export default {
 }
 </script>
 <style scoped>
+  /* .header{
+    height: 145px
+  } */
   .logo{
     text-decoration: none
   }
   .logo-img{
-    width: 25px;
-    height: 25px;
+    width: 50px;
+    height: 50px;
     vertical-align:middle;
-    padding: 0 10px 0 40px
+    padding: 0 10px 0 40px;
+    margin-bottom: 10px;
   }
   .logo-title{
     color: white;
     cursor: pointer;
     padding-left: 10px;
-    font-size: 18px;
+    font-size: 30px;
   }
   .dropdown{
     cursor: pointer;
     float: right;
     margin-right: 20px;
+    font-size: 24px;
     color: white
+  }
+  .el-dropdown-menu li{
+    font-size: 20px;
   }
   /* .header-list{
     display: inline-block;
