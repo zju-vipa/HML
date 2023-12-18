@@ -1,3 +1,4 @@
+import math
 import os
 from flask import Blueprint, request, g, json, current_app
 from app.constant import get_error, RET
@@ -224,12 +225,18 @@ def queryLatestResult():
             else:
                 all_feature_num = 0
             taskDetails['all_feature_num'] = all_feature_num
-            taskDetails['effective_feature_num'] = int(all_feature_num * float(featureEng.FeatureEng_efficiency) / 100)
+            # (60.41 * 17 / 100) = 10
+            # 58.82 * 17 / 100
+            taskDetails['effective_feature_num'] = round(all_feature_num * round(float(featureEng.FeatureEng_efficiency)/100, 2))
             taskDetails['network'] = '300节点电网'
             taskDetails['checkedModules'] = featureEng.featureEng_modules
+            current_app.logger.info('taskDetails')
+            current_app.logger.info(taskDetails['effective_feature_num'])
             if featureEng.FeatureEng_efficiency:
+                # 58.82
                 taskDetails['original_efficiency'] = round(float(taskDetails['effective_feature_num'] / all_feature_num) * 100, 2)
                 taskDetails['original_accuracy'] = round(float(featureEng.FeatureEng_accuracy), 2)
+                current_app.logger.info(taskDetails['original_efficiency'])
                 featureEngService.updateEfficiency(taskDetails['original_efficiency'], featureEng.featureEng_id)
             else:
                 taskDetails['original_efficiency'] = None
@@ -450,13 +457,12 @@ def querySelectedTaskResults():
             else:
                 all_feature_num = 0
             taskDetails['all_feature_num'] = all_feature_num
-            taskDetails['effective_feature_num'] = int(all_feature_num * float(featureEng.FeatureEng_efficiency) / 100)
+            taskDetails['effective_feature_num'] = round(all_feature_num * round(float(featureEng.FeatureEng_efficiency)/100, 2))
             taskDetails['network'] = '300节点电网'
             taskDetails['checkedModules'] = featureEng.featureEng_modules
             if featureEng.FeatureEng_efficiency:
                 taskDetails['original_efficiency'] = round(float(taskDetails['effective_feature_num'] / all_feature_num) * 100, 2)
                 taskDetails['original_accuracy'] = round(float(featureEng.FeatureEng_accuracy), 2)
-                featureEngService.updateEfficiency(taskDetails['original_efficiency'], featureEng_id)
             else:
                 taskDetails['original_efficiency'] = None
                 taskDetails['original_accuracy'] = None
