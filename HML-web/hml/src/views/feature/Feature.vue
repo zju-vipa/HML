@@ -615,12 +615,12 @@
                         <span>{{ scope.row.start_time }}</span>
                       </template>
                     </el-table-column>
-                    <el-table-column prop="spent_time" label="完成用时" style="font-weight: bolder">
-                      <template slot-scope="scope">
-                        <span v-if="scope.row.operate_state==='已完成' || scope.row.operate_state==='已停止'" style="color: green">{{ scope.row.spent_time }}</span>
-                        <span v-else style="color: gray">暂无内容</span>
-                      </template>
-                    </el-table-column>
+<!--                    <el-table-column prop="spent_time" label="完成用时" style="font-weight: bolder">-->
+<!--                      <template slot-scope="scope">-->
+<!--                        <span v-if="scope.row.operate_state==='已完成' || scope.row.operate_state==='已停止'" style="color: green">{{ scope.row.spent_time }}</span>-->
+<!--                        <span v-else style="color: gray">暂无内容</span>-->
+<!--                      </template>-->
+<!--                    </el-table-column>-->
                     <el-table-column label="结果">
                       <template slot-scope="scope">
                         <span>

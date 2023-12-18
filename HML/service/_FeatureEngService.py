@@ -145,6 +145,7 @@ class FeatureEngService:
                 featureEng['spent_time'] = None
             task_id = featureEngs[i].task_id
             message = self.getTaskStatus(task_id)
+
             if len(message) == 0:
                 task_progress = None
             else:
