@@ -18,7 +18,7 @@
           <el-table-column type="expand" v-if="!isLearnDialog">
             <template slot-scope="scope" >
               <el-button v-if="scope.row.action===-1" size="mini" plain @click="handleLearner(scope.row.learner_id)" style="font-size: 16px">待处理</el-button>
-              <el-button  size="mini" plain @click="trainProgress(scope.row.task_id)" style="font-size: 16px">训练进度</el-button>
+              <el-button size="mini" plain @click="trainProgress(scope.row.task_id)" style="font-size: 16px">训练进度</el-button>
               <el-button size="mini" plain @click="handleDownLoadPrediction(scope.row)" style="font-size: 16px">下载预测结果</el-button>
               <el-button size="mini" plain @click="handleDownLoadReport(scope.row)" style="font-size: 16px">下载预测报告</el-button>
               <el-button v-if="scope.row.train_state==='2' && (scope.row.learner_parameters.train_name ==='HML_RL'|| scope.row.learner_parameters.train_name === 'HML_ML')" size="mini" plain @click="handleModelTest(scope.row.learner_id)" style="font-size: 16px">模型测试</el-button>
