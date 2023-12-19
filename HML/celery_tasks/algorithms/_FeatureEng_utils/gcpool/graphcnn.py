@@ -15,6 +15,29 @@ import pandas as pd
 
 criterion = nn.CrossEntropyLoss()
 
+class Parser():
+    def __init__(self, num_layers, n_components, epoch):
+        self.dataset = 'CASE300'
+        self.device = 0
+        self.batch_size = 32
+        self.iters_per_epoch = 50
+        self.epochs = epoch
+        self.lr = 0.001
+        self.seed = 0
+        self.fold_idx = 0
+        self.num_layers = num_layers
+        self.num_mlp_layers = 2
+        self.hidden_dim = 32
+        self.final_dropout = 0.5
+        self.graph_pooling_type = "sum"
+        self.neighbor_pooling_type = "sum"
+        self.fac_dim = 1
+        self.rep_dim = n_components
+        self.filename = "10flod.txt"
+        self.fo_type = 0
+        self.so_type = 0
+        self.train_ratio = 0.9
+        self.learn_eps = False
 
 class graphcnn():
     def __init__(self, datapath, result_path, num_layers=5, n_components=10, epoch=100):
@@ -42,6 +65,27 @@ class graphcnn():
         acc = (tp + tn) / (tp + tn + fp + fn)
         # recall = tp / (tp + fn)
         return F1, acc, tnr, tpr
+
+    def load_model(self, model_path):
+        args = Parser(self.num_layers, self.n_component, self.epoch)
+        # set up seeds and gpu device
+        torch.manual_seed(0)
+        np.random.seed(0)
+        torch.set_num_threads(10)
+        device = torch.device("cuda:" + str(args.device)) if torch.cuda.is_available() else torch.device("cpu")
+        if torch.cuda.is_available():
+            torch.cuda.manual_seed_all(0)
+
+        num_classes = 2
+
+        train_graphs, test_graphs, train_label, test_label = load_psdata(self.datapath, args.dataset, args.fold_idx)
+        model = GraphCNN(args.num_layers, args.num_mlp_layers, train_graphs[0].node_features.shape[1], args.hidden_dim,
+                         num_classes,
+                         args.fac_dim, args.rep_dim, args.final_dropout, args.learn_eps, args.graph_pooling_type,
+                         args.neighbor_pooling_type,
+                         args.fo_type, args.so_type, device).to(device)
+        model.load_state_dict(torch.load(os.path.join(model_path, 'CASE300_0_32_32_0.001_.pth')))
+        return model
 
     def train(self, args, model, device, train_graphs, optimizer, epoch):
         model.train()
@@ -104,32 +148,7 @@ class graphcnn():
         return output  # need pd.dataframe
 
     def main(self):
-        class Parser():
-            def __init__(self, num_layers, n_components, epoch):
-                self.dataset = 'CASE300'
-                self.device = 0
-                self.batch_size = 32
-                self.iters_per_epoch = 50
-                self.epochs = epoch
-                self.lr = 0.001
-                self.seed = 0
-                self.fold_idx = 0
-                self.num_layers = num_layers
-                self.num_mlp_layers = 2
-                self.hidden_dim = 32
-                self.final_dropout = 0.5
-                self.graph_pooling_type = "sum"
-                self.neighbor_pooling_type = "sum"
-                self.fac_dim = 1
-                self.rep_dim = n_components
-                self.filename = "10flod.txt"
-                self.fo_type = 0
-                self.so_type = 0
-                self.train_ratio = 0.9
-                self.learn_eps = False
-
         args = Parser(self.num_layers, self.n_component, self.epoch)
-
         # set up seeds and gpu device
         torch.manual_seed(0)
         np.random.seed(0)

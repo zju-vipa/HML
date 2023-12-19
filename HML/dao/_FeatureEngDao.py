@@ -45,6 +45,7 @@ class FeatureEngDao(BaseDao):
         featureEng.FeatureEng_accuracy = featureEng_bean.FeatureEng_accuracy
         featureEng.featureEng_operationMode = featureEng_bean.featureEng_operationMode
         featureEng.start_time = featureEng_bean.start_time
+        featureEng.end_time = featureEng_bean.end_time
         self.db.session.commit()
 
     def updateTaskStatus(self, featureEng_id):
@@ -63,3 +64,8 @@ class FeatureEngDao(BaseDao):
     def queryFinishedFeatureEngListByUserId(self, user_id):
         featureEngs = FeatureEng.query.filter_by(user_id=user_id, operate_state='2').all()
         return featureEngs
+
+    def updateFeatureEngEfficiency(self, efficiency, featureEng_id):
+        featureEng = FeatureEng.query.filter_by(featureEng_id=featureEng_id).first()
+        featureEng.FeatureEng_efficiency = efficiency
+        self.db.session.commit()

@@ -109,6 +109,8 @@ class FeatureEng(db.Model):
     user_id = db.Column(db.String(32), nullable=False, info='用户ID')
     username = db.Column(db.String(32), nullable=False, info='用户名')
     start_time = db.Column(db.DateTime, nullable=True, info='创建时间')
+    retrain = db.Column(db.String(32), nullable=False, default=False, info='是否重新训练')
+    end_time = db.Column(db.DateTime, nullable=True, info='任务完成时间')
     @property
     def serialize(self):
         return to_json(self, self.__class__)

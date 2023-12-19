@@ -52,7 +52,9 @@ export default {
         featureEng_modules: form.checkedModules,
         featureEng_processes: form.featureEng_processes,
         original_dataset_id: form.original_dataset_id,
-        new_dataset_name: form.new_dataset_name
+        new_dataset_name: form.new_dataset_name,
+        retrain: form.retrain,
+        imported_featureEng: form.importedFeatureEng
       },
       headers: {
         // 'content-type': 'application/x-www-form-urlencoded'

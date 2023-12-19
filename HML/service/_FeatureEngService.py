@@ -18,8 +18,7 @@ class FeatureEngService:
         self.featureEngDao = FeatureEngDao(db)
         self.datasetDao = DatasetDao(db)
 
-    def addFeatureEng(self, featureEng, featureEng_processes, original_dataset,
-                      original_dataset_file_path, new_dataset_name):
+    def addFeatureEng(self, featureEng, featureEng_processes, original_dataset, original_dataset_file_path, new_dataset_name, imported_featureEng):
         featureEng.featureEng_id = get_uid()
         featureEng.operate_state = '1'
 
@@ -27,7 +26,7 @@ class FeatureEngService:
                                                           featureEng_processes,
                                                           original_dataset.serialize,
                                                           original_dataset_file_path,
-                                                          new_dataset_name), countdown=1)
+                                                          new_dataset_name, imported_featureEng), countdown=1)
 
         featureEng.task_id = task.id
         self.featureEngDao.addFeatureEng(featureEng)
@@ -105,6 +104,83 @@ class FeatureEngService:
         result.revoke(terminate=True)
         return 'SUCCESS'
 
+    def queryFeatureEngList(self, user_id):
+        featureEngs = self.featureEngDao.queryFeatureEngListByUserId(user_id)
+        featureEngList = []
+        for i in range(len(featureEngs)):
+            featureEng = {}
+            featureEng['featureEng_id'] = featureEngs[i].featureEng_id
+            featureEng['featureEng_name'] = featureEngs[i].featureEng_name
+            featureEng['featureEng_type'] = featureEngs[i].featureEng_type
+            if featureEngs[i].FeatureEng_accuracy:
+                featureEng['FeatureEng_accuracy'] = round(float(featureEngs[i].FeatureEng_accuracy), 2)
+                featureEng['FeatureEng_efficiency'] = round(float(featureEngs[i].FeatureEng_efficiency), 2)
+            else:
+                featureEng['FeatureEng_accuracy'] = None
+                featureEng['FeatureEng_efficiency'] = None
+            featureEng['operate_state'] = featureEngs[i].operate_state
+            featureEng['start_time'] = str(featureEngs[i].start_time)
+            if featureEngs[i].end_time:
+                duration = featureEngs[i].end_time - featureEngs[i].start_time
+                days = duration.days
+                hours = int(duration.seconds / 3600)
+                minutes = int((duration.seconds - hours * 3600) / 60)
+                seconds = duration.seconds - hours * 3600 - minutes * 60
+                days = str(days)
+                if hours < 10:
+                    hours = '0' + str(hours)
+                else:
+                    hours = str(hours)
+                if minutes < 10:
+                    minutes = '0' + str(minutes)
+                else:
+                    minutes = str(minutes)
+                if seconds < 10:
+                    seconds = '0' + str(seconds)
+                else:
+                    seconds = str(seconds)
+                spent_time = days + ':' + hours + ':' + minutes + ':' + seconds
+                featureEng['spent_time'] = spent_time
+            else:
+                featureEng['spent_time'] = None
+            task_id = featureEngs[i].task_id
+            message = self.getTaskStatus(task_id)
+
+            if len(message) == 0:
+                task_progress = None
+            else:
+                task_progress = int(message['progress'] * 100)
+            featureEng['task_progress'] = task_progress
+            featureEngList.append(featureEng)
+        if len(featureEngList) != 0:
+            return featureEngList
+        else:
+            return None
+
+    def queryImportFeatureEngList(self, user_id):
+        featureEngs = self.featureEngDao.queryFinishedFeatureEngListByUserId(user_id)
+        featureEngList = []
+        for i in range(len(featureEngs)):
+            featureEng = {}
+            new_dataset_id = featureEngs[i].new_dataset_id
+            new_dataset = self.datasetDao.queryDatasetById(new_dataset_id)
+            new_dataset_introduction = new_dataset.introduction
+            featureEng['featureEng_id'] = featureEngs[i].featureEng_id
+            featureEng['featureEng_name'] = featureEngs[i].featureEng_name
+            featureEng['task'] = new_dataset_introduction
+            featureEng['featureEng_type'] = featureEngs[i].featureEng_type
+            if featureEngs[i].FeatureEng_accuracy:
+                featureEng['FeatureEng_accuracy'] = round(float(featureEngs[i].FeatureEng_accuracy), 2)
+                featureEng['FeatureEng_efficiency'] = round(float(featureEngs[i].FeatureEng_efficiency), 2)
+            else:
+                featureEng['FeatureEng_accuracy'] = None
+                featureEng['FeatureEng_efficiency'] = None
+            featureEngList.append(featureEng)
+        if len(featureEngList) != 0:
+            return featureEngList
+        else:
+            return None
+
     def queryFeatureLibraryByUserId(self, user_id):
         featureEngs = self.featureEngDao.queryFinishedFeatureEngListByUserId(user_id)
         featureLibrary = []
@@ -147,7 +223,7 @@ class FeatureEngService:
                 data_path = current_app.config['SAVE_DATASET_PATH'] + '/' + new_dataset_id + '.csv'
                 if os.path.exists(data_path):
                     columns = pd.read_csv(data_path, delimiter=',', encoding='utf-8').columns.tolist()
-                    for k in range(len(columns)):
+                    for k in range(len(columns)-1):
                         feature_item = {}
                         feature_item['name'] = columns[k]
                         feature_item['dataset'] = new_dataset_name
@@ -169,7 +245,7 @@ class FeatureEngService:
                     file_num = len(os.listdir(decompress_dataset_path))
                     sample_file = os.listdir(decompress_dataset_path)[int(file_num / 2)]
                     columns = pd.read_csv(os.path.join(decompress_dataset_path, sample_file), delimiter=',', encoding='utf-8').columns.tolist()
-                    for k in range(len(columns)):
+                    for k in range(len(columns)-1):
                         feature_item = {}
                         feature_item['name'] = columns[k]
                         feature_item['dataset'] = new_dataset_name
@@ -188,7 +264,9 @@ class FeatureEngService:
         featureEng_processes = featureEng.featureEng_processes
         featureEng_processes = json.loads(featureEng_processes)
         new_dataset_id = featureEng.new_dataset_id
+        original_dataset_id = featureEng.original_dataset_id
         new_dataset = self.datasetDao.queryDatasetById(new_dataset_id)
+        original_dataset = self.datasetDao.queryDatasetById(original_dataset_id)
         new_dataset_name = new_dataset.dataset_name
         new_dataset_introduction = new_dataset.introduction
         new_dataset_file_type = new_dataset.file_type
@@ -224,17 +302,37 @@ class FeatureEngService:
             data_path = current_app.config['SAVE_DATASET_PATH'] + '/' + new_dataset_id + '.csv'
             if os.path.exists(data_path):
                 columns = pd.read_csv(data_path, delimiter=',', encoding='utf-8').columns.tolist()
-                for k in range(len(columns)):
+                score_file_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'score.csv')
+                key = []
+                if os.path.exists(score_file_path):
+                    with open(score_file_path, 'r') as file:
+                        reader = csv.reader(file)
+                        header = next(reader)
+                        data = [row for row in reader]
+                        data_num = len(columns) - 1
+                        effective_data_num = int(data_num * float(featureEng.FeatureEng_efficiency) / 100)
+                        sorted_data = data[:effective_data_num]
+                        for row in sorted_data:
+                            key.append(row[0])
+                        file.close()
+                for k in range(len(columns)-1):
                     feature_item = {}
                     feature_item['name'] = columns[k]
                     feature_item['dataset'] = new_dataset_name
-                    feature_item['task'] = new_dataset_introduction
+                    feature_item['task'] = original_dataset.introduction
                     feature_item['featureConstruct'] = feature_construct
                     feature_item['featureGeneration'] = feature_generation
                     feature_item['featureDecoupling'] = feature_decoupling
                     feature_item['featureLearning'] = feature_learning
                     feature_item['featureDerivation'] = feature_derive
                     feature_item['featureSelection'] = feature_selection
+                    if len(key) == 0:
+                        feature_item['effective'] = '暂无'
+                    else:
+                        if columns[k] in key:
+                            feature_item['effective'] = '是'
+                        else:
+                            feature_item['effective'] = '否'
                     featureList.append(feature_item)
             else:
                 return None
@@ -248,7 +346,7 @@ class FeatureEngService:
                 file_num = len(os.listdir(decompress_dataset_path))
                 sample_file = os.listdir(decompress_dataset_path)[int(file_num / 2)]
                 columns = pd.read_csv(os.path.join(decompress_dataset_path, sample_file), delimiter=',', encoding='utf-8').columns.tolist()
-                for k in range(len(columns)):
+                for k in range(len(columns)-1):
                     feature_item = {}
                     feature_item['name'] = columns[k]
                     feature_item['dataset'] = new_dataset_name
@@ -347,14 +445,14 @@ class FeatureEngService:
                     reader = csv.reader(file)
                     header = next(reader)
                     data = [row for row in reader]
-                    sorted_data = sorted(data, key=lambda x: x[1], reverse=True)
+                    # sorted_data = sorted(data, key=lambda x: x[1], reverse=True)
+                    sorted_data = data
                     score_dict = {}
                     key = []
                     value = []
                     if len(sorted_data) > 100:
                         sorted_data = sorted_data[0:100]
                     for row in sorted_data:
-                        current_app.logger.info(row)
                         key.append(row[0])
                         value.append(row[1])
                     file.close()
@@ -368,7 +466,6 @@ class FeatureEngService:
 
     def getTaskStatus(self, task_id):
         a = FeatureEngTasks.operate.AsyncResult(task_id)  # 实例化得到一个对象
-        current_app.logger.info(a)
         running_message = {}
         if a.state == 'PENDING':
             running_message['status'] = 'PENDING'
@@ -382,5 +479,8 @@ class FeatureEngService:
             running_message['status'] = 'SUCCESS'
             running_message['progress'] = 1.0
             running_message['message'] = '完成！'
-        current_app.logger.info(running_message)
         return running_message
+
+    def updateEfficiency(self, efficiency, featureEng_id):
+        self.featureEngDao.updateFeatureEngEfficiency(efficiency, featureEng_id)
+        return 'SUCCESS'

@@ -1,3 +1,4 @@
+import math
 import os
 from flask import Blueprint, request, g, json, current_app
 from app.constant import get_error, RET
@@ -5,7 +6,7 @@ from app._UserApp import login_required
 from model import FeatureEng
 from service import FeatureEngService
 from service import DatasetService
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from utils.CommonUtil import download_file
 
 featureEngService = FeatureEngService()
@@ -27,6 +28,31 @@ def query_featureEng_list():
         return {'meta': {'msg': 'query featureEng list success', 'code': 200}, 'data': featureEngs}, 200
     return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
 
+@bp.route('/queryAllFeatureEng', methods=('GET', 'POST'))
+@login_required
+def queryAllFeatureEng():
+    if request.method == 'GET':
+        user_id = g.user_id
+        featureEngList = featureEngService.queryFeatureEngList(user_id)
+        if featureEngList:
+            featureEngList = json.dumps(featureEngList)
+        else:
+            featureEngList = None
+        return {'meta': {'msg': 'query featureEng list success', 'code': 200}, 'data': featureEngList}, 200
+    return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
+
+@bp.route('/queryImportFeatureEng', methods=('GET', 'POST'))
+@login_required
+def queryImportFeatureEng():
+    if request.method == 'GET':
+        user_id = g.user_id
+        featureEngList = featureEngService.queryImportFeatureEngList(user_id)
+        if featureEngList:
+            featureEngList = json.dumps(featureEngList)
+        else:
+            featureEngList = None
+        return {'meta': {'msg': 'query featureEng list success', 'code': 200}, 'data': featureEngList}, 200
+    return {'meta': {"msg": "method not allowed", 'code': 405}}, 405
 
 @bp.route('/delete', methods=('GET', 'POST'))
 @login_required
@@ -132,7 +158,6 @@ def add_featureEng():
         featureEng_bean.original_dataset_id = original_dataset_id
         featureEng_bean.user_id = user_id
         featureEng_bean.username = username
-
         featureEng = featureEngService.addFeatureEng(featureEng_bean,
                                                      featureEng_processes,
                                                      original_dataset,
@@ -190,11 +215,34 @@ def queryLatestResult():
                 taskDetails['type'] = '纯人工方法'
             if featureEng.featureEng_operationMode == '1':
                 taskDetails['mode'] = '001夏平初始'
+            if featureEng.retrain == '0':
+                taskDetails['retrain'] = '是'
+            else:
+                taskDetails['retrain'] = '否'
+            featureList = featureEngService.getTaskFeatureList(featureEng.featureEng_id)
+            if featureList:
+                all_feature_num = len(featureList)
+            else:
+                all_feature_num = 0
+            taskDetails['all_feature_num'] = all_feature_num
+            # (60.41 * 17 / 100) = 10
+            # 58.82 * 17 / 100
+            taskDetails['effective_feature_num'] = round(all_feature_num * round(float(featureEng.FeatureEng_efficiency)/100, 2))
             taskDetails['network'] = '300节点电网'
             taskDetails['checkedModules'] = featureEng.featureEng_modules
-            taskDetails['original_efficiency'] = featureEng.FeatureEng_efficiency
-            taskDetails['original_accuracy'] = featureEng.FeatureEng_accuracy
+            current_app.logger.info('taskDetails')
+            current_app.logger.info(taskDetails['effective_feature_num'])
+            if featureEng.FeatureEng_efficiency:
+                # 58.82
+                taskDetails['original_efficiency'] = round(float(taskDetails['effective_feature_num'] / all_feature_num) * 100, 2)
+                taskDetails['original_accuracy'] = round(float(featureEng.FeatureEng_accuracy), 2)
+                current_app.logger.info(taskDetails['original_efficiency'])
+                featureEngService.updateEfficiency(taskDetails['original_efficiency'], featureEng.featureEng_id)
+            else:
+                taskDetails['original_efficiency'] = None
+                taskDetails['original_accuracy'] = None
             taskDetails['dataset'] = dataset.dataset_name
+            taskDetails['new_dataset'] = datasetService.queryDatasetById(featureEng.new_dataset_id).dataset_name
         else:
             taskDetails = {}
             taskDetails['isNewResult'] = False
@@ -290,9 +338,12 @@ def addFeatureEngTask():
             featureEng_processes = request.json.get('featureEng_processes')
             original_dataset_id = request.json.get('original_dataset_id')
             new_dataset_name = request.json.get('new_dataset_name')
+            retrain = request.json.get('retrain')
+            imported_featureEng = request.json.get('imported_featureEng')
         except Exception:
             return get_error(RET.PARAMERR, 'Error: no request')
-
+        current_app.logger.info('imported_featureEng')
+        current_app.logger.info(imported_featureEng)
         try:
             user_id = g.user_id
             username = g.user.username
@@ -313,6 +364,8 @@ def addFeatureEngTask():
             return get_error(RET.PARAMERR, 'Error: request lacks original_dataset_id')
         if not new_dataset_name:
             return get_error(RET.PARAMERR, 'Error: request lacks new_dataset_name')
+        if not retrain:
+            return get_error(RET.PARAMERR, 'Error: request lacks retrain setting')
         original_dataset = datasetService.queryDatasetById(original_dataset_id)
         if not original_dataset:
             return get_error(RET.PARAMERR, 'Error: original_dataset_id not exists')
@@ -326,6 +379,8 @@ def addFeatureEngTask():
         featureEng_bean.featureEng_name = featureEng_name
         featureEng_bean.featureEng_type = featureEng_type
         featureEng_bean.featureEng_operationMode = featureEng_operationMode
+        featureEng_bean.retrain = retrain
+        current_app.logger.info(retrain)
         moduleString = ''
         for i in range(len(featureEng_modules)):
             moduleString = moduleString + str(featureEng_modules[i]) + ','
@@ -335,13 +390,16 @@ def addFeatureEngTask():
         featureEng_bean.original_dataset_id = original_dataset_id
         featureEng_bean.user_id = user_id
         featureEng_bean.username = username
-        start_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        SHA_TZ = timezone(timedelta(hours=8), name='Asia/Shanghai')
+        start_time = datetime.utcnow().replace(tzinfo=timezone.utc)
+        start_time = start_time.astimezone(SHA_TZ).strftime('%Y-%m-%d %H:%M:%S')
         featureEng_bean.start_time = start_time
         featureEng = featureEngService.addFeatureEng(featureEng_bean,
                                                      featureEng_processes,
                                                      original_dataset,
                                                      original_dataset_file_path,
-                                                     new_dataset_name).serialize
+                                                     new_dataset_name,
+                                                     imported_featureEng).serialize
 
         msg = 'add featureEng success and operate immediately'
         code = 204
@@ -389,11 +447,27 @@ def querySelectedTaskResults():
                 taskDetails['type'] = '纯人工方法'
             if featureEng.featureEng_operationMode == '1':
                 taskDetails['mode'] = '001夏平初始'
+            if featureEng.retrain == '0':
+                taskDetails['retrain'] = '是'
+            else:
+                taskDetails['retrain'] = '否'
+            featureList = featureEngService.getTaskFeatureList(featureEng_id)
+            if featureList:
+                all_feature_num = len(featureList)
+            else:
+                all_feature_num = 0
+            taskDetails['all_feature_num'] = all_feature_num
+            taskDetails['effective_feature_num'] = round(all_feature_num * round(float(featureEng.FeatureEng_efficiency)/100, 2))
             taskDetails['network'] = '300节点电网'
             taskDetails['checkedModules'] = featureEng.featureEng_modules
-            taskDetails['original_efficiency'] = featureEng.FeatureEng_efficiency
-            taskDetails['original_accuracy'] = featureEng.FeatureEng_accuracy
+            if featureEng.FeatureEng_efficiency:
+                taskDetails['original_efficiency'] = round(float(taskDetails['effective_feature_num'] / all_feature_num) * 100, 2)
+                taskDetails['original_accuracy'] = round(float(featureEng.FeatureEng_accuracy), 2)
+            else:
+                taskDetails['original_efficiency'] = None
+                taskDetails['original_accuracy'] = None
             taskDetails['dataset'] = dataset.dataset_name
+            taskDetails['new_dataset'] = datasetService.queryDatasetById(featureEng.new_dataset_id).dataset_name
         else:
             taskDetails = {}
             taskDetails['isNewResult'] = False
@@ -477,6 +551,7 @@ def import_featureEng():
             existedFeatureEng['dataset_name'] = dataset.dataset_name
             existedFeatureEng['featureEng_processes'] = featureEng.featureEng_processes
             existedFeatureEng['dataset_id'] = featureEng.original_dataset_id
+            existedFeatureEng['retrain'] = featureEng.retrain
             existedFeatureEng['new_dataset_name'] = new_dataset.dataset_name
         else:
             existedFeatureEng = {}

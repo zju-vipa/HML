@@ -45,6 +45,18 @@ export default {
       method: 'GET'
     })
   },
+  queryAllFeatureEng () {
+    return request({
+      url: '/featureEng/queryAllFeatureEng',
+      method: 'GET'
+    })
+  },
+  queryImportFeatureEng () {
+    return request({
+      url: '/featureEng/queryImportFeatureEng',
+      method: 'GET'
+    })
+  },
   // 查询特征库
   queryFeatureLibrary () {
     return request({

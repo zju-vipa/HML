@@ -70,30 +70,84 @@
                       </el-row>
                     </div>
                     <div style="margin: 15px; text-align: center">
-                        <el-row  v-for="item in newResultForm.taskDetails" :key="item.type" style="line-height: 5px">
-                          <el-col span="6">
-                            <h3 style="text-align: left">{{item.label}}</h3>
-                          </el-col>
-                          <el-col span="18" style="text-align: left">
-                            <h4 style="font-weight: lighter">{{item.value}}</h4>
-                          </el-col>
-                        </el-row>
-                        <el-row style="line-height: 5px" type="flex" align="middle">
-                          <el-col span="6">
-                           <h3 style="text-align: left">已选功能模块</h3>
-                          </el-col>
-                          <el-col span="18" style="text-align: left">
-                            <el-checkbox-group v-model="newResultForm.checkedModules" v-if="displayType == 0">
-                              <el-checkbox v-for="(item, index) in moduleOptions" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
-                            </el-checkbox-group>
-                            <el-checkbox-group v-model="newResultForm.checkedModules" v-else-if="displayType == 1">
-                              <el-checkbox v-for="(item, index) in moduleOptions2" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
-                            </el-checkbox-group>
-                            <el-checkbox-group v-model="newResultForm.checkedModules" v-else>
-                              <el-checkbox v-for="(item, index) in moduleOptions3" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
-                            </el-checkbox-group>
-                          </el-col>
-                        </el-row>
+                      <el-row style="line-height: 12px">
+                        <el-col span="6">
+                          <h3 style="text-align: left">{{newResultForm.taskDetails[0].label}}</h3>
+                        </el-col>
+                        <el-col span="6" style="text-align: left">
+                          <h4 style="font-weight: lighter">{{newResultForm.taskDetails[0].value}}</h4>
+                        </el-col>
+                        <el-col span="6">
+                          <h3 style="text-align: left">{{newResultForm.taskDetails[1].label}}</h3>
+                        </el-col>
+                        <el-col span="6" style="text-align: left">
+                          <h4 style="font-weight: lighter">{{newResultForm.taskDetails[1].value}}</h4>
+                        </el-col>
+                      </el-row>
+                      <el-row style="line-height: 12px">
+                        <el-col span="6">
+                          <h3 style="text-align: left">{{newResultForm.taskDetails[2].label}}</h3>
+                        </el-col>
+                        <el-col span="6" style="text-align: left">
+                          <h4 style="font-weight: lighter">{{newResultForm.taskDetails[2].value}}</h4>
+                        </el-col>
+                        <el-col span="6">
+                          <h3 style="text-align: left">{{newResultForm.taskDetails[3].label}}</h3>
+                        </el-col>
+                        <el-col span="6" style="text-align: left">
+                          <h4 style="font-weight: lighter">{{newResultForm.taskDetails[3].value}}</h4>
+                        </el-col>
+                      </el-row>
+                      <el-row style="line-height: 12px">
+                        <el-col span="6">
+                          <h3 style="text-align: left">{{newResultForm.taskDetails[4].label}}</h3>
+                        </el-col>
+                        <el-col span="6" style="text-align: left">
+                          <h4 style="font-weight: lighter">{{newResultForm.taskDetails[4].value}}</h4>
+                        </el-col>
+                        <el-col span="6">
+                          <h3 style="text-align: left">{{newResultForm.taskDetails[5].label}}</h3>
+                        </el-col>
+                        <el-col span="6" style="text-align: left">
+                          <h4 style="font-weight: lighter">{{newResultForm.taskDetails[5].value}}</h4>
+                        </el-col>
+                      </el-row>
+                      <el-row style="line-height: 12px">
+                        <el-col span="6">
+                          <h3 style="text-align: left">{{newResultForm.taskDetails[6].label}}</h3>
+                        </el-col>
+                        <el-col span="6" style="text-align: left">
+                          <h4 style="font-weight: lighter">{{newResultForm.taskDetails[6].value}}</h4>
+                        </el-col>
+                        <el-col span="6">
+                          <h3 style="text-align: left">{{newResultForm.taskDetails[7].label}}</h3>
+                        </el-col>
+                        <el-col span="6" style="text-align: left">
+                          <h4 style="font-weight: lighter">{{newResultForm.taskDetails[7].value}}</h4>
+                        </el-col>
+                      </el-row>
+                      <el-row style="line-height: 12px" type="flex" align="middle">
+                        <el-col span="5">
+                          <h3 style="text-align: left">{{newResultForm.taskDetails[8].label}}</h3>
+                        </el-col>
+                        <el-col span="2" style="text-align: left">
+                          <h4 style="font-weight: lighter">{{newResultForm.taskDetails[8].value}}</h4>
+                        </el-col>
+                        <el-col span="5">
+                          <h3 style="text-align: left">已选功能模块</h3>
+                        </el-col>
+                        <el-col span="12" style="text-align: left">
+                          <el-checkbox-group v-model="newResultForm.checkedModules" v-if="displayType == 0">
+                            <el-checkbox v-for="(item, index) in moduleOptions" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
+                          </el-checkbox-group>
+                          <el-checkbox-group v-model="newResultForm.checkedModules" v-else-if="displayType == 1">
+                            <el-checkbox v-for="(item, index) in moduleOptions2" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
+                          </el-checkbox-group>
+                          <el-checkbox-group v-model="newResultForm.checkedModules" v-else>
+                            <el-checkbox v-for="(item, index) in moduleOptions3" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
+                          </el-checkbox-group>
+                        </el-col>
+                      </el-row>
                     </div>
                   </el-card>
                 </el-col>
@@ -107,6 +161,14 @@
                       </el-row>
                     </div>
                     <div style="margin: 15px; text-align: center; height: 300px">
+                      <el-row v-if="newResultForm.efficiency != null" style="text-align: center">
+                        <el-col span="12" style="text-align: center">
+                          <h3 style="text-align: center; font-size: 20px">{{newResultForm.taskDetails[6].label}}：{{newResultForm.taskDetails[6].value}}</h3>
+                        </el-col>
+                        <el-col span="12" style="text-align: center">
+                          <h3 style="text-align: center; font-size: 20px">{{newResultForm.taskDetails[7].label}}：{{newResultForm.taskDetails[7].value}}</h3>
+                        </el-col>
+                      </el-row>
                       <el-row v-if="newResultForm.efficiency != null">
                         <el-col span="12">
                           <el-row>
@@ -276,7 +338,7 @@
                   </el-table>
                 </div>
               </el-card>
-              <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 530px">
+              <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 570px">
                 <div slot="header" class="header">
                   <el-row type="flex" align="middle">
                     <el-col span="12">
@@ -293,7 +355,7 @@
                   </div>
                 </el-row>
                 <div style="margin: 15px; text-align: center;">
-                  <div id="featureCharts" style="width: 100%; height: 650px; margin: 0 auto;"></div>
+                  <div id="featureCharts" style="width: 100%; height: 510px; margin: 0 auto;"></div>
                 </div>
               </el-card>
             </el-col>
@@ -318,25 +380,76 @@
                           <el-col span="12">
                             <span class="header-label" style="font-size: 18px; font-weight: bolder">当前任务概况</span>
                           </el-col>
-                          <!--                      <el-col span="12" style="text-align: right">-->
-                          <!--                        <el-link type="success">查看详情</el-link>-->
-                          <!--                      </el-col>-->
                         </el-row>
                       </div>
                       <div style="margin: 15px; text-align: center">
-                        <el-row  v-for="item in newResultForm.taskDetails" :key="item.type" style="line-height: 5px">
+                        <el-row style="line-height: 12px">
                           <el-col span="6">
-                            <h3 style="text-align: left">{{item.label}}</h3>
+                            <h3 style="text-align: left">{{newResultForm.taskDetails[0].label}}</h3>
                           </el-col>
-                          <el-col span="18" style="text-align: left">
-                            <h4 style="font-weight: lighter">{{item.value}}</h4>
+                          <el-col span="6" style="text-align: left">
+                            <h4 style="font-weight: lighter">{{newResultForm.taskDetails[0].value}}</h4>
+                          </el-col>
+                          <el-col span="6">
+                            <h3 style="text-align: left">{{newResultForm.taskDetails[1].label}}</h3>
+                          </el-col>
+                          <el-col span="6" style="text-align: left">
+                            <h4 style="font-weight: lighter">{{newResultForm.taskDetails[1].value}}</h4>
                           </el-col>
                         </el-row>
-                        <el-row style="line-height: 5px" type="flex" align="middle">
+                        <el-row style="line-height: 12px">
                           <el-col span="6">
+                            <h3 style="text-align: left">{{newResultForm.taskDetails[2].label}}</h3>
+                          </el-col>
+                          <el-col span="6" style="text-align: left">
+                            <h4 style="font-weight: lighter">{{newResultForm.taskDetails[2].value}}</h4>
+                          </el-col>
+                          <el-col span="6">
+                            <h3 style="text-align: left">{{newResultForm.taskDetails[3].label}}</h3>
+                          </el-col>
+                          <el-col span="6" style="text-align: left">
+                            <h4 style="font-weight: lighter">{{newResultForm.taskDetails[3].value}}</h4>
+                          </el-col>
+                        </el-row>
+                        <el-row style="line-height: 12px">
+                          <el-col span="6">
+                            <h3 style="text-align: left">{{newResultForm.taskDetails[4].label}}</h3>
+                          </el-col>
+                          <el-col span="6" style="text-align: left">
+                            <h4 style="font-weight: lighter">{{newResultForm.taskDetails[4].value}}</h4>
+                          </el-col>
+                          <el-col span="6">
+                            <h3 style="text-align: left">{{newResultForm.taskDetails[5].label}}</h3>
+                          </el-col>
+                          <el-col span="6" style="text-align: left">
+                            <h4 style="font-weight: lighter">{{newResultForm.taskDetails[5].value}}</h4>
+                          </el-col>
+                        </el-row>
+                        <el-row style="line-height: 12px">
+                          <el-col span="6">
+                            <h3 style="text-align: left">{{newResultForm.taskDetails[6].label}}</h3>
+                          </el-col>
+                          <el-col span="6" style="text-align: left">
+                            <h4 style="font-weight: lighter">{{newResultForm.taskDetails[6].value}}</h4>
+                          </el-col>
+                          <el-col span="6">
+                            <h3 style="text-align: left">{{newResultForm.taskDetails[7].label}}</h3>
+                          </el-col>
+                          <el-col span="6" style="text-align: left">
+                            <h4 style="font-weight: lighter">{{newResultForm.taskDetails[7].value}}</h4>
+                          </el-col>
+                        </el-row>
+                        <el-row style="line-height: 12px" type="flex" align="middle">
+                          <el-col span="5">
+                            <h3 style="text-align: left">{{newResultForm.taskDetails[8].label}}</h3>
+                          </el-col>
+                          <el-col span="2" style="text-align: left">
+                            <h4 style="font-weight: lighter">{{newResultForm.taskDetails[8].value}}</h4>
+                          </el-col>
+                          <el-col span="5">
                             <h3 style="text-align: left">已选功能模块</h3>
                           </el-col>
-                          <el-col span="18" style="text-align: left">
+                          <el-col span="12" style="text-align: left">
                             <el-checkbox-group v-model="newResultForm.checkedModules" v-if="displayType == 0">
                               <el-checkbox v-for="(item, index) in moduleOptions" :label="item.value" :key="index" :value="item.value" disabled>{{item.label}}</el-checkbox>
                             </el-checkbox-group>
@@ -361,6 +474,14 @@
                         </el-row>
                       </div>
                       <div style="margin: 15px; text-align: center; height: 300px">
+                        <el-row v-if="newResultForm.efficiency != null" style="text-align: center">
+                          <el-col span="12" style="text-align: center">
+                            <h3 style="text-align: center; font-size: 20px">{{newResultForm.taskDetails[6].label}}：{{newResultForm.taskDetails[6].value}}</h3>
+                          </el-col>
+                          <el-col span="12" style="text-align: center">
+                            <h3 style="text-align: center; font-size: 20px">{{newResultForm.taskDetails[7].label}}：{{newResultForm.taskDetails[7].value}}</h3>
+                          </el-col>
+                        </el-row>
                         <el-row v-if="newResultForm.efficiency != null">
                           <el-col span="12">
                             <el-row>
@@ -485,10 +606,21 @@
                     <el-table-column prop="operate_state" label="状态" style="text-align: center">
                       <template slot-scope="scope">
                         <span v-if="scope.row.operate_state==='已完成'" style="color: green">已完成</span>
-                        <span v-else-if="scope.row.operate_state==='交互中'"  style="color: orange">交互中</span>
+                        <span v-else-if="scope.row.operate_state==='交互中'"  style="color: orange">交互中<br>{{ scope.row.task_progress }}%</span>
                         <span v-else-if="scope.row.operate_state==='已停止'"  style="color: red">已停止</span>
                       </template>
                     </el-table-column>
+                    <el-table-column prop="start_time" label="创建时间" style="font-weight: bolder">
+                      <template slot-scope="scope">
+                        <span>{{ scope.row.start_time }}</span>
+                      </template>
+                    </el-table-column>
+<!--                    <el-table-column prop="spent_time" label="完成用时" style="font-weight: bolder">-->
+<!--                      <template slot-scope="scope">-->
+<!--                        <span v-if="scope.row.operate_state==='已完成' || scope.row.operate_state==='已停止'" style="color: green">{{ scope.row.spent_time }}</span>-->
+<!--                        <span v-else style="color: gray">暂无内容</span>-->
+<!--                      </template>-->
+<!--                    </el-table-column>-->
                     <el-table-column label="结果">
                       <template slot-scope="scope">
                         <span>
@@ -596,7 +728,11 @@ export default {
           { type: 'type', label: '特征工程类型', value: '' },
           { type: 'network', label: '网络拓扑', value: '300节点电网' },
           { type: 'mode', label: '运行方式', value: '' },
-          { type: 'dataset', label: '数据集', value: '' }
+          { type: 'dataset', label: '数据集', value: '' },
+          { type: 'new_dataset', label: '新数据集名', value: '' },
+          { type: 'all_feature_num', label: '所有特征数目', value: '' },
+          { type: 'effective_feature_num', label: '有效特征数目', value: '' },
+          { type: 'retrain', label: '是否重新训练', value: '' }
         ]
       },
       HumanInLoopForm: {
@@ -624,6 +760,7 @@ export default {
       taskFeatureColumnsList: [{ label: '特征名', prop: 'name' },
         { label: '所属数据集', prop: 'dataset' },
         { label: '针对任务', prop: 'task' },
+        { label: '是否有效', prop: 'effective' },
         { label: '特征解耦', prop: 'featureDecoupling' },
         { label: '特征学习', prop: 'featureLearning' },
         { label: '特征衍生', prop: 'featureDerivation' },
@@ -716,10 +853,10 @@ export default {
             if (key === 'type') {
               if (this.newResultForm.taskDetails[i].value === '纯人工方法') {
                 this.displayType = 1
-                this.taskFeatureColumnsList = [{ label: '特征名', prop: 'name' }, { label: '所属数据集', prop: 'dataset' }, { label: '针对任务', prop: 'task' }, { label: '特征构建', prop: 'featureConstruct' }]
+                this.taskFeatureColumnsList = [{ label: '特征名', prop: 'name' }, { label: '所属数据集', prop: 'dataset' }, { label: '针对任务', prop: 'task' }, { label: '是否有效', prop: 'effective' }, { label: '特征构建', prop: 'featureConstruct' }]
               } else if (this.newResultForm.taskDetails[i].value === '纯机器方法') {
                 this.displayType = 2
-                this.taskFeatureColumnsList = [{ label: '特征名', prop: 'name' }, { label: '所属数据集', prop: 'dataset' }, { label: '针对任务', prop: 'task' }, { label: '特征生成', prop: 'featureGeneration' }]
+                this.taskFeatureColumnsList = [{ label: '特征名', prop: 'name' }, { label: '所属数据集', prop: 'dataset' }, { label: '针对任务', prop: 'task' }, { label: '是否有效', prop: 'effective' }, { label: '特征生成', prop: 'featureGeneration' }]
               }
             }
           }
@@ -741,42 +878,46 @@ export default {
     getLatestFeatures () {
       featureEngApi.queryLatestFeatures().then(response => {
         const resp = JSON.parse(response.data.data)
-        console.log(resp)
-        const upper = resp.length
-        for (let i = 0; i < upper; i = i + 1) {
-          this.taskFeatureList.push({ name: resp[i].name, dataset: resp[i].dataset, task: resp[i].task, featureConstruct: resp[i].featureConstruct, featureGeneration: resp[i].featureGeneration, featureDecoupling: resp[i].featureDecoupling, featureLearning: resp[i].featureLearning, featureDerivation: resp[i].featureDerivation, featureSelection: resp[i].featureSelection })
+        if (resp != null) {
+          const upper = resp.length
+          for (let i = 0; i < upper; i = i + 1) {
+            this.taskFeatureList.push({ name: resp[i].name, dataset: resp[i].dataset, task: resp[i].task, effective: resp[i].effective, featureConstruct: resp[i].featureConstruct, featureGeneration: resp[i].featureGeneration, featureDecoupling: resp[i].featureDecoupling, featureLearning: resp[i].featureLearning, featureDerivation: resp[i].featureDerivation, featureSelection: resp[i].featureSelection })
+          }
         }
+        this.getAllFeatureEngs()
       })
-      this.getAllFeatureEngs()
     },
     getAllFeatureEngs () {
       this.HumanFeaData = []
       // 已有特征工程
-      featureEngApi.query().then(response => {
-        const resp = response.data
-        console.log(resp.data)
-        if (resp.data != null) {
-          const upper = resp.data.length
+      featureEngApi.queryAllFeatureEng().then(response => {
+        const resp = JSON.parse(response.data.data)
+        console.log(resp)
+        if (resp != null) {
+          const upper = resp.length
           let state = ''
           let type = ''
           for (let i = 0; i < upper; i = i + 1) {
-            if (resp.data[i].operate_state === '1') {
+            if (resp[i].operate_state === '1') {
               state = '交互中'
-            } else if (resp.data[i].operate_state === '2') {
+            } else if (resp[i].operate_state === '2') {
               state = '已完成'
-            } else if (resp.data[i].operate_state === '3') {
+            } else if (resp[i].operate_state === '3') {
               state = '已停止'
             }
-            if (resp.data[i].featureEng_type === 'HumanInLoop') {
+            if (resp[i].featureEng_type === 'HumanInLoop') {
               type = '人机协同特征学习与衍生技术'
-            } else if (resp.data[i].featureEng_type === 'Machine') {
+            } else if (resp[i].featureEng_type === 'Machine') {
               type = '纯机器方法'
             } else {
               type = '纯人工方法'
             }
-            this.HumanFeaData.push({ featureEng_id: resp.data[i].featureEng_id, featureEng_name: resp.data[i].featureEng_name, featureEng_type: type, featureEng_accuracy: resp.data[i].FeatureEng_accuracy, featureEng_efficiency: resp.data[i].FeatureEng_efficiency, operate_state: state })
+            this.HumanFeaData.push({ featureEng_id: resp[i].featureEng_id, featureEng_name: resp[i].featureEng_name, featureEng_type: type, featureEng_accuracy: resp[i].FeatureEng_accuracy, featureEng_efficiency: resp[i].FeatureEng_efficiency, operate_state: state, start_time: resp[i].start_time, spent_time: resp[i].spent_time, task_progress: resp[i].task_progress })
           }
-          this.getFeatureLibrary()
+          console.log(this.HumanFeaData)
+          if (this.newResultForm.isNewResult) {
+            this.getFeatureLibrary()
+          }
         }
       })
     },
@@ -791,8 +932,6 @@ export default {
           for (let i = 0; i < upper; i = i + 1) {
             this.featureLibraryList.push({ name: resp[i].name, dataset: resp[i].dataset, task: resp[i].task, featureConstruct: resp[i].featureConstruct, featureGeneration: resp[i].featureGeneration, featureDecoupling: resp[i].featureDecoupling, featureLearning: resp[i].featureLearning, featureDerivation: resp[i].featureDerivation, featureSelection: resp[i].featureSelection })
           }
-          console.log('featureLibraryList')
-          console.log(this.featureLibraryList)
         }
       })
       console.log(this.checkedAll)
@@ -811,8 +950,8 @@ export default {
           for (let i = 0; i < upper; i = i + 1) {
             this.IteractionRecord.push({ record_efficiency: resp[i].record_efficiency + '%', record_accuracy: resp[i].record_accuracy + '%' })
           }
-          this.drawChart()
         }
+        this.drawChart()
       })
     },
     drawChart () {
@@ -958,7 +1097,7 @@ export default {
     font-size: 12px;
   }
   .box-card {
-    height: 320px;
+    height: 340px;
     .header {
       position: relative;
       .header-label {
