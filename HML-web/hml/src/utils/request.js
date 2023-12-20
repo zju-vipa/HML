@@ -3,7 +3,7 @@ import axios from 'axios'
 const request = axios.create({
   // baseURL: 'http://10.214.211.135:8051/api/private/v1',
   baseURL: 'http://10.214.211.137:8051/api/private/v1',
-  // baseURL: 'http://192.168.137.8:8051/api/private/v1',
+  // baseURL: 'http://10.214.211.137:8051/api/private/v1',
   timeout: 1000000
 })
 // 请求拦截

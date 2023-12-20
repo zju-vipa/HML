@@ -339,7 +339,7 @@
                 </el-card>
                 </el-col>
               </el-row>
-              <el-row>
+              <!-- <el-row> -->
               <el-row>
                 <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 340px">
                   <div slot="header" class="header">
