@@ -1,0 +1,205 @@
+{
+    "id": 0,
+    "highlight": true,
+    "condition": "feature_318 <= 1.0069249868392944",
+    "yes": {
+        "id": 1,
+        "highlight": false,
+        "condition": "feature_645 <= 331.7935333251953",
+        "yes": {
+            "id": 3,
+            "highlight": false,
+            "condition": "feature_1434 <= 0.8589349985122681",
+            "yes": {
+                "id": 7,
+                "highlight": false,
+                "value": [
+                    [
+                        0.0,
+                        13.0
+                    ]
+                ]
+            },
+            "no": {
+                "id": 8,
+                "highlight": false,
+                "value": [
+                    [
+                        4.0,
+                        0.0
+                    ]
+                ]
+            }
+        },
+        "no": {
+            "id": 4,
+            "highlight": false,
+            "condition": "feature_326 <= 0.9955500066280365",
+            "yes": {
+                "id": 9,
+                "highlight": false,
+                "condition": "feature_2189 <= 307.3982696533203",
+                "yes": {
+                    "id": 19,
+                    "highlight": false,
+                    "value": [
+                        [
+                            10.0,
+                            5.0
+                        ]
+                    ]
+                },
+                "no": {
+                    "id": 20,
+                    "highlight": false,
+                    "value": [
+                        [
+                            1018.0,
+                            0.0
+                        ]
+                    ]
+                }
+            },
+            "no": {
+                "id": 10,
+                "highlight": false,
+                "condition": "feature_1013 <= 359.01783752441406",
+                "yes": {
+                    "id": 21,
+                    "highlight": false,
+                    "value": [
+                        [
+                            25.0,
+                            4.0
+                        ]
+                    ]
+                },
+                "no": {
+                    "id": 22,
+                    "highlight": false,
+                    "value": [
+                        [
+                            0.0,
+                            5.0
+                        ]
+                    ]
+                }
+            }
+        }
+    },
+    "no": {
+        "id": 2,
+        "highlight": false,
+        "condition": "feature_1134 <= 1.0010899901390076",
+        "yes": {
+            "id": 5,
+            "highlight": false,
+            "condition": "feature_78 <= 1.002340018749237",
+            "yes": {
+                "id": 11,
+                "highlight": false,
+                "condition": "feature_958 <= 0.9451299905776978",
+                "yes": {
+                    "id": 23,
+                    "highlight": false,
+                    "value": [
+                        [
+                            1.0,
+                            0.0
+                        ]
+                    ]
+                },
+                "no": {
+                    "id": 24,
+                    "highlight": false,
+                    "value": [
+                        [
+                            0.0,
+                            3281.0
+                        ]
+                    ]
+                }
+            },
+            "no": {
+                "id": 12,
+                "highlight": true,
+                "condition": "feature_1317 <= 217.00411224365234",
+                "yes": {
+                    "id": 25,
+                    "highlight": false,
+                    "value": [
+                        [
+                            11.0,
+                            6.0
+                        ]
+                    ]
+                },
+                "no": {
+                    "id": 26,
+                    "highlight": false,
+                    "value": [
+                        [
+                            0.0,
+                            27.0
+                        ]
+                    ]
+                }
+            }
+        },
+        "no": {
+            "id": 6,
+            "highlight": false,
+            "condition": "feature_325 <= 222.66832733154297",
+            "yes": {
+                "id": 13,
+                "highlight": true,
+                "condition": "feature_556 <= 0.9326950013637543",
+                "yes": {
+                    "id": 27,
+                    "highlight": false,
+                    "value": [
+                        [
+                            0.0,
+                            5.0
+                        ]
+                    ]
+                },
+                "no": {
+                    "id": 28,
+                    "highlight": false,
+                    "value": [
+                        [
+                            63.0,
+                            1.0
+                        ]
+                    ]
+                }
+            },
+            "no": {
+                "id": 14,
+                "highlight": true,
+                "condition": "feature_1319 <= 266.4802703857422",
+                "yes": {
+                    "id": 29,
+                    "highlight": false,
+                    "value": [
+                        [
+                            0.0,
+                            20.0
+                        ]
+                    ]
+                },
+                "no": {
+                    "id": 30,
+                    "highlight": false,
+                    "value": [
+                        [
+                            1.0,
+                            0.0
+                        ]
+                    ]
+                }
+            }
+        }
+    }
+}
