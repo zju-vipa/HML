@@ -603,36 +603,7 @@ def apply_mam():
             msg = '没有正确返回值'
 
 
-        # 1019补全data
-        # if task+case1 == "M5case118":
-        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/M5case118/q_table.png"
-        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/M5case118/q_table_evenly_spaced_states.txt"
-        # if task+case1 == "M5case300":
-        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/M5case300/q_table.png"
-        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/M5case300/q_table_evenly_spaced_states.txt"
-        # if task+case1 == "M5case9241":
-        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/M5case9241/q_table.png"
-        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/M5case9241/q_table_evenly_spaced_states.txt"
-        # if task+case1 == "S4case118":
-        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/S4case118/q_table.png"
-        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/S4case118/q_table_evenly_spaced_states.txt"
-        # if task+case1 == "S4case300":
-        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/S4case300/q_table.png"
-        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/S4case300/q_table_evenly_spaced_states.txt"
-        # if task+case1 == "S4case9241":
-        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/S4case9241/q_table.png"
-        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/S4case9241/q_table_evenly_spaced_states.txt"
-        # if task+case1 == "S10case118":
-        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/S10case118/q_table.png"
-        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/S10case118/q_table_evenly_spaced_states.txt"
-        # if task+case1 == "S10case300":
-        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/S10case300/q_table.png"
-        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/S10case300/q_table_evenly_spaced_states.txt"
-        # if task+case1 == "S10case9241":
-        #     image_path = "/root/HML/Decision/MAM_Factor-main/q_table/S10case9241/q_table.png"
-        #     text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/S10case9241/q_table_evenly_spaced_states.txt"
-        # image_path = "/root/HML/Decision/MAM_Factor-main/q_table/q_table.png"
-        # text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/q_table_evenly_spaced_states.txt"
+
         image_path = "/root/HML/Decision/MAM_Factor-main/q_table/"+task+case1+"/q_table.png"
         text_file_path = "/root/HML/Decision/MAM_Factor-main/q_table/"+task+case1+"/q_table_evenly_spaced_states.txt"
 
@@ -714,4 +685,186 @@ def apply_mam1():
         except Exception as e:
             return jsonify({'meta': {'msg': 'Error: ' + str(e), 'code': 500}}), 500
 
+# 1226GCN决策器优化卡片
+@bp.route('/apply/adddecisionmaker', methods=['POST'])
+@login_required
+def add_decision_maker():
+    data = request.json
+    selectedDataset = data.get('selectedDataset')
+    selectedDecisionMakerName = data.get('selectedDecisionMakerName')
+    selectedDecisionMakerType = data.get('selectedDecisionMakerType')
+    import os
 
+    def save_to_file(dataset, decision_maker_name, decision_maker_type):
+
+        file_path = "/root/HML/Decision/GCN_xgboost_1226/decision_maker_data.txt"
+        # 要保存的数据
+        data_to_save = f"Dataset: {dataset}, Decision Maker: {decision_maker_name}, Type: {decision_maker_type}\n"
+        # 检查文件夹是否存在，如果不存在则创建
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        # 以追加模式打开文件并写入数据
+        with open(file_path, "a") as file:
+            file.write(data_to_save)
+
+    # 保存到文件
+    try:
+        save_to_file(selectedDataset, selectedDecisionMakerName, selectedDecisionMakerType)
+        return jsonify({'meta': {'msg': '添加成功', 'code': 200}})
+    except Exception as e:
+        return jsonify({'meta': {'msg': 'Error: ' + str(e), 'code': 500}}), 500
+
+
+
+# 1226GCN决策器蒸馏卡片
+@bp.route('/apply/adddecisionmaker1', methods=['POST'])
+@login_required
+def add_decision_maker1():
+    data = request.json
+    selectedDataset = data.get('selectedDataset')
+    selectedDecisionMakerName = data.get('selectedDecisionMakerName')
+    selectedDecisionMakerType = data.get('selectedDecisionMakerType')
+    import os
+
+    def save_to_file(dataset, decision_maker_name, decision_maker_type):
+
+        file_path = "/root/HML/Decision/GCN_xgboost_1226/decision_maker_data1.txt"
+        # 要保存的数据
+        data_to_save = f"Dataset: {dataset}, Decision Maker: {decision_maker_name}, Distiller: {decision_maker_type}\n"
+        # 检查文件夹是否存在，如果不存在则创建
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        # 以追加模式打开文件并写入数据
+        with open(file_path, "a") as file:
+            file.write(data_to_save)
+
+    # 保存到文件
+    try:
+        save_to_file(selectedDataset, selectedDecisionMakerName, selectedDecisionMakerType)
+        return jsonify({'meta': {'msg': '添加成功', 'code': 200}})
+    except Exception as e:
+        return jsonify({'meta': {'msg': 'Error: ' + str(e), 'code': 500}}), 500
+
+
+
+
+# 1226GCN决策器路径可视化卡片
+@bp.route('/apply/adddecisionmaker2', methods=['POST'])
+@login_required
+def add_decision_maker2():
+    data = request.json
+    selectedDataset = data.get('selectedDataset')
+    selectedDecisionMakerName = data.get('selectedDecisionMakerName')
+    # selectedDecisionMakerType = data.get('selectedDecisionMakerType')
+    import os
+
+    def save_to_file(dataset, decision_maker_name):
+
+        file_path = "/root/HML/Decision/GCN_xgboost_1226/decision_maker_data2.txt"
+        # 要保存的数据
+        data_to_save = f"Dataset: {dataset}, Decision Maker: {decision_maker_name}\n"
+        # 检查文件夹是否存在，如果不存在则创建
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        # 以追加模式打开文件并写入数据
+        with open(file_path, "a") as file:
+            file.write(data_to_save)
+
+    # 保存到文件
+    try:
+        save_to_file(selectedDataset, selectedDecisionMakerName)
+        return jsonify({'meta': {'msg': '添加成功', 'code': 200}})
+    except Exception as e:
+        return jsonify({'meta': {'msg': 'Error: ' + str(e), 'code': 500}}), 500
+
+
+# 1227决策树图像传输
+@bp.route('/visualize/path', methods=['GET'])
+@login_required
+def visualize_path():
+    param1 = request.args.get('param1')
+    param2 = request.args.get('param2')
+
+    # 根据参数确定文件夹路径
+    # folder_path = f"/root/HML/Decision/GCN_xgboost_1226/{param1}{param2}/decision_path_steps"
+    folder_path = f"/root/HML/Decision/GCN_xgboost_1226/{param1}/decision_path_steps"
+    image_path = os.path.join(folder_path, "step_5.png")
+
+    if os.path.exists(image_path):
+        try:
+            with open(image_path, "rb") as image_file:
+                encoded_image = base64.b64encode(image_file.read()).decode('utf-8')
+            return jsonify({'meta': {'msg': 'Success', 'code': 200},
+                            'data': {'imageData': 'data:image/png;base64,' + encoded_image}})
+        except Exception as e:
+            return jsonify({'meta': {'msg': 'Error: ' + str(e), 'code': 500}}), 500
+    else:
+        return jsonify({'meta': {'msg': 'Image not found', 'code': 404}}), 404
+
+
+
+# 1229 决策器名称信息传递
+@bp.route('/get/decisionmakers', methods=['GET'])
+@login_required
+def get_decision_makers():
+    file_path = "/root/HML/Decision/GCN_xgboost_1226/decision_maker_data.txt"
+    try:
+        with open(file_path, "r") as file:
+            decision_makers = [line.split(',')[1].split(':')[1].strip() for line in file.readlines()]
+        return jsonify({'meta': {'msg': 'Success', 'code': 200}, 'data': decision_makers})
+    except FileNotFoundError:
+        return jsonify({'meta': {'msg': 'File not found', 'code': 404}})
+    except Exception as e:
+        return jsonify({'meta': {'msg': 'Error: ' + str(e), 'code': 500}}), 500
+
+
+# 1229 蒸馏器名称信息传递
+@bp.route('/get/decisionmakers1', methods=['GET'])
+@login_required
+def get_decision_makers1():
+    file_path = "/root/HML/Decision/GCN_xgboost_1226/decision_maker_data1.txt"
+    try:
+        with open(file_path, "r") as file:
+            decision_makers1 = [line.split(',')[2].split(':')[1].strip() for line in file.readlines()]
+        return jsonify({'meta': {'msg': 'Success', 'code': 200}, 'data': decision_makers1})
+    except FileNotFoundError:
+        return jsonify({'meta': {'msg': 'File not found', 'code': 404}})
+    except Exception as e:
+        return jsonify({'meta': {'msg': 'Error: ' + str(e), 'code': 500}}), 500
+
+
+# 1230交互记录卡片——删除指定决策器名称的数据
+@bp.route('/delete/decisionmaker', methods=['POST'])
+@login_required
+def delete_decision_maker():
+    data = request.json
+    decision_maker_name = data.get('decisionMakerName')
+    file_path = "/root/HML/Decision/GCN_xgboost_1226/decision_maker_data.txt"
+
+    try:
+        with open(file_path, "r") as file:
+            lines = file.readlines()
+        with open(file_path, "w") as file:
+            for line in lines:
+                if decision_maker_name not in line:
+                    file.write(line)
+        return jsonify({'meta': {'msg': '删除成功', 'code': 200}})
+    except Exception as e:
+        return jsonify({'meta': {'msg': 'Error: ' + str(e), 'code': 500}}), 500
+
+
+# 1230交互记录卡片——删除指定蒸馏器名称的数据
+@bp.route('/delete/decisionmaker1', methods=['POST'])
+@login_required
+def delete_decision_maker1():
+    data = request.json
+    decision_maker_name = data.get('decisionMakerName')
+    file_path = "/root/HML/Decision/GCN_xgboost_1226/decision_maker_data1.txt"
+
+    try:
+        with open(file_path, "r") as file:
+            lines = file.readlines()
+        with open(file_path, "w") as file:
+            for line in lines:
+                if decision_maker_name not in line:
+                    file.write(line)
+        return jsonify({'meta': {'msg': '删除成功', 'code': 200}})
+    except Exception as e:
+        return jsonify({'meta': {'msg': 'Error: ' + str(e), 'code': 500}}), 500
