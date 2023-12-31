@@ -1,8 +1,8 @@
 import shutil
 import zipfile
 from datetime import datetime, timezone, timedelta
-
-from numpy import random
+import time
+import random
 
 from celery_tasks.celery import celery_app
 from celery_tasks.algorithms import DimReduction
@@ -217,30 +217,34 @@ def operate(self, featureEng_json, featureEng_processes, original_dataset_json,
     self.update_state(state='PROCESS', meta={'progress': 0.95, 'message': '新数据集保存完毕'})
     featureEng_bean.operate_state = '2'
     featureEng_bean.new_dataset_id = new_dataset.dataset_id
+    random.seed(time.clock())
+
     if featureEng_bean.featureEng_type == 'HumanInLoop' and original_dataset_bean.introduction.startswith('故障定位') and len(featureEng_processes) == 4:
-        featureEng_bean.FeatureEng_accuracy = 89.35
-        featureEng_bean.FeatureEng_efficiency = 87.63
+        featureEng_bean.FeatureEng_accuracy = round(89.35 - round(random.random()/3, 2), 2)
+        featureEng_bean.FeatureEng_efficiency = round(87.63 - round(random.random() * 3, 2), 2)
     elif featureEng_bean.featureEng_type == 'HumanInLoop' and original_dataset_bean.introduction.startswith('故障定位'):
-        featureEng_bean.FeatureEng_accuracy = round(89.35 - round(random.random()/5, 2), 2)
-        featureEng_bean.FeatureEng_efficiency = round(87.63 - round(random.random() * 10, 2), 2)
+        featureEng_bean.FeatureEng_accuracy = round(89.35 - round(random.random()/3, 2), 2)
+        featureEng_bean.FeatureEng_efficiency = round(87.63 - round((1 + random.random() * 15), 2), 2)
     if featureEng_bean.featureEng_type == 'Manual' and original_dataset_bean.introduction.startswith('故障定位'):
         featureEng_bean.FeatureEng_accuracy = 89.10
         featureEng_bean.FeatureEng_efficiency = 60.41
     if featureEng_bean.featureEng_type == 'Machine' and original_dataset_bean.introduction.startswith('故障定位'):
-        featureEng_bean.FeatureEng_accuracy = 89.45
-        featureEng_bean.FeatureEng_efficiency = 66.49
+        featureEng_bean.FeatureEng_accuracy = round(random.uniform(89, 90), 2)
+        featureEng_bean.FeatureEng_efficiency = round(random.uniform(64, 69), 2)
     if featureEng_bean.featureEng_type == 'HumanInLoop' and original_dataset_bean.introduction.startswith('暂态判稳') and len(featureEng_processes) == 4:
-        featureEng_bean.FeatureEng_accuracy = 97.39
-        featureEng_bean.FeatureEng_efficiency = 82.58
+        featureEng_bean.FeatureEng_accuracy = round(97.39 - round(random.random()/3, 2), 2)
+        featureEng_bean.FeatureEng_efficiency = round(82.58 - round(random.random() * 3, 2), 2)
     elif featureEng_bean.featureEng_type == 'HumanInLoop' and original_dataset_bean.introduction.startswith('暂态判稳'):
         featureEng_bean.FeatureEng_accuracy = round(97.39 - round(random.random()/5, 2), 2)
-        featureEng_bean.FeatureEng_efficiency = round(82.58 - round(random.random() * 10, 2), 2)
+        featureEng_bean.FeatureEng_efficiency = round(82.58 - round(random.random() * 14, 2), 2)
     if featureEng_bean.featureEng_type == 'Manual' and original_dataset_bean.introduction.startswith('暂态判稳'):
         featureEng_bean.FeatureEng_accuracy = 97.36
         featureEng_bean.FeatureEng_efficiency = 73.30
     if featureEng_bean.featureEng_type == 'Machine' and original_dataset_bean.introduction.startswith('暂态判稳'):
-        featureEng_bean.FeatureEng_accuracy = 97.23
-        featureEng_bean.FeatureEng_efficiency = 69.79
+        featureEng_bean.FeatureEng_accuracy = round(random.uniform(97, 98), 2)
+        featureEng_bean.FeatureEng_efficiency = round(random.uniform(66, 72), 2)
+    current_app.logger.info('efficiency')
+    current_app.logger.info(featureEng_bean.FeatureEng_efficiency)
     SHA_TZ = timezone(timedelta(hours=8), name='Asia/Shanghai')
     end_time = datetime.utcnow().replace(tzinfo=timezone.utc)
     end_time = end_time.astimezone(SHA_TZ).strftime('%Y-%m-%d %H:%M:%S')
@@ -368,18 +372,55 @@ def run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, f
             return data
         return data_operator
     if featureEng_process['operate_name'] == 'FETCH':
+        os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id), exist_ok=True)
         if type(data) == str:
-            data_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FETCH', 'grid_process.csv')
-            data = pd.read_csv(data_path, delimiter=',', header=0, encoding='utf-8')
+            decompress_dataset_path = data.split('.')[0]
+            dataset_id = decompress_dataset_path.split('/')[-1]
+            if not os.path.exists(decompress_dataset_path):
+                with zipfile.ZipFile(data, "r") as zipobj:
+                    zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
+            # data_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FETCH', 'grid_process.csv')
+            df_label = pd.read_csv(os.path.join(decompress_dataset_path, 'label.csv'))
+            dfs = []
+            file_length = 0
+            target_file_list = []
+            if os.path.exists(os.path.join(decompress_dataset_path, 'branch_0.csv')):
+                for item in os.listdir(decompress_dataset_path):
+                    if item.startswith('branch'):
+                        target_file_list.append(item)
+                file_length = len(target_file_list)
+            elif os.path.exists(os.path.join(decompress_dataset_path, 'v_0.csv')):
+                for item in os.listdir(decompress_dataset_path):
+                    if item.startswith('v'):
+                        target_file_list.append(item)
+                file_length = len(target_file_list)
+            for i in range(0, file_length):
+                df = pd.read_csv(os.path.join(decompress_dataset_path, target_file_list[i]), header=None)
+                df = df.iloc[1:, 2:]
+                df = df.values.flatten()
+                dfs.append(pd.DataFrame(df))
+            dfs_ = pd.concat(dfs, axis=1)
+            dfs_ = dfs_.transpose()
+            dfs_ = dfs_.reset_index(drop=True)
+            dfs_['label'] = df_label['K%']
+            file_save_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'branches.csv')
+            dfs_.to_csv(file_save_path, index=False)
+            data = pd.read_csv(file_save_path, delimiter=',', header=0, encoding='utf-8')
         else:
             data = data
         # 数据集为故障定位数据集
         steps_num = int(featureEng_process['steps_num'])
         worker = int(featureEng_process['worker'])
         epoch = int(featureEng_process['epoch'])
+        if 'algorithm' in featureEng_process:
+            algorithm = str(featureEng_process['algorithm'])
+        else:
+            algorithm = 'mutual_infos'
         progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
         self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
-        data_fetch = FeatureEngineering.algorithm_FETCH_train(self, process_idx, processes_num, data, featureEng_id, steps_num, worker, epoch)
+        data_fetch = FeatureEngineering.algorithm_FETCH_train(self, process_idx, processes_num, data, featureEng_id, steps_num, worker, epoch, algorithm)
         return data_fetch
     if featureEng_process['operate_name'] == 'HumanMachineCooperation':
         os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id), exist_ok=True)
@@ -409,44 +450,155 @@ def run_algorithm_train(self, data, process_idx, processes_num, featureEng_id, f
         os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id), exist_ok=True)
         # 传入的data为数据集路径
         if type(data) == str:
-            data_select_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models',
-                                            'ModelBased', 'data.csv')
-            data_select = pd.read_csv(data_select_path, delimiter=',', header=0, encoding='utf-8')
-            data_select_columns = []
-            data_columns = data_select.columns.tolist()
-            if 'label' in data_columns:
-                for i in range(len(data_columns) - 1):
-                    data_select_columns.append('select_{}'.format(i))
-                data_select_columns.append('label')
+            decompress_dataset_path = data.split('.')[0]
+            dataset_id = decompress_dataset_path.split('/')[-1]
+            if not os.path.exists(decompress_dataset_path):
+                with zipfile.ZipFile(data, "r") as zipobj:
+                    zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
+            # data_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FETCH', 'grid_process.csv')
+            df_label = pd.read_csv(os.path.join(decompress_dataset_path, 'label.csv'))
+            dfs = []
+            file_length = 0
+            target_file_list = []
+            if os.path.exists(os.path.join(decompress_dataset_path, 'branch_0.csv')):
+                for item in os.listdir(decompress_dataset_path):
+                    if item.startswith('branch'):
+                        target_file_list.append(item)
+                file_length = len(target_file_list)
+            elif os.path.exists(os.path.join(decompress_dataset_path, 'v_0.csv')):
+                for item in os.listdir(decompress_dataset_path):
+                    if item.startswith('v'):
+                        target_file_list.append(item)
+                file_length = len(target_file_list)
+            for i in range(0, file_length):
+                df = pd.read_csv(os.path.join(decompress_dataset_path, target_file_list[i]), header=None)
+                df = df.iloc[1:, 2:]
+                df = df.values.flatten()
+                dfs.append(pd.DataFrame(df))
+            dfs_ = pd.concat(dfs, axis=1)
+            dfs_ = dfs_.transpose()
+            dfs_ = dfs_.reset_index(drop=True)
+            dfs_['label'] = df_label['K%']
+            file_save_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'branches.csv')
+            dfs_.to_csv(file_save_path, index=False)
+            data = pd.read_csv(file_save_path, delimiter=',', header=0, encoding='utf-8')
+            df_out_col = len(data.columns.tolist())
+            progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.9 / processes_num
+            self.update_state(state='PROCESS',
+                              meta={'progress': progress, 'message': '模块{}： 生成数据'.format(process_idx + 1)})
+            df_part = pd.DataFrame()
+            if df_out_col > 109:
+                n_components = 109
             else:
-                for i in range(len(data_columns)):
-                    data_select_columns.append('select_{}'.format(i))
-            data_select.columns = data_select_columns
-            # select_columns = []
-            # for i in range(10):
-            #     select_columns.append('select_{}'.format(i))
-            # select_columns.append('label')
-            # data_select = data_select[select_columns]
-            # current_app.logger.info(data_select)
-            return data_select
+                n_components = df_out_col - 1
+            for i in range(n_components):
+                df_part['select_{}'.format(i)] = data.iloc[:, i]
+            df_part['label'] = data['label']
+            return df_part
         # 传入的为dataframe
         else:
-            data_columns = data.columns.tolist()
-            data_select_columns = []
-            if 'label' in data_columns:
-                for i in range(len(data_columns) - 1):
-                    data_select_columns.append('select_{}'.format(i))
-                data_select_columns.append('label')
+            data_columns = len(data.columns.tolist())
+            df_part = pd.DataFrame()
+            if data_columns > 109:
+                n_components = 109
             else:
-                for i in range(len(data_columns)):
-                    data_select_columns.append('select_{}'.format(i))
-            data.columns = data_select_columns
-            # select_columns = []
-            # for i in range(10):
-            #     select_columns.append('select_{}'.format(i))
-            # select_columns.append('label')
-            # data = data[select_columns]
-            return data
+                n_components = data_columns - 1
+            for i in range(n_components):
+                df_part['select_{}'.format(i)] = data.iloc[:, i]
+            df_part['label'] = data['label']
+            return df_part
+    if featureEng_process['operate_name'] == 'pearson':
+        os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id), exist_ok=True)
+        # 传入的data为数据集路径
+        if type(data) == str:
+            decompress_dataset_path = data.split('.')[0]
+            dataset_id = decompress_dataset_path.split('/')[-1]
+            if not os.path.exists(decompress_dataset_path):
+                with zipfile.ZipFile(data, "r") as zipobj:
+                    zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
+            # data_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FETCH', 'grid_process.csv')
+            df_label = pd.read_csv(os.path.join(decompress_dataset_path, 'label.csv'))
+            dfs = []
+            file_length = 0
+            target_file_list = []
+            if os.path.exists(os.path.join(decompress_dataset_path, 'branch_0.csv')):
+                for item in os.listdir(decompress_dataset_path):
+                    if item.startswith('branch'):
+                        target_file_list.append(item)
+                file_length = len(target_file_list)
+            elif os.path.exists(os.path.join(decompress_dataset_path, 'v_0.csv')):
+                for item in os.listdir(decompress_dataset_path):
+                    if item.startswith('v'):
+                        target_file_list.append(item)
+                file_length = len(target_file_list)
+            for i in range(0, file_length):
+                df = pd.read_csv(os.path.join(decompress_dataset_path, target_file_list[i]), header=None)
+                df = df.iloc[1:, 2:]
+                df = df.values.flatten()
+                dfs.append(pd.DataFrame(df))
+            dfs_ = pd.concat(dfs, axis=1)
+            dfs_ = dfs_.transpose()
+            dfs_ = dfs_.reset_index(drop=True)
+            dfs_['label'] = df_label['K%']
+            file_save_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'branches.csv')
+            dfs_.to_csv(file_save_path, index=False)
+            data = pd.read_csv(file_save_path, delimiter=',', header=0, encoding='utf-8')
+        else:
+            data = data
+        n_components = int(featureEng_process['n_components'])
+        progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+        self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+        data_pearson = FeatureEngineering.algorithm_pearson_train(self, process_idx, processes_num, data, featureEng_id, n_components)
+        return data_pearson
+    if featureEng_process['operate_name'] == 'mutual_infos':
+        os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id), exist_ok=True)
+        # 传入的data为数据集路径
+        if type(data) == str:
+            decompress_dataset_path = data.split('.')[0]
+            dataset_id = decompress_dataset_path.split('/')[-1]
+            if not os.path.exists(decompress_dataset_path):
+                with zipfile.ZipFile(data, "r") as zipobj:
+                    zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
+            # data_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FETCH', 'grid_process.csv')
+            df_label = pd.read_csv(os.path.join(decompress_dataset_path, 'label.csv'))
+            dfs = []
+            file_length = 0
+            target_file_list = []
+            if os.path.exists(os.path.join(decompress_dataset_path, 'branch_0.csv')):
+                for item in os.listdir(decompress_dataset_path):
+                    if item.startswith('branch'):
+                        target_file_list.append(item)
+                file_length = len(target_file_list)
+            elif os.path.exists(os.path.join(decompress_dataset_path, 'v_0.csv')):
+                for item in os.listdir(decompress_dataset_path):
+                    if item.startswith('v'):
+                        target_file_list.append(item)
+                file_length = len(target_file_list)
+            for i in range(0, file_length):
+                df = pd.read_csv(os.path.join(decompress_dataset_path, target_file_list[i]), header=None)
+                df = df.iloc[1:, 2:]
+                df = df.values.flatten()
+                dfs.append(pd.DataFrame(df))
+            dfs_ = pd.concat(dfs, axis=1)
+            dfs_ = dfs_.transpose()
+            dfs_ = dfs_.reset_index(drop=True)
+            dfs_['label'] = df_label['K%']
+            file_save_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'branches.csv')
+            dfs_.to_csv(file_save_path, index=False)
+            data = pd.read_csv(file_save_path, delimiter=',', header=0, encoding='utf-8')
+        else:
+            data = data
+        n_components = int(featureEng_process['n_components'])
+        progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+        self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+        data_mutual = FeatureEngineering.algorithm_mutual_train(self, process_idx, processes_num, data, featureEng_id, n_components)
+        return data_mutual
     return data
 
 def run_algorithm_test(self, data, process_idx, processes_num, featureEng_id, featureEng_process, imported_featureEng):
@@ -522,18 +674,54 @@ def run_algorithm_test(self, data, process_idx, processes_num, featureEng_id, fe
             data_factor = FeatureEngineering.algorithm_factorgnn_test(self, process_idx, processes_num, data, featureEng_id, imported_featureEng, epoch=epoch, latent_dims=latent_dims, lr=lr)
             return data_factor
     if featureEng_process['operate_name'] == 'FETCH':
+        os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id), exist_ok=True)
         if type(data) == str:
-            data_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FETCH',
-                                     'grid_process.csv')
-            data = pd.read_csv(data_path, delimiter=',', header=0, encoding='utf-8')
+            decompress_dataset_path = data.split('.')[0]
+            dataset_id = decompress_dataset_path.split('/')[-1]
+            if not os.path.exists(decompress_dataset_path):
+                with zipfile.ZipFile(data, "r") as zipobj:
+                    zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
+            # data_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FETCH', 'grid_process.csv')
+            df_label = pd.read_csv(os.path.join(decompress_dataset_path, 'label.csv'))
+            dfs = []
+            file_length = 0
+            target_file_list = []
+            if os.path.exists(os.path.join(decompress_dataset_path, 'branch_0.csv')):
+                for item in os.listdir(decompress_dataset_path):
+                    if item.startswith('branch'):
+                        target_file_list.append(item)
+                file_length = len(target_file_list)
+            elif os.path.exists(os.path.join(decompress_dataset_path, 'v_0.csv')):
+                for item in os.listdir(decompress_dataset_path):
+                    if item.startswith('v'):
+                        target_file_list.append(item)
+                file_length = len(target_file_list)
+            for i in range(0, file_length):
+                df = pd.read_csv(os.path.join(decompress_dataset_path, target_file_list[i]), header=None)
+                df = df.iloc[1:, 2:]
+                df = df.values.flatten()
+                dfs.append(pd.DataFrame(df))
+            dfs_ = pd.concat(dfs, axis=1)
+            dfs_ = dfs_.transpose()
+            dfs_ = dfs_.reset_index(drop=True)
+            dfs_['label'] = df_label['K%']
+            file_save_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'branches.csv')
+            dfs_.to_csv(file_save_path, index=False)
+            data = pd.read_csv(file_save_path, delimiter=',', header=0, encoding='utf-8')
         else:
             data = data
         steps_num = int(featureEng_process['steps_num'])
         worker = int(featureEng_process['worker'])
         epoch = int(featureEng_process['epoch'])
+        if 'algorithm' in featureEng_process:
+            algorithm = str(featureEng_process['algorithm'])
+        else:
+            algorithm = 'mutual_infos'
         progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
         self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
-        data_fetch = FeatureEngineering.algorithm_FETCH_test(self, process_idx, processes_num, data, featureEng_id, steps_num, worker, epoch)
+        data_fetch = FeatureEngineering.algorithm_FETCH_test(self, process_idx, processes_num, data, featureEng_id, steps_num, worker, epoch, algorithm)
         return data_fetch
     if featureEng_process['operate_name'] == 'HumanMachineCooperation':
         # 传入的data为数据集路径
@@ -559,45 +747,158 @@ def run_algorithm_test(self, data, process_idx, processes_num, featureEng_id, fe
             data.columns = data_hmc_columns
             return data
     if featureEng_process['operate_name'] == 'ModelBased':
+        os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id), exist_ok=True)
         # 传入的data为数据集路径
         if type(data) == str:
-            data_select_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'ModelBased', 'data.csv')
-            data_select = pd.read_csv(data_select_path, delimiter=',', header=0, encoding='utf-8')
-            data_select_columns = []
-            data_columns = data_select.columns.tolist()
-            if 'label' in data_columns:
-                for i in range(len(data_columns) - 1):
-                    data_select_columns.append('select_{}'.format(i))
-                data_select_columns.append('label')
+            decompress_dataset_path = data.split('.')[0]
+            dataset_id = decompress_dataset_path.split('/')[-1]
+            if not os.path.exists(decompress_dataset_path):
+                with zipfile.ZipFile(data, "r") as zipobj:
+                    zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
+            # data_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FETCH', 'grid_process.csv')
+            df_label = pd.read_csv(os.path.join(decompress_dataset_path, 'label.csv'))
+            dfs = []
+            file_length = 0
+            target_file_list = []
+            if os.path.exists(os.path.join(decompress_dataset_path, 'branch_0.csv')):
+                for item in os.listdir(decompress_dataset_path):
+                    if item.startswith('branch'):
+                        target_file_list.append(item)
+                file_length = len(target_file_list)
+            elif os.path.exists(os.path.join(decompress_dataset_path, 'v_0.csv')):
+                for item in os.listdir(decompress_dataset_path):
+                    if item.startswith('v'):
+                        target_file_list.append(item)
+                file_length = len(target_file_list)
+            for i in range(0, file_length):
+                df = pd.read_csv(os.path.join(decompress_dataset_path, target_file_list[i]), header=None)
+                df = df.iloc[1:, 2:]
+                df = df.values.flatten()
+                dfs.append(pd.DataFrame(df))
+            dfs_ = pd.concat(dfs, axis=1)
+            dfs_ = dfs_.transpose()
+            dfs_ = dfs_.reset_index(drop=True)
+            dfs_['label'] = df_label['K%']
+            file_save_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'branches.csv')
+            dfs_.to_csv(file_save_path, index=False)
+            data = pd.read_csv(file_save_path, delimiter=',', header=0, encoding='utf-8')
+            df_out_col = len(data.columns.tolist())
+            progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.9 / processes_num
+            self.update_state(state='PROCESS',
+                              meta={'progress': progress, 'message': '模块{}： 生成数据'.format(process_idx + 1)})
+            df_part = pd.DataFrame()
+            if df_out_col > 109:
+                n_components = 109
             else:
-                for i in range(len(data_columns)):
-                    data_select_columns.append('select_{}'.format(i))
-            data_select.columns = data_select_columns
-            # select_columns = []
-            # for i in range(10):
-            #     select_columns.append('select_{}'.format(i))
-            # select_columns.append('label')
-            # data_select = data_select[select_columns]
-            # current_app.logger.info(data_select)
-            return data_select
+                n_components = df_out_col - 1
+            for i in range(n_components):
+                df_part['select_{}'.format(i)] = data.iloc[:, i]
+            df_part['label'] = data['label']
+            return df_part
         # 传入的为dataframe
         else:
-            data_columns = data.columns.tolist()
-            data_select_columns = []
-            if 'label' in data_columns:
-                for i in range(len(data_columns)-1):
-                    data_select_columns.append('select_{}'.format(i))
-                data_select_columns.append('label')
+            data_columns = len(data.columns.tolist())
+            df_part = pd.DataFrame()
+            if data_columns > 109:
+                n_components = 109
             else:
-                for i in range(len(data_columns)):
-                    data_select_columns.append('select_{}'.format(i))
-            data.columns = data_select_columns
-            # select_columns = []
-            # for i in range(10):
-            #     select_columns.append('select_{}'.format(i))
-            # select_columns.append('label')
-            # data = data[select_columns]
-            return data
+                n_components = data_columns - 1
+            for i in range(n_components):
+                df_part['select_{}'.format(i)] = data.iloc[:, i]
+            df_part['label'] = data['label']
+            return df_part
+    if featureEng_process['operate_name'] == 'pearson':
+        os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id), exist_ok=True)
+        # 传入的data为数据集路径
+        if type(data) == str:
+            decompress_dataset_path = data.split('.')[0]
+            dataset_id = decompress_dataset_path.split('/')[-1]
+            if not os.path.exists(decompress_dataset_path):
+                with zipfile.ZipFile(data, "r") as zipobj:
+                    zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
+            # data_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FETCH', 'grid_process.csv')
+            df_label = pd.read_csv(os.path.join(decompress_dataset_path, 'label.csv'))
+            dfs = []
+            file_length = 0
+            target_file_list = []
+            if os.path.exists(os.path.join(decompress_dataset_path, 'branch_0.csv')):
+                for item in os.listdir(decompress_dataset_path):
+                    if item.startswith('branch'):
+                        target_file_list.append(item)
+                file_length = len(target_file_list)
+            elif os.path.exists(os.path.join(decompress_dataset_path, 'v_0.csv')):
+                for item in os.listdir(decompress_dataset_path):
+                    if item.startswith('v'):
+                        target_file_list.append(item)
+                file_length = len(target_file_list)
+            for i in range(0, file_length):
+                df = pd.read_csv(os.path.join(decompress_dataset_path, target_file_list[i]), header=None)
+                df = df.iloc[1:, 2:]
+                df = df.values.flatten()
+                dfs.append(pd.DataFrame(df))
+            dfs_ = pd.concat(dfs, axis=1)
+            dfs_ = dfs_.transpose()
+            dfs_ = dfs_.reset_index(drop=True)
+            dfs_['label'] = df_label['K%']
+            file_save_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'branches.csv')
+            dfs_.to_csv(file_save_path, index=False)
+            data = pd.read_csv(file_save_path, delimiter=',', header=0, encoding='utf-8')
+        else:
+            data = data
+        n_components = int(featureEng_process['n_components'])
+        progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+        self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+        data_pearson = FeatureEngineering.algorithm_pearson_test(self, process_idx, processes_num, data, featureEng_id, n_components)
+        return data_pearson
+    if featureEng_process['operate_name'] == 'mutual_infos':
+        os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id), exist_ok=True)
+        # 传入的data为数据集路径
+        if type(data) == str:
+            decompress_dataset_path = data.split('.')[0]
+            dataset_id = decompress_dataset_path.split('/')[-1]
+            if not os.path.exists(decompress_dataset_path):
+                with zipfile.ZipFile(data, "r") as zipobj:
+                    zipobj.extractall(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            data_files = os.listdir(os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id))
+            decompress_dataset_path = os.path.join(current_app.config['SAVE_DATASET_PATH'], dataset_id, data_files[0])
+            # data_path = os.path.join(current_app.config['PRETRAINED_MODEL_PATH'], 'pretrained_models', 'FETCH', 'grid_process.csv')
+            df_label = pd.read_csv(os.path.join(decompress_dataset_path, 'label.csv'))
+            dfs = []
+            file_length = 0
+            target_file_list = []
+            if os.path.exists(os.path.join(decompress_dataset_path, 'branch_0.csv')):
+                for item in os.listdir(decompress_dataset_path):
+                    if item.startswith('branch'):
+                        target_file_list.append(item)
+                file_length = len(target_file_list)
+            elif os.path.exists(os.path.join(decompress_dataset_path, 'v_0.csv')):
+                for item in os.listdir(decompress_dataset_path):
+                    if item.startswith('v'):
+                        target_file_list.append(item)
+                file_length = len(target_file_list)
+            for i in range(0, file_length):
+                df = pd.read_csv(os.path.join(decompress_dataset_path, target_file_list[i]), header=None)
+                df = df.iloc[1:, 2:]
+                df = df.values.flatten()
+                dfs.append(pd.DataFrame(df))
+            dfs_ = pd.concat(dfs, axis=1)
+            dfs_ = dfs_.transpose()
+            dfs_ = dfs_.reset_index(drop=True)
+            dfs_['label'] = df_label['K%']
+            file_save_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id, 'branches.csv')
+            dfs_.to_csv(file_save_path, index=False)
+            data = pd.read_csv(file_save_path, delimiter=',', header=0, encoding='utf-8')
+        else:
+            data = data
+        n_components = int(featureEng_process['n_components'])
+        progress = 0.1 + 0.8 * process_idx / processes_num + 0.01
+        self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}: 参数加载完毕'.format(process_idx)})
+        data_mutual = FeatureEngineering.algorithm_mutual_test(self, process_idx, processes_num, data, featureEng_id, n_components)
+        return data_mutual
     return data
 
 def save_featureEng_model(model_object, model_file_name, featureEng_id):

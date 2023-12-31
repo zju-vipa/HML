@@ -5,6 +5,7 @@ import pandas as pd
 import warnings
 
 from scipy.stats import pearsonr
+from sklearn import metrics
 
 from celery_tasks.algorithms._FeatureEng_utils.FETCH.autofe import AutoFE
 
@@ -46,11 +47,12 @@ class Parser():
         self.file_name = 'grid'
 
 class fetch():
-    def __init__(self, result_path, steps_num=3, worker=12, epoch=100):
+    def __init__(self, result_path, steps_num=3, worker=12, epoch=100, algorithm='mutual_infos'):
         self.result_path = result_path
         self.steps_num = steps_num
         self.worker = worker
         self.epoch = epoch
+        self.algorithm = algorithm
 
     def main(self, data):
         args = Parser(self.steps_num, self.worker, self.epoch)
@@ -58,15 +60,27 @@ class fetch():
         df_out_col = len(df.columns.tolist())
 
         # 判断特征列数,若大于阈值，则进行特征选择, 采样前n个特征
-        feat_thre = 50
-        n = 5
-        if (df_out_col > feat_thre):
+        feat_thre = 40
+        n = 12
+        if df_out_col > feat_thre:
             # pearson feature selections
-            corrs = []
-            for i in range(df_out_col - 1):
-                corr, p_value = pearsonr(df.iloc[:, i], df.iloc[:, -1])
-                corrs.append((i, corr))
-            sorted_corrs = sorted(corrs, key=lambda x: -x[1])
+
+            if self.algorithm == 'mutual_infos':
+                # mutual information feature selections
+                mutual_infos = []
+                for i in range(df_out_col - 1):
+                    mutual_info = metrics.mutual_info_score(df.iloc[:, -1], df.iloc[:, i])
+                    mutual_infos.append((i, mutual_info))
+                sorted_corrs = sorted(mutual_infos, key=lambda x: -x[1])
+
+            elif self.algorithm == 'pearson':
+                # pearson feature selections
+                corrs = []
+                for i in range(df_out_col - 1):
+                    corr, p_value = pearsonr(df.iloc[:, i], df.iloc[:, -1])
+                    corrs.append((i, abs(corr)))
+                sorted_corrs = sorted(corrs, key=lambda x: -x[1])
+
             df_part = pd.DataFrame()
             for i in range(n):
                 df_part[f'{i}'] = df.iloc[:, sorted_corrs[i][0]]
@@ -110,6 +124,7 @@ class fetch():
         args.c_columns = c_columns
         args.d_columns = d_columns
         args.target = target
+        args.result_path = self.result_path
 
         autofe = AutoFE(df_part, args)
         data = autofe.fit_attention(args)

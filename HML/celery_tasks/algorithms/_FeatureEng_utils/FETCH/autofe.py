@@ -322,6 +322,7 @@ class AutoFE:
         pool.join()
         return self.output
 
+
     def transform(self, df_train, df_test, args, actions_c, actions_d):
         """Apply the best autofe strategy to input data and return the transformed data"""
         c_columns = self.info_["c_columns"]
@@ -473,6 +474,211 @@ class AutoFE:
                 elif metric == 'grid_score':
                     scores = cross_val_score(model, X, y, cv=my_cv, scoring=grid_score)
         return np.array(scores).mean(), scores
+
+    def forward(self, args):
+
+        df = self.dfs_['FE_train']
+        c_columns, d_columns = self.info_['c_columns'], self.info_['d_columns']
+        if len(self.info_['d_columns']) == 0:
+            args.combine = False
+        target, mode, model, metric = self.info_['target'], self.info_['mode'], self.info_['model'], self.info_[
+            'metric']
+        # 开进程
+        pool = multiprocessing.Pool(processes=args.worker)
+
+        n_features_c, n_features_d = len(self.info_['c_columns']), len(self.info_['d_columns'])
+        # 获取可能的操作
+        c_ops, d_ops = get_ops(n_features_c, n_features_d)
+
+        # Get score of test
+
+        score_b, scores_b = self._get_cv_baseline(df, args, mode, model, metric)
+
+        # Get encoded (normalized) data as init state if needed
+        if args.preprocess:
+            df_d_labelencode, df_c_encode, df_d_encode, df_t, df_t_norm = features_process(df, mode, c_columns,
+                                                                                           d_columns, target)
+            x_d_onehot = label_encode_to_onehot(df_d_labelencode.values)
+        else:
+            df_c_encode, df_d_encode = df.loc[:, c_columns + [target]], df.loc[:, d_columns + [target]]
+            x_d_onehot, df_d_labelencode = df.loc[:, d_columns], df.loc[:, d_columns]
+            df_t, df_t_norm = df.loc[:, target], df.loc[:, target]
+
+            # Searching autofe strategy
+        data_nums = self.dfs_['FE_train'].shape[0]
+
+        operations_c = len(c_ops)
+        operations_d = len(d_ops)
+        d_model = args.d_model
+        d_k = args.d_k
+        d_v = args.d_v
+        d_ff = args.d_ff
+        n_heads = args.n_heads
+        # Proximal Policy Optimization
+        self.ppo = PPO(args, data_nums, operations_c, operations_d, d_model, d_k, d_v, d_ff, n_heads, self.device)
+        self.ppo.load_state_dict(os.path.join(args.result_path, args.file_name))
+
+        pipline_args_test = {'dataframe': self.dfs_['FE_train'],
+                             'continuous_columns': self.info_['c_columns'],
+                             'discrete_columns': self.info_['d_columns'],
+                             'label_name': self.info_['target'],
+                             'mode': self.info_['mode'],
+                             'isvalid': False,
+                             'memory': None}
+
+        # Samples used to record the top5 reward of the search process
+        self.workers_top5 = []
+        if args.combine:
+            ori_nums = df_c_encode.shape[1] - 1 + df_d_labelencode.shape[1] - 1
+        else:
+            ori_nums = df_c_encode.shape[1] - 1
+
+        # Get the data with constructed features by action plan
+
+        # Train a model to validate constructed features by 5-fold
+
+        # Calculate reward
+
+        init_workers_c = []
+        init_workers_d = []
+        # worker类实例化
+        worker_c = Worker(args)
+        worker_d = Worker(args)
+
+        init_state_c = torch.from_numpy(df_c_encode.values).float().transpose(0, 1)
+        init_state_d = torch.from_numpy(df_d_encode.values).float().transpose(0, 1)
+        worker_c.states = [init_state_c]
+        worker_d.states = [init_state_d]
+        worker_c.actions, worker_d.actions, worker_c.steps, worker_d.steps = [], [], [], []
+        worker_c.log_probs, worker_d.log_probs, worker_c.dones, worker_d.dones = [], [], [], []
+        worker_c.features, worker_d.features, worker_c.ff, worker_d.ff = [], [], [], []
+        dones = [False for i in range(args.steps_num)]
+        dones[-1] = True
+        worker_c.dones, worker_d.dones = dones, dones
+        init_pipline_list = []
+        pipline_ff_c = Pipeline(pipline_args_test)
+        for i in range(args.episodes):
+            init_workers_c.append(copy.deepcopy(worker_c))
+            init_workers_d.append(copy.deepcopy(worker_d))
+            init_pipline_list.append(copy.deepcopy(pipline_ff_c))
+
+        workers_c = []
+        workers_d = []
+        # Parallel sampling or not
+        if args.worker == 0 or args.worker == 1:
+            for i in range(args.episodes):
+                # Get feature engineer action plans
+                w_c, w_d = sample(args, self.ppo, pipline_args_test, df_c_encode, df_d_encode, df_t_norm, c_ops,
+                                  d_ops, i, self.device)
+                workers_c.append(w_c)
+                workers_d.append(w_d)
+        else:
+
+            workers_c = copy.deepcopy(init_workers_c)
+            workers_d = copy.deepcopy(init_workers_d)
+            pipline_list = copy.deepcopy(init_pipline_list)
+
+            for step in range(args.steps_num):
+                p_lst = []
+                for i in range(args.episodes):
+                    if i < args.episodes // 2:
+                        sample_rule = True
+                    else:
+                        sample_rule = False
+                    if df_c_encode.shape[0] > 1:
+                        actions, log_probs, m1_output, m2_output, m3_output, action_softmax = self.ppo.choose_action_c(
+                            workers_c[i].states[-1].to(self.device), step, c_ops, sample_rule)
+                        workers_c[i].actions.append(actions)
+                        workers_c[i].log_probs.append(log_probs)
+
+                        workers_c[i].m1.append(m1_output.detach().cpu())
+                        workers_c[i].m2.append(m2_output.detach().cpu())
+                        workers_c[i].m3.append(m3_output.detach().cpu())
+                        workers_c[i].action_softmax.append(action_softmax.detach().cpu())
+                    if args.combine:
+                        actions, log_probs, m1_output, m2_output, m3_output, action_softmax = self.ppo.choose_action_d(
+                            workers_d[i].states[-1].to(self.device), step, c_ops, sample_rule)
+                        workers_d[i].actions.append(actions)
+                        workers_d[i].log_probs.append(log_probs)
+
+                        workers_c[i].m1.append(m1_output.detach().cpu())
+                        workers_c[i].m2.append(m2_output.detach().cpu())
+                        workers_c[i].m3.append(m3_output.detach().cpu())
+                        workers_c[i].action_softmax.append(action_softmax.detach().cpu())
+                for i in range(args.episodes):
+                    res = pool.apply_async(apply_actions,
+                                           (args, pipline_list[i], df_c_encode, df_d_encode, df_t_norm, c_ops,
+                                            d_ops, i, self.device, step, workers_c[i], workers_d[i]))
+                    p_lst.append(res)
+                for i, p in enumerate(p_lst):
+                    # ret = p
+                    ret = p.get()
+                    workers_c[i] = ret[0]
+                    workers_d[i] = ret[1]
+                    pipline_list[i] = ret[2]
+                    workers_c[i].steps.append(step)
+                    workers_d[i].steps.append(step)
+            for i in range(args.episodes):
+                if df_c_encode.shape[0] > 1:
+                    workers_c[i].states = workers_c[i].states[0:-1]
+                if args.combine:
+                    workers_d[i].states = workers_d[i].states[0:-1]
+
+        # Validate the performance of seached action plans
+        if args.worker == 0 or args.worker == 1:
+            for num, worker_c in enumerate(workers_c):
+                worker_d = workers_d[num]
+                w_c, w_d = multiprocess_reward(args, worker_c, worker_d, c_columns, d_columns, scores_b, mode,
+                                               model, metric, x_d_onehot, df_t.values, df_d_labelencode)
+                workers_c[num] = w_c
+                workers_d[num] = w_d
+        else:
+            p_lst = []
+            for num, worker_c in enumerate(workers_c):
+                worker_d = workers_d[num]
+                workers_c[num] = None
+                workers_d[num] = None
+                res = pool.apply_async(multiprocess_reward, (
+                    args, worker_c, worker_d, c_columns, d_columns, scores_b, mode, model, metric, x_d_onehot,
+                    df_t.values, df_d_labelencode))
+                p_lst.append(res)
+            workers_c = []
+            workers_d = []
+            for p in p_lst:
+                ret = p.get()
+                workers_c.append(ret[0])
+                workers_d.append(ret[1])
+
+        for i, worker_c in enumerate(workers_c):
+            worker_d = workers_d[i]
+            new_nums = worker_c.fe_nums[-1]
+
+            for step in range(args.steps_num):
+                worker = Worker(args)
+                worker.accs = worker_c.accs[step]
+                worker.fe_nums = worker_c.fe_nums[step]
+                worker.scores = worker_c.scores[step]
+                worker.repeat_fe_nums = worker_c.repeat_fe_nums
+                worker.features = [worker_c.features[0:step + 1]] + [worker_d.features[0:step + 1]]
+                worker.ff = [worker_c.ff[0:step + 1]] + [worker_d.ff[0:step + 1]]
+                self.workers_top5.append(worker)
+
+        baseline = np.mean([worker.accs for worker in workers_c], axis=0)
+
+        self.workers_top5.sort(key=lambda worker: worker.scores.mean(), reverse=True)
+        self.workers_top5 = self.workers_top5[0:5]
+
+        workers_top5_features = self.workers_top5[0].features
+        self.output = pd.DataFrame(workers_top5_features[0][-1])
+
+        for i in range(5):
+            new_nums = self.workers_top5[i].fe_nums
+        # 取最后一轮、最高分数的特征，生成csv文件
+
+        pool.close()
+        pool.join()
+
+        return self.output
 
 
 def test_one_worker(args, worker, c_columns, d_columns, target, mode, model, metric, df_train, df_test):
