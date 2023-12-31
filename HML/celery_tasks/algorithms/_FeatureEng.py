@@ -2,6 +2,9 @@ import shutil
 import zipfile
 
 import pandas as pd
+from scipy.stats import pearsonr
+from sklearn import metrics
+
 from celery_tasks.algorithms._FeatureEng_utils.factor import factorgnn as factor
 from celery_tasks.algorithms._FeatureEng_utils.gcpool import graphcnn as gnn
 from sklearn.preprocessing import OneHotEncoder
@@ -181,18 +184,18 @@ def algorithm_factorgnn_test(self, process_idx, processes_num, data_path, featur
     return data_factor
 
 
-def algorithm_FETCH_train(self, process_idx, processes_num, data, featureEng_id, steps_num, worker, epoch):
+def algorithm_FETCH_train(self, process_idx, processes_num, data, featureEng_id, steps_num, worker, epoch, algorithm):
     progress = 0.1 + 0.8 * process_idx / processes_num + 0.05
     self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 加载数据'.format(process_idx + 1)})
     os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id), exist_ok=True)
     result_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id)
-    fetchModel = fetch_model.fetch(result_path, steps_num=steps_num, worker=worker, epoch=epoch)
+    fetchModel = fetch_model.fetch(result_path, steps_num=steps_num, worker=worker, epoch=epoch, algorithm = algorithm)
     progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.6 / processes_num
     self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 训练模型'.format(process_idx + 1)})
     data_fetch, model_fetch = fetchModel.main(data)
     return data_fetch
 
-def algorithm_FETCH_test(self, process_idx, processes_num, data, featureEng_id, steps_num, worker, epoch):
+def algorithm_FETCH_test(self, process_idx, processes_num, data, featureEng_id, steps_num, worker, epoch, algorithm):
     # progress = 0.1 + 0.8 * process_idx / processes_num + 0.05
     # self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 加载数据'.format(process_idx + 1)})
     # progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.6 / processes_num
@@ -208,7 +211,7 @@ def algorithm_FETCH_test(self, process_idx, processes_num, data, featureEng_id, 
     self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 加载数据'.format(process_idx + 1)})
     os.makedirs(os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id), exist_ok=True)
     result_path = os.path.join(current_app.config['SAVE_FE_MODEL_PATH'], featureEng_id)
-    fetchModel = fetch_model.fetch(result_path, steps_num=1, worker=5, epoch=1)
+    fetchModel = fetch_model.fetch(result_path, steps_num=3, worker=5, epoch=5, algorithm='mutual_infos')
     progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.6 / processes_num
     self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 生成数据'.format(process_idx + 1)})
     data_fetch, model_fetch = fetchModel.main(data)
@@ -350,3 +353,85 @@ def algorithm_PCA_train(self, process_idx, processes_num, data, n_components, fe
 def algorithm_PCA_apply(data, model_pca):
     data_pca = pd.DataFrame(model_pca.transform(data))
     return data_pca
+
+def algorithm_pearson_test(self, process_idx, processes_num, data, featureEng_id, n_components):
+    corrs = []
+    df_out_col = len(data.columns.tolist())
+    for i in range(df_out_col - 1):
+        corr, p_value = pearsonr(data.iloc[:, i], data.iloc[:, -1])
+        corrs.append((i, abs(corr)))
+    sorted_corrs = sorted(corrs, key=lambda x: -x[1])
+    progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.9 / processes_num
+    self.update_state(state='PROCESS', meta={'progress': progress, 'message': '模块{}： 生成数据'.format(process_idx + 1)})
+    df_part = pd.DataFrame()
+    if df_out_col > (n_components + 1):
+        n_components = n_components
+    else:
+        n_components = df_out_col - 1
+    for i in range(n_components):
+        df_part['select_{}'.format(i)] = data.iloc[:, sorted_corrs[i][0]]
+    df_part['label'] = data['label']
+    return df_part
+
+
+def algorithm_pearson_train(self, process_idx, processes_num, data, featureEng_id, n_components):
+    corrs = []
+    df_out_col = len(data.columns.tolist())
+    for i in range(df_out_col - 1):
+        corr, p_value = pearsonr(data.iloc[:, i], data.iloc[:, -1])
+        corrs.append((i, abs(corr)))
+    sorted_corrs = sorted(corrs, key=lambda x: -x[1])
+    progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.9 / processes_num
+    self.update_state(state='PROCESS',
+                      meta={'progress': progress, 'message': '模块{}： 生成数据'.format(process_idx + 1)})
+    df_part = pd.DataFrame()
+    if df_out_col > (n_components + 1):
+        n_components = n_components
+    else:
+        n_components = df_out_col - 1
+    for i in range(n_components):
+        df_part['select_{}'.format(i)] = data.iloc[:, sorted_corrs[i][0]]
+    df_part['label'] = data['label']
+    return df_part
+
+
+def algorithm_mutual_test(self, process_idx, processes_num, data, featureEng_id, n_components):
+    corrs = []
+    df_out_col = len(data.columns.tolist())
+    for i in range(df_out_col - 1):
+        corr, p_value = pearsonr(data.iloc[:, i], data.iloc[:, -1])
+        corrs.append((i, abs(corr)))
+    sorted_corrs = sorted(corrs, key=lambda x: -x[1])
+    progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.9 / processes_num
+    self.update_state(state='PROCESS',
+                      meta={'progress': progress, 'message': '模块{}： 生成数据'.format(process_idx + 1)})
+    df_part = pd.DataFrame()
+    if df_out_col > (n_components + 1):
+        n_components = n_components
+    else:
+        n_components = df_out_col - 1
+    for i in range(n_components):
+        df_part['select_{}'.format(i)] = data.iloc[:, sorted_corrs[i][0]]
+    df_part['label'] = data['label']
+    return df_part
+
+
+def algorithm_mutual_train(self, process_idx, processes_num, data, featureEng_id, n_components):
+    df_out_col = len(data.columns.tolist())
+    mutual_infos = []
+    for i in range(df_out_col - 1):
+        mutual_info = metrics.mutual_info_score(data.iloc[:, -1], data.iloc[:, i])
+        mutual_infos.append((i, mutual_info))
+    sorted_corrs = sorted(mutual_infos, key=lambda x: -x[1])
+    progress = 0.1 + 0.8 * process_idx / processes_num + 0.8 * 0.9 / processes_num
+    self.update_state(state='PROCESS',
+                      meta={'progress': progress, 'message': '模块{}： 生成数据'.format(process_idx + 1)})
+    df_part = pd.DataFrame()
+    if df_out_col > (n_components + 1):
+        n_components = n_components
+    else:
+        n_components = df_out_col - 1
+    for i in range(n_components):
+        df_part['select_{}'.format(i)] = data.iloc[:, sorted_corrs[i][0]]
+    df_part['label'] = data['label']
+    return df_part
