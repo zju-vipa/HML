@@ -9,48 +9,6 @@
         <img v-if="tree2ImageUrl" :src="tree2ImageUrl" alt="决策树2" :width="imgWidth2 + 'px'" height="auto" @wheel="handleWheel($event, 'tree2')" @load="setInitialSize('tree2')" />
       </el-dialog>
       </div>
-<!--      &lt;!&ndash; 卡片区域 &ndash;&gt;-->
-<!--      <el-card >-->
-<!--        &lt;!&ndash; form区域 &ndash;&gt;-->
-<!--          <el-row type="flex" align="middle">-->
-<!--            <el-col :span="2"><h3>创建特征工程</h3></el-col>-->
-<!--            <el-col :span="4">-->
-<!--&lt;!&ndash;              <el-form label-width="0px" label-position="right" :model="chooseDatasetForm" ref="chooseDatasetFormRef" id="chooseDatasetFormID">&ndash;&gt;-->
-<!--&lt;!&ndash;                <el-form-item prop="dataset_name">&ndash;&gt;-->
-<!--                  <el-input clearable readonly v-model="chooseDatasetForm.dataset_name"-->
-<!--                  @click.native="datasetDialogVisible=true" placeholder="请选择数据集" style="width: 90%"></el-input>-->
-<!--&lt;!&ndash;                </el-form-item>&ndash;&gt;-->
-<!--&lt;!&ndash;              </el-form>&ndash;&gt;-->
-<!--            </el-col>-->
-<!--            <el-col :span="4">-->
-<!--              <el-button type="primary" @click="goHumanFea">创建</el-button>-->
-<!--            </el-col>-->
-<!--          </el-row>-->
-<!--            &lt;!&ndash; <el-form-item prop="dataset_name" label="数据集">-->
-<!--              <el-input clearable  readonly v-model="chooseDatasetForm.dataset_name" style="width: 300px"-->
-<!--                        @click.native="datasetDialogVisible=true" placeholder="请选择数据集"></el-input>-->
-<!--            </el-form-item> &ndash;&gt;-->
-<!--            &lt;!&ndash; <el-form-item label="特征工程">-->
-<!--              <el-row>-->
-<!--                <el-col :span="5">-->
-<!--                  <el-button type="primary" @click="goHumanFea">人工特征工程</el-button>-->
-<!--                </el-col>-->
-<!--                <el-col :span="5">-->
-<!--                  <el-button type="primary" >自动化特征工程</el-button>-->
-<!--                </el-col>-->
-<!--                <el-col :span="5">-->
-<!--                  <el-button type="primary" >人在回路的特征工程</el-button>-->
-<!--                </el-col>-->
-<!--              </el-row>-->
-<!--            </el-form-item> &ndash;&gt;-->
-<!--      </el-card>-->
-
-<!--          <el-table :data="datasetDetailList" border stripe  style="width: 100%">-->
-<!--          &lt;!&ndash; <el-table-column  label="序号" type="index" width="120"> </el-table-column> &ndash;&gt;-->
-<!--          <el-table-column width="120" v-for="(item,id) in columnsList" :key="id" :prop="item" :label="item"></el-table-column>-->
-<!--          &lt;!&ndash; <el-table-column prop="age" label="数据集类型"> </el-table-column>-->
-<!--          <el-table-column prop="checking_status" label="数据集介绍"> </el-table-column> &ndash;&gt;-->
-<!--        </el-table>-->
       <div style="padding: 1%">
         <el-tabs type="border-card">
         <el-tab-pane label="决策面板">
@@ -120,7 +78,7 @@
                             </el-progress>
 <!--                            <span class="progress-text">{{ efficiencyText }}</span>-->
                           </el-row>
-                          <span style="color: steelblue; font-size: 18px;">决策器数目</span>
+                          <span style="color: steelblue; font-size: 18px;">决策器识别率</span>
                         </el-col>
                         <el-col span="12">
                           <el-row>
@@ -128,7 +86,7 @@
                             </el-progress>
 <!--                            <span class="progress-text">{{ newResultForm.accuracy }}</span>-->
                           </el-row>
-                          <span style="color: steelblue; font-size: 18px;">决策案例数目</span>
+                          <span style="color: steelblue; font-size: 18px;">蒸馏器识别率</span>
                         </el-col>
                       </el-row>
                     </div>
@@ -145,96 +103,59 @@
                       </el-col>
                     </el-row>
                   </div>
-<!--                    <div style="margin: 15px; text-align: left">-->
-<!--                        &lt;!&ndash; 新添加的选择栏 &ndash;&gt;-->
-<!--                        <label>数据集：</label>-->
-<!--                        <el-select v-model="selectedDataset" placeholder="选择数据集">-->
-<!--                            <el-option v-for="dataset in datasets" :key="dataset.value" :label="dataset.label" :value="dataset.value"></el-option>-->
-<!--                        </el-select>-->
-<!--                        <br>-->
-<!--                        <label>决策器名称：</label>-->
-<!--                        <el-select v-model="selectedDecisionMakerName" placeholder="选择决策器名称">-->
-<!--                            <el-option v-for="name in decisionMakerNames" :key="name.value" :label="name.label" :value="name.value"></el-option>-->
-<!--                        </el-select>-->
-<!--                        <br>-->
-<!--                        <label>决策器类型：</label>-->
-<!--                        <el-select v-model="selectedDecisionMakerType" placeholder="选择决策器类型">-->
-<!--                            <el-option label="机器自主决策" value="machine"></el-option>-->
-<!--                            <el-option label="人机智能决策" value="human-machine"></el-option>-->
-<!--                        </el-select>-->
-<!--                        <br>-->
-<!--                        &lt;!&ndash; 显示选中的决策器类型 &ndash;&gt;-->
-<!--                        <p v-if="selectedDecisionMakerType">已选择的决策器类型: {{ selectedDecisionMakerType }}</p>-->
-<!--                    </div>-->
                   <div style="display: flex; margin: 15px;">
                   <!-- 左侧区域：选择栏和按钮 -->
                   <div style="flex: 1; margin: 15px; text-align: left">
                       <!-- 数据集选择栏 -->
                       <div style="margin-bottom: 10px;">
                           <label>数据集：</label>
-                          <el-select v-model="selectedDataset" placeholder="选择数据集">
-                              <el-option v-for="dataset in datasets" :key="dataset.value" :label="dataset.label" :value="dataset.value"></el-option>
+                          <el-select v-model="selectedDataset" placeholder="选择数据集" style="width: 300px;">
+                            <el-option label="China-300" value="China-300" ></el-option>
+<!--                            <el-option label="case39" value="case39"></el-option>-->
+<!--                              <el-option v-for="dataset in datasets" :key="dataset.value" :label="dataset.label" :value="dataset.value"></el-option>-->
                           </el-select>
                       </div>
                       <!-- 决策器名称选择栏 -->
                       <div style="margin-bottom: 10px;">
                           <label>决策器名称：</label>
-                          <el-select v-model="selectedDecisionMakerName" placeholder="选择决策器名称">
-                              <el-option v-for="name in decisionMakerNames" :key="name.value" :label="name.label" :value="name.value"></el-option>
-                          </el-select>
+<!--                          <el-select v-model="selectedDecisionMakerName" placeholder="选择决策器名称">-->
+<!--                            <el-option label="dec_eng1" value="dec_eng1"></el-option>-->
+<!--                            <el-option label="dec_eng2" value="dec_eng2"></el-option>-->
+<!--                              <el-option v-for="name in decisionMakerNames" :key="name.value" :label="name.label" :value="name.value"></el-option>-->
+<!--                          </el-select>-->
+                        <el-input v-model="selectedDecisionMakerName" placeholder="输入决策器名称" style="width: 300px;"></el-input>
                       </div>
                       <!-- 决策器类型选择栏 -->
                       <div style="margin-bottom: 10px;">
                           <label>决策器类型：</label>
-                          <el-select v-model="selectedDecisionMakerType" placeholder="选择决策器类型">
+                          <el-select v-model="selectedDecisionMakerType" placeholder="选择决策器类型" style="width: 300px;">
                               <el-option label="机器自主决策" value="machine"></el-option>
                               <el-option label="人机智能决策" value="human-machine"></el-option>
                           </el-select>
                       </div>
                       <!-- 显示选中的决策器类型 -->
-                      <p v-if="selectedDecisionMakerType">已选择的决策器类型: {{ selectedDecisionMakerType }}</p>
+<!--                      <p v-if="selectedDecisionMakerType">已选择的决策器类型: {{ selectedDecisionMakerType }}</p>-->
                       <!-- 按钮区域 -->
                       <div style="margin-top: 10px;">
-                          <el-button type="primary">添加决策器</el-button>
-                          <el-button @click="showDashboard">查看决策器</el-button>
+                          <el-button type="primary" @click="handleAddDecisionMaker">添加决策器</el-button>
+                          <el-button @click="viewDecisionMaker" :disabled="!isDecisionMakerAdded">查看决策器</el-button>
                       </div>
                   </div>
                   <!-- 右侧区域：仪表盘 -->
-                  <div style="flex: 1; margin: 15px; text-align: right">
-                    <div v-if="isDashboardVisible" style="flex: 1;">
-                        <!-- 这里放置仪表盘的内容 -->
-<!--                        <div>仪表盘内容</div>-->
-                        <div v-if="isDashboardVisible" style="flex: 1; padding-left: 20px;">
-                            <!-- Element UI 进度条作为仪表盘 -->
-                            <el-progress type="circle" :percentage="progress"></el-progress>
-                        </div>
-                    </div>
+                  <div style="flex: 1; margin: 15px; text-align: right; display: flex; align-items: flex-end; justify-content: flex-start;">
+<!--                  <div style="flex: 1; margin: 15px; text-align: right">-->
+<!--                    <el-progress v-if="isDashboardVisible" type="dashboard" :percentage="progress"></el-progress>-->
+                    <el-progress v-if="isDashboardVisible" type="dashboard" :percentage="progress" style="transform: scale(1.5); transform-origin: bottom left;"></el-progress>
+<!--                    <div v-if="isDashboardVisible" style="flex: 1;">-->
+<!--                        &lt;!&ndash; 这里放置仪表盘的内容 &ndash;&gt;-->
+<!--&lt;!&ndash;                        <div>仪表盘内容</div>&ndash;&gt;-->
+<!--                        <div v-if="isDashboardVisible" style="flex: 1; padding-left: 20px;">-->
+<!--                            &lt;!&ndash; Element UI 进度条作为仪表盘 &ndash;&gt;-->
+<!--                            <el-progress type="circle" :percentage="progress"></el-progress>-->
+<!--                        </div>-->
+<!--                    </div>-->
                   </div>
                   </div>
-<!--                    <el-form-item prop="dataset_name" label="数据集">-->
-<!--                      <el-input clearable readonly  style="width: 300px"-->
-<!--                                 placeholder="请选择数据集"></el-input>-->
-<!--                    </el-form-item>-->
-<!--                    <el-form-item label="学习器名" prop="learner_name">-->
-<!--                      <el-input clearable v-model="addLearnerForm.learner_name" placeholder="请填写学习器名" style="width: 300px"></el-input>-->
-<!--                    </el-form-item>-->
-<!--                    <el-form-item label="学习器类型" prop="learner_type">-->
-<!--                      <el-select v-model="addLearnerForm.learner_type" placeholder="学习器类型" style="width: 300px">-->
-<!--                        <el-option v-for="(option, index) in learnerTypeOptions" :key="index" :label="option.name" :value="option.type"></el-option>-->
-<!--                      </el-select>-->
-<!--                    </el-form-item>-->
-<!--                    <el-form-item label="训练方法" prop="train_name">-->
-<!--                      <el-select v-model="learnParamsForm.train_name" placeholder="请选择方法" style="width: 300px"-->
-<!--                                 @change="handleselectTrainname">-->
-<!--                        <el-option-->
-<!--                          v-for="(item, index) in algorithm_Options" :key="index"-->
-<!--                          :label="item.introduction"-->
-<!--                          :value="item.algorithm_name">-->
-<!--                        </el-option>-->
-<!--                      </el-select>-->
-<!--                    </el-form-item>-->
-<!--                    <el-button class="submitBtn" type="primary" @click="submitAllForm">开始训练</el-button>-->
-<!--                    <el-button @click="queryLearner" class="queryBtn" type="primary">查看学习器</el-button>-->
                 </el-card>
                 </el-col>
                 <el-col span="12">
@@ -246,96 +167,62 @@
                       </el-col>
                     </el-row>
                   </div>
-<!--                    <div style="margin: 15px; text-align: left">-->
-<!--                        &lt;!&ndash; 新添加的选择栏 &ndash;&gt;-->
-<!--                        <label>数据集：</label>-->
-<!--                        <el-select v-model="selectedDataset" placeholder="选择数据集">-->
-<!--                            <el-option v-for="dataset in datasets" :key="dataset.value" :label="dataset.label" :value="dataset.value"></el-option>-->
-<!--                        </el-select>-->
-<!--                        <br>-->
-<!--                        <label>决策器名称：</label>-->
-<!--                        <el-select v-model="selectedDecisionMakerName" placeholder="选择决策器名称">-->
-<!--                            <el-option v-for="name in decisionMakerNames" :key="name.value" :label="name.label" :value="name.value"></el-option>-->
-<!--                        </el-select>-->
-<!--                        <br>-->
-<!--                        <label>决策器类型：</label>-->
-<!--                        <el-select v-model="selectedDecisionMakerType" placeholder="选择决策器类型">-->
-<!--                            <el-option label="机器自主决策" value="machine"></el-option>-->
-<!--                            <el-option label="人机智能决策" value="human-machine"></el-option>-->
-<!--                        </el-select>-->
-<!--                        <br>-->
-<!--                        &lt;!&ndash; 显示选中的决策器类型 &ndash;&gt;-->
-<!--                        <p v-if="selectedDecisionMakerType">已选择的决策器类型: {{ selectedDecisionMakerType }}</p>-->
-<!--                    </div>-->
                   <div style="display: flex; margin: 15px;">
                   <!-- 左侧区域：选择栏和按钮 -->
                   <div style="flex: 1; margin: 15px; text-align: left">
                       <!-- 数据集选择栏 -->
                       <div style="margin-bottom: 10px;">
                           <label>数据集：</label>
-                          <el-select v-model="selectedDataset" placeholder="选择数据集">
-                              <el-option v-for="dataset in datasets" :key="dataset.value" :label="dataset.label" :value="dataset.value"></el-option>
+                          <el-select v-model="selectedDataset1" placeholder="选择数据集" style="width: 300px;">
+                            <el-option label="China-300" value="China-300"></el-option>
+<!--                            <el-option label="case39" value="case39"></el-option>-->
+<!--                              <el-option v-for="dataset in datasets" :key="dataset.value" :label="dataset.label" :value="dataset.value"></el-option>-->
                           </el-select>
                       </div>
                       <!-- 决策器名称选择栏 -->
                       <div style="margin-bottom: 10px;">
                           <label>决策器名称：</label>
-                          <el-select v-model="selectedDecisionMakerName" placeholder="选择决策器名称">
-                              <el-option v-for="name in decisionMakerNames" :key="name.value" :label="name.label" :value="name.value"></el-option>
-                          </el-select>
+<!--                          <el-select v-model="selectedDecisionMakerName1" placeholder="选择决策器名称">-->
+<!--                            <el-option label="dec_eng1" value="dec_eng1"></el-option>-->
+<!--                            <el-option label="dec_eng2" value="dec_eng2"></el-option>-->
+<!--&lt;!&ndash;                              <el-option v-for="name in decisionMakerNames" :key="name.value" :label="name.label" :value="name.value"></el-option>&ndash;&gt;-->
+<!--                          </el-select>-->
+                            <el-select v-model="selectedDecisionMakerName1" placeholder="选择决策器名称" style="width: 300px;">
+                                <el-option v-for="item in decisionMakerOptions" :key="item.value" :label="item.label" :value="item.value"></el-option>
+                            </el-select>
                       </div>
                       <!-- 决策器类型选择栏 -->
                       <div style="margin-bottom: 10px;">
-                          <label>决策器类型：</label>
-                          <el-select v-model="selectedDecisionMakerType" placeholder="蒸馏器名称">
-                              <el-option label="dec_tree" value="machine"></el-option>
-                              <el-option label="..." value="human-machine"></el-option>
-                          </el-select>
+                          <label>蒸馏器名称：</label>
+<!--                          <el-select v-model="selectedDecisionMakerType1" placeholder="蒸馏器名称">-->
+<!--                              <el-option label="dec_tree1" value="dec_tree1"></el-option>-->
+<!--                              <el-option label="dec_tree2" value="dec_tree2"></el-option>-->
+<!--                          </el-select>-->
+                        <el-input v-model="selectedDecisionMakerType1" placeholder="输入蒸馏器名称" style="width: 300px;"></el-input>
                       </div>
                       <!-- 显示选中的决策器类型 -->
-                      <p v-if="selectedDecisionMakerType">已选择的决策器类型: {{ selectedDecisionMakerType }}</p>
+<!--                      <p v-if="selectedDecisionMakerType1">已选择的决策器类型: {{ selectedDecisionMakerType1 }}</p>-->
                       <!-- 按钮区域 -->
                       <div style="margin-top: 10px;">
-                          <el-button type="primary">添加蒸馏器</el-button>
-                          <el-button @click="showDashboard">查看蒸馏器</el-button>
+                          <el-button type="primary" @click="handleAddDecisionMaker1">添加蒸馏器</el-button>
+                          <el-button @click="viewDecisionMaker1" :disabled="!isDecisionMakerAdded1">查看蒸馏器</el-button>
                       </div>
                   </div>
                   <!-- 右侧区域：仪表盘 -->
-                  <div style="flex: 1; margin: 15px; text-align: right">
-                    <div v-if="isDashboardVisible" style="flex: 1;">
-                        <!-- 这里放置仪表盘的内容 -->
-<!--                        <div>仪表盘内容</div>-->
-                        <div v-if="isDashboardVisible" style="flex: 1; padding-left: 20px;">
-                            <!-- Element UI 进度条作为仪表盘 -->
-                            <el-progress type="circle" :percentage="progress"></el-progress>
-                        </div>
-                    </div>
+                  <div style="flex: 1; margin: 15px; text-align: right; display: flex; align-items: flex-end; justify-content: flex-start;">
+<!--                  <div style="flex: 1; margin: 15px; text-align: right">-->
+<!--                    <el-progress v-if="isDashboardVisible" type="dashboard" :percentage="progress"></el-progress>-->
+                    <el-progress v-if="isDashboardVisible1" type="dashboard" :percentage="progress1" style="transform: scale(1.5); transform-origin: bottom left;"></el-progress>
+<!--                    <div v-if="isDashboardVisible" style="flex: 1;">-->
+<!--                        &lt;!&ndash; 这里放置仪表盘的内容 &ndash;&gt;-->
+<!--&lt;!&ndash;                        <div>仪表盘内容</div>&ndash;&gt;-->
+<!--                        <div v-if="isDashboardVisible" style="flex: 1; padding-left: 20px;">-->
+<!--                            &lt;!&ndash; Element UI 进度条作为仪表盘 &ndash;&gt;-->
+<!--                            <el-progress type="circle" :percentage="progress"></el-progress>-->
+<!--                        </div>-->
+<!--                    </div>-->
                   </div>
                   </div>
-<!--                    <el-form-item prop="dataset_name" label="数据集">-->
-<!--                      <el-input clearable readonly  style="width: 300px"-->
-<!--                                 placeholder="请选择数据集"></el-input>-->
-<!--                    </el-form-item>-->
-<!--                    <el-form-item label="学习器名" prop="learner_name">-->
-<!--                      <el-input clearable v-model="addLearnerForm.learner_name" placeholder="请填写学习器名" style="width: 300px"></el-input>-->
-<!--                    </el-form-item>-->
-<!--                    <el-form-item label="学习器类型" prop="learner_type">-->
-<!--                      <el-select v-model="addLearnerForm.learner_type" placeholder="学习器类型" style="width: 300px">-->
-<!--                        <el-option v-for="(option, index) in learnerTypeOptions" :key="index" :label="option.name" :value="option.type"></el-option>-->
-<!--                      </el-select>-->
-<!--                    </el-form-item>-->
-<!--                    <el-form-item label="训练方法" prop="train_name">-->
-<!--                      <el-select v-model="learnParamsForm.train_name" placeholder="请选择方法" style="width: 300px"-->
-<!--                                 @change="handleselectTrainname">-->
-<!--                        <el-option-->
-<!--                          v-for="(item, index) in algorithm_Options" :key="index"-->
-<!--                          :label="item.introduction"-->
-<!--                          :value="item.algorithm_name">-->
-<!--                        </el-option>-->
-<!--                      </el-select>-->
-<!--                    </el-form-item>-->
-<!--                    <el-button class="submitBtn" type="primary" @click="submitAllForm">开始训练</el-button>-->
-<!--                    <el-button @click="queryLearner" class="queryBtn" type="primary">查看学习器</el-button>-->
                 </el-card>
                 </el-col>
               </el-row>
@@ -355,75 +242,122 @@
                       <!-- 数据集选择栏 -->
                       <div style="margin-bottom: 10px;">
                           <label>决策案例：</label>
-                          <el-select v-model="selectedDataset" placeholder="选择数据集">
+                          <el-select v-model="selectedDataset2" placeholder="选择案例">
+                              <el-option label="case1" value="case1"></el-option>
+                              <el-option label="case2" value="case2"></el-option>
+                              <el-option label="case3" value="case3"></el-option>
+                              <el-option label="case4" value="case4"></el-option>
+                              <el-option label="case5" value="case5"></el-option>
                               <el-option v-for="dataset in datasets" :key="dataset.value" :label="dataset.label" :value="dataset.value"></el-option>
                           </el-select>
                       </div>
                       <!-- 决策器名称选择栏 -->
                       <div style="margin-bottom: 10px;">
                           <label>蒸馏器名称：</label>
-                          <el-select v-model="selectedDecisionMakerName" placeholder="选择决策器名称">
-                              <el-option v-for="name in decisionMakerNames" :key="name.value" :label="name.label" :value="name.value"></el-option>
+                          <el-select v-model="selectedDecisionMakerName2" placeholder="选择蒸馏器">
+<!--                              <el-option label="dec_tree1" value="dec_tree1"></el-option>-->
+<!--                              <el-option label="dec_tree2" value="dec_tree2"></el-option>-->
+                            <el-option v-for="item in decisionMakerOptions1" :key="item.value" :label="item.label" :value="item.value"></el-option>
+<!--                              <el-option v-for="name in decisionMakerNames" :key="name.value" :label="name.label" :value="name.value"></el-option>-->
                           </el-select>
                       </div>
-                      <!-- 决策器类型选择栏 -->
-<!--                      <div style="margin-bottom: 10px;">-->
-<!--                          <label>决策器类型：</label>-->
-<!--                          <el-select v-model="selectedDecisionMakerType" placeholder="选择决策器类型">-->
-<!--                              <el-option label="机器自主决策" value="machine"></el-option>-->
-<!--                              <el-option label="人机智能决策" value="human-machine"></el-option>-->
-<!--                          </el-select>-->
-<!--                      </div>-->
-                      <!-- 显示选中的决策器类型 -->
-                      <p v-if="selectedDecisionMakerType">已选择的决策器类型: {{ selectedDecisionMakerType }}</p>
+<!--                      <p v-if="selectedDecisionMakerType32">已选择的决策器类型: {{ selectedDecisionMakerType3 }}</p>-->
                       <!-- 按钮区域 -->
                       <div style="margin-top: 10px;">
-                          <el-button type="primary">可视化决策路径</el-button>
-                          <el-button @click="viewResult">查看结果</el-button>
+                          <el-button type="primary" @click="handleAddDecisionMaker2">可视化决策路径</el-button>
+                          <el-button  :disabled="!isDecisionMakerAdded2" @click="getVisualizationImage">查看结果</el-button>
+<!--                          <el-button @click="viewResult">查看结果</el-button>-->
                       </div>
                   </div>
                   <!-- 右侧区域：仪表盘 -->
-                  <div style="flex: 1; margin: 15px; text-align: right">
-                      <div v-if="showImagetree" style="text-align: center; margin-top: 20px;">
-                        <img src="./../../assets/img/decision_tree_simplified.png" alt="展示图片">
-                      </div>
+                  <div style="flex: 1; margin: 15px; text-align: right; margin-top: 20px;">
+<!--                      <div v-if="showImagetree" style="text-align: center; margin-top: 20px;">-->
+<!--                        <img src="./../../assets/img/decision_tree_simplified.png" alt="展示图片">-->
+<!--                      </div>-->
+                     <img v-if="visualizationImageUrl" :src="visualizationImageUrl" width="990" height="165" alt="Visualization" @click="openModal">
+                  </div>
+                      <!-- 模态弹窗 -->
+                  <div v-if="showModal" class="modal">
+                    <div class="modal-content">
+                      <span class="close" @click="closeModal">&times;</span>
+                      <img :src="visualizationImageUrl" alt="Visualization"  class="modal-image">
+                    </div>
                   </div>
                   </div>
                 </el-card>
               </el-row>
             </el-col>
             <el-col span="4">
-              <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 1040px">
-                <div slot="header" class="header">
-                  <el-row type="flex" align="middle">
-                    <el-col span="16">
-                      <span class="header-label" style="font-size: 18px; font-weight: bolder">交互记录</span>
-                    </el-col>
-                  </el-row>
-                </div>
-                <div style="margin: 15px; text-align: center;">
-                  <el-table
-                    :data="IteractionRecord"
-                    border stripe
-                    ref="iteraction_record_table">
-                    <el-table-column label="交互次数" type="index" :index="indexMethod"> </el-table-column>
-                    <el-table-column prop="record_efficiency" label="决策器名称"></el-table-column>
-                    <el-table-column prop="record_accuracy" label="蒸馏器名称"></el-table-column>
-                  </el-table>
-                </div>
-              </el-card>
-<!--              <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 550px">-->
+<!--              <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 1040px">-->
 <!--                <div slot="header" class="header">-->
 <!--                  <el-row type="flex" align="middle">-->
-<!--                    <el-col span="12">-->
-<!--                      <span class="header-label" style="font-size: 18px; font-weight: bolder">决策路径</span>-->
+<!--                    <el-col span="16">-->
+<!--                      <span class="header-label" style="font-size: 18px; font-weight: bolder">交互记录</span>-->
 <!--                    </el-col>-->
 <!--                  </el-row>-->
 <!--                </div>-->
 <!--                <div style="margin: 15px; text-align: center;">-->
-<!--&lt;!&ndash;                  <div id="featureCharts" style="width: 400px; height: 500px; margin: 0 auto"></div>&ndash;&gt;-->
-<!--                    当前路径：节点4小于等于0.986，节点75小于等于0.330，节点40小于等于-2.582，节点76小于等于-5.498366117477417-->
+<!--                  <el-table-->
+<!--                    :data="IteractionRecord"-->
+<!--                    border stripe-->
+<!--                    ref="iteraction_record_table">-->
+<!--                    <el-table-column label="交互记录" type="index" :index="indexMethod"> </el-table-column>-->
+<!--                    <el-table-column prop="record_efficiency" label="决策器名称"></el-table-column>-->
+<!--&lt;!&ndash;                    <el-table-column prop="record_accuracy" label="蒸馏器名称"></el-table-column>&ndash;&gt;-->
+<!--                  </el-table>-->
 <!--                </div>-->
+<!--              </el-card>-->
+                      <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 1040px">
+                        <div slot="header" class="header">
+                          <el-row type="flex" align="middle">
+                            <el-col span="18">
+                              <span class="header-label" style="font-size: 18px; font-weight: bolder">交互记录</span>
+                            </el-col>
+                          </el-row>
+                        </div>
+                        <div style="margin: 15px; text-align: center;">
+                          <!-- 决策器名称表格 -->
+                          <el-table :data="decisionMakerOptions" border stripe style="margin-bottom: 20px;">
+                            <el-table-column label="记录" type="index"></el-table-column>
+                            <el-table-column prop="value" label="决策器名称">
+                                <template slot-scope="scope">
+                                  <span @click="handleDecisionMakerNameClick(scope.row.value)">
+                                    {{ scope.row.value }}
+                                  </span>
+                                </template>
+                            </el-table-column>
+                          </el-table>
+                          <!-- 蒸馏器名称表格 -->
+                          <el-table :data="decisionMakerOptions1" border stripe>
+                            <el-table-column label="记录" type="index"></el-table-column>
+                            <el-table-column prop="value" label="蒸馏器名称">
+                              <template slot-scope="scope">
+                                  <span @click="handleDecisionMakerNameClick1(scope.row.value)">
+                                    {{ scope.row.value }}
+                                  </span>
+                              </template>
+                            </el-table-column>
+                          </el-table>
+                        </div>
+                      </el-card>
+<!--                <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 1040px">-->
+<!--                  <div slot="header" class="header">-->
+<!--                    <el-row type="flex" align="middle">-->
+<!--                      <el-col span="16">-->
+<!--                        <span class="header-label" style="font-size: 18px; font-weight: bolder">交互记录</span>-->
+<!--                      </el-col>-->
+<!--                    </el-row>-->
+<!--                  </div>-->
+<!--                  <div style="margin: 15px; text-align: center;">-->
+<!--                    &lt;!&ndash; 决策器名称表格 &ndash;&gt;-->
+<!--                    <el-table :data="decisionMakerOptions" style="margin-bottom: 20px;">-->
+<!--                      <el-table-column prop="value" label="决策器名称"></el-table-column>-->
+<!--                    </el-table>-->
+<!--                    &lt;!&ndash; 蒸馏器名称表格 &ndash;&gt;-->
+<!--                    <el-table :data="decisionMakerOptions1">-->
+<!--                      <el-table-column prop="value" label="蒸馏器名称"></el-table-column>-->
+<!--                    </el-table>-->
+<!--                  </div>-->
 <!--              </el-card>-->
             </el-col>
           </div>
@@ -626,31 +560,6 @@
             </div>
           </el-card>
         </el-tab-pane>
-<!--        <el-tab-pane label="特征库">-->
-<!--          <el-card>-->
-<!--            <div class="table_box2">-->
-<!--              <el-row>-->
-<!--                <el-col :span="24">-->
-<!--                  <el-table-->
-<!--                    border stripe-->
-<!--                    ref="feature_library_table"-->
-<!--                    height="550"-->
-<!--                    solt="append"-->
-<!--                    style="font-size: 15px"-->
-<!--                    :data="featureLibraryList">-->
-<!--                    <el-table-column label="序号" type="index"></el-table-column>-->
-<!--                    <el-table-column-->
-<!--                      v-for="(item, index) in featureLibraryColumnsList"-->
-<!--                      :key="index + 'i'"-->
-<!--                      :label="item.label"-->
-<!--                      :prop="item.prop"-->
-<!--                      show-overflow-tooltip/>-->
-<!--                  </el-table>-->
-<!--                </el-col>-->
-<!--              </el-row>-->
-<!--            </div>-->
-<!--          </el-card>-->
-<!--        </el-tab-pane>-->
       </el-tabs>
       </div>
 <!--      选择数据集，弹出的窗口-->
@@ -678,7 +587,9 @@ import Dataset from '../data/OriginDataset'
 // import featureApi from './../../api/feature'
 import decisionApi from './../../api/decision'
 // import axios from 'axios'
+// import axios from 'axios'
 // import * as d3 from 'd3'
+// import axios from 'axios'
 
 const moduleOptions = [
   { value: '1', label: '原始特征' },
@@ -704,14 +615,42 @@ export default {
   },
   data () {
     return {
+      // 1229交互记录卡片
+      decisionMakerNames1: [], // 存储决策器的名称
+      distillerNames: [], // 存储蒸馏器的名称
+      // 1229轮训更新名称信息
+      pollingTimer: null,
+      // 1229蒸馏器名称信息传递
+      decisionMakerOptions1: [],
+      // 1229决策器名称信息传递
+      decisionMakerOptions: [],
       showImagetree: false,
       // 1205新仪表盘
-      progress: 75, // 这里设置你的进度值
-      isDashboardVisible: false, // 控制仪表盘显示的数据属性
+      // progress: 75, // 这里设置你的进度值
+      // isDashboardVisible: false, // 控制仪表盘显示的数据属性
+      // 决策器优化卡片
+      progress: 0, // 仪表盘
+      isDashboardVisible: false, // 仪表盘
+      timer: null, // 仪表盘
+      isDecisionMakerAdded: false, // 是否成功添加
       selectedDecisionMakerType: null,
-      // 1205新卡片
       selectedDataset: null,
       selectedDecisionMakerName: null,
+      // 决策器蒸馏卡片
+      progress1: 0, // 仪表盘
+      isDashboardVisible1: false, // 仪表盘
+      timer1: null, // 仪表盘
+      isDecisionMakerAdded1: false, // 是否成功添加
+      selectedDecisionMakerType1: null,
+      selectedDataset1: null,
+      selectedDecisionMakerName1: null,
+      // 决策器路径可视化卡片
+      visualizationImageUrl: '', // 图片加载
+      showModal: false, // 控制模态弹窗的显示
+      isDecisionMakerAdded2: false, // 是否成功添加
+      selectedDecisionMakerType2: null,
+      selectedDataset2: null,
+      selectedDecisionMakerName2: null,
       // selectedDecisionMakerType: null,
       datasets: [], // 数据集列表
       decisionMakerNames: [], // 决策器名称列表
@@ -807,7 +746,14 @@ export default {
     }
   },
   created () {
+    // 1229交互记录卡片
+    this.fetchDecisionMakerNames()
+    this.fetchDistillerNames()
+    // 1229决策器名称信息传递
+    this.fetchDecisionMakers()
+    this.fetchDecisionMakers1()
     // 用假数据暂时替代
+    // eslint-disable-next-line no-unreachable
     this.featureLibraryList = []
     this.HumanFeaData = []
     this.taskFeatureList = []
@@ -830,6 +776,12 @@ export default {
     this.lazyLoading_featureEngList()
     this.lazyLoading_taskFeatureList()
     this.drawChart()
+    // this.fetchDecisionMakers()
+    // this.fetchDecisionMakers1()
+    this.pollingTimer = setInterval(() => {
+      this.fetchDecisionMakers()
+      this.fetchDecisionMakers1()
+    }, 1000) // 30000毫秒 = 30秒
   },
   methods: {
     drawChart () {
@@ -1114,10 +1066,297 @@ export default {
       }
     },
     showDashboard () {
-      this.isDashboardVisible = true // 在点击按钮时显示仪表盘
+      // this.isDashboardVisible = true // 在点击按钮时显示仪表盘
     },
     viewResult () {
       this.showImagetree = true
+    },
+    // 1226GCN决策器优化卡片
+    handleAddDecisionMaker () {
+      // 1229更新名称表单状态
+      this.fetchDecisionMakers()
+      // this.fetchDecisionMakers1()
+      // 重置仪表盘状态
+      this.progress = 0
+      this.isDashboardVisible = false
+      clearInterval(this.timer)
+      // 弹窗提示表单的完整性
+      const missingFields = []
+      if (!this.selectedDataset) {
+        missingFields.push('数据集')
+      }
+      if (!this.selectedDecisionMakerName) {
+        missingFields.push('决策器名称')
+      }
+      if (!this.selectedDecisionMakerType) {
+        missingFields.push('决策器类型')
+      }
+      if (missingFields.length > 0) {
+        this.$message({
+          message: `请添加${missingFields.join('、')}`,
+          type: 'warning'
+        })
+        return
+      }
+      // 提交表单
+      const payload = {
+        selectedDataset: this.selectedDataset,
+        selectedDecisionMakerName: this.selectedDecisionMakerName,
+        selectedDecisionMakerType: this.selectedDecisionMakerType
+      }
+      decisionApi.addDecisionMaker(payload)
+        .then(response => {
+          this.$message.success('添加成功')
+          this.isDecisionMakerAdded = true // 更新状态，成功添加了
+          this.startProgress() // 仪表盘开始计时
+          // 这里可以根据需要添加更多的逻辑
+        })
+        .catch(error => {
+          console.error('添加失败', error)
+        })
+    },
+    // 1226GCN决策器优化卡片——仪表盘
+    startProgress () {
+      this.timer = setInterval(() => {
+        if (this.progress < 100) {
+          this.progress += 0.5 // 或者根据实际情况调整增量
+        } else {
+          clearInterval(this.timer) // 到达 100% 后停止计时
+        }
+      }, 100) // 调整时间间隔以控制速度
+    },
+    // 1226GCN决策器优化卡片——显示仪表盘
+    viewDecisionMaker () {
+      this.isDashboardVisible = true // 显示仪表盘
+    },
+    // 1226GCN决策器蒸馏卡片
+    handleAddDecisionMaker1 () {
+      // 1229更新名称表单状态
+      // this.fetchDecisionMakers()
+      this.fetchDecisionMakers1()
+      this.fetchDecisionMakerNames()
+      this.fetchDistillerNames()
+      // 重置仪表盘状态
+      this.progress1 = 0
+      this.isDashboardVisible1 = false
+      clearInterval(this.timer1)
+      // 弹窗提示表单的完整性
+      const missingFields = []
+      if (!this.selectedDataset1) {
+        missingFields.push('数据集')
+      }
+      if (!this.selectedDecisionMakerName1) {
+        missingFields.push('决策器名称')
+      }
+      if (!this.selectedDecisionMakerType1) {
+        missingFields.push('决策器类型')
+      }
+      if (missingFields.length > 0) {
+        this.$message({
+          message: `请添加${missingFields.join('、')}`,
+          type: 'warning'
+        })
+        return
+      }
+      // 提交表单
+      const payload = {
+        selectedDataset: this.selectedDataset1,
+        selectedDecisionMakerName: this.selectedDecisionMakerName1,
+        selectedDecisionMakerType: this.selectedDecisionMakerType1
+      }
+      decisionApi.addDecisionMaker1(payload)
+        .then(response => {
+          this.$message.success('添加成功')
+          this.isDecisionMakerAdded1 = true // 更新状态，成功添加了
+          this.startProgress1() // 仪表盘开始计时
+          // 这里可以根据需要添加更多的逻辑
+        })
+        .catch(error => {
+          console.error('添加失败', error)
+        })
+    },
+    // 1226GCN决策器优化卡片——仪表盘
+    startProgress1 () {
+      this.timer1 = setInterval(() => {
+        if (this.progress1 < 100) {
+          this.progress1 += 1 // 或者根据实际情况调整增量
+        } else {
+          clearInterval(this.timer1) // 到达 100% 后停止计时
+        }
+      }, 100) // 调整时间间隔以控制速度
+    },
+    // 1226GCN决策器优化卡片——显示仪表盘
+    viewDecisionMaker1 () {
+      this.isDashboardVisible1 = true // 显示仪表盘
+    },
+    // 1226GCN决策路径可视化
+    handleAddDecisionMaker2 () {
+      // 弹窗提示表单的完整性
+      const missingFields = []
+      if (!this.selectedDataset2) {
+        missingFields.push('决策案例')
+      }
+      if (!this.selectedDecisionMakerName2) {
+        missingFields.push('蒸馏器名称')
+      }
+      if (missingFields.length > 0) {
+        this.$message({
+          message: `请添加${missingFields.join('、')}`,
+          type: 'warning'
+        })
+        return
+      }
+      // 提交表单
+      const payload = {
+        selectedDataset: this.selectedDataset2,
+        selectedDecisionMakerName: this.selectedDecisionMakerName2
+        // selectedDecisionMakerType: this.selectedDecisionMakerType2
+      }
+      decisionApi.addDecisionMaker2(payload)
+        .then(response => {
+          this.$message.success('添加成功')
+          this.isDecisionMakerAdded2 = true // 更新状态，成功添加了
+          // this.startProgress1() // 仪表盘开始计时
+          // 这里可以根据需要添加更多的逻辑
+        })
+        .catch(error => {
+          console.error('添加失败', error)
+        })
+    },
+    // 1227GCN决策路径可视化——显示图片
+    getVisualizationImage () {
+      const params = { param1: this.selectedDataset2, param2: this.selectedDecisionMakerName2 }
+      decisionApi.fetchVisualizationImage(params)
+        .then(response => {
+          if (response.data.meta.code === 200) {
+            this.visualizationImageUrl = response.data.data.imageData
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching visualization image:', error)
+        })
+    },
+    openModal () {
+      this.showModal = true
+    },
+    closeModal () {
+      this.showModal = false
+    },
+    // 1229决策器名称传递
+    fetchDecisionMakers () {
+      // axios.get('/decision/get/decisionmakers')
+      decisionApi.fetchDecisionMakers()
+        .then(response => {
+          if (response.data.meta.code === 200) {
+            this.decisionMakerOptions = response.data.data.map(name => ({ label: name, value: name }))
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching decision makers~~:', error)
+          // 处理错误
+        })
+    },
+    // 1229蒸馏器名称传递
+    fetchDecisionMakers1 () {
+      // axios.get('/decision/get/decisionmakers')
+      decisionApi.fetchDecisionMakers1()
+        .then(response => {
+          if (response.data.meta.code === 200) {
+            this.decisionMakerOptions1 = response.data.data.map(name => ({ label: name, value: name }))
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching decision makers~~:', error)
+          // 处理错误
+        })
+    },
+    // 未使用
+    fetchDecisionMakerNames () {
+    // 发送请求到后端，URL和方法根据实际情况调整
+      decisionApi.fetchDecisionMakers()
+        .then(response => {
+          this.decisionMakerNames1 = response.data.data
+        }).catch(error => {
+          console.error('Error fetching decision maker names:', error)
+        })
+    },
+    // 未使用——获取蒸馏器的名称
+    fetchDistillerNames () {
+      // 发送请求到后端，URL和方法根据实际情况调整
+      decisionApi.fetchDecisionMakers1()
+        .then(response => {
+          this.distillerNames = response.data.data
+        }).catch(error => {
+          console.error('Error fetching distiller names:', error)
+        })
+    },
+    // 1230交互记录卡片——删除名称——处理决策器名称的点击事件
+    handleDecisionMakerNameClick (decisionMakerName) {
+      this.$confirm('确定要删除这个决策器吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.deleteDecisionMaker(decisionMakerName)
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    // 1230交互记录卡片——删除决策器名称——向后端发送删除请求
+    deleteDecisionMaker (decisionMakerName) {
+      decisionApi.deleteDesionMaker(decisionMakerName)
+      // this.$axios.post('/api/delete/decisionmaker', { decisionMakerName })
+        .then(response => {
+          if (response.data.meta.code === 200) {
+            this.$message.success('删除成功')
+            this.fetchDecisionMakers()
+            this.fetchDecisionMakers1()
+            // 这里可以添加代码来更新前端的显示，比如重新加载决策器列表
+          } else {
+            this.$message.error('删除失败！')
+          }
+        })
+        .catch(error => {
+          console.error('删除失败~', error)
+          this.$message.error('删除时发生错误')
+        })
+    },
+    // 1230交互记录卡片——删除名称——处理蒸馏器名称的点击事件
+    handleDecisionMakerNameClick1 (decisionMakerName) {
+      this.$confirm('确定要删除这个蒸馏器吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.deleteDecisionMaker1(decisionMakerName)
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消删除'
+        })
+      })
+    },
+    // 1230交互记录卡片——删除蒸馏器名称——向后端发送删除请求
+    deleteDecisionMaker1 (decisionMakerName) {
+      decisionApi.deleteDesionMaker1(decisionMakerName)
+      // this.$axios.post('/api/delete/decisionmaker', { decisionMakerName })
+        .then(response => {
+          if (response.data.meta.code === 200) {
+            this.$message.success('删除成功')
+            this.fetchDecisionMakers()
+            this.fetchDecisionMakers1()
+            // 这里可以添加代码来更新前端的显示，比如重新加载决策器列表
+          } else {
+            this.$message.error('删除失败！')
+          }
+        })
+        .catch(error => {
+          console.error('删除失败~', error)
+          this.$message.error('删除时发生错误')
+        })
     }
   }
 }
@@ -1197,5 +1436,45 @@ export default {
   .no-percent-sign .el-progress__text {
     font-size: 0.1px !important; /* 或者使用更小的值，直到文本几乎不可见 */
     color: transparent !important; /* 可以选择性地保留，以确保文本不可见 */
+}
+  .modal {
+  display: block; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
+}
+
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+.modal-image {
+  width: 100%; /* 或者使用具体的像素值，例如 800px */
+  height: auto; /* 设置为 auto 以保持图片的宽高比 */
+  display: block; /* 使图片块级显示 */
+  margin: 0 auto; /* 水平居中 */
 }
 </style>

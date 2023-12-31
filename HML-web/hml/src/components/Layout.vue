@@ -39,8 +39,8 @@ export default {
   .header {
     /* background-color:#367FA9; */
     background-color: #2d3a4b;
-    height: 50px;
-    line-height: 50px;
+    height: 80px;
+    line-height: 73px;
     position: absolute;
     top: 0px;
     left: 0px;
@@ -49,25 +49,25 @@ export default {
   .navbar{
     position: absolute;
     left: 0px;
-    top:  50px;
+    top:  80px;
     bottom: 0px;
-    width: 180px;
+    width: 200px;
     overflow-y: auto;
     background:#373d41;
   }
   .navbar2{
     position: absolute;
     left: 0px;
-    top:  50px;
+    top:  80px;
     bottom: 0px;
-    width: 60px;
+    width: 64px;
     overflow-y: auto;
     background: #373d41;
   }
   .main{
     position: absolute;
-    top: 50px;
-    left: 180px;
+    top: 80px;
+    left: 200px;
     right: 0px;
     bottom: 0px;
     overflow-y: auto;
@@ -75,22 +75,22 @@ export default {
   }
   .main2{
     position: absolute;
-    top: 50px;
-    left: 60px;
+    top: 80px;
+    left: 64px;
     right: 0px;
     bottom: 0px;
     overflow-y: auto;
     background: #eaedf1;
   }
-.toggle-button{
-  background: #4A5064;
-  font-size: 10px;
-  text-align: center;
-  /* color: #B8C7CE; */
-  color:#ffffff;
-  cursor: pointer;
-  line-height: 24px;
-  /* 这个是控制这三个竖线之间的间距的，注意，这里不是用margin和padding */
-  letter-spacing: 0.2em;
-}
+  .toggle-button{
+    background: #4A5064;
+    font-size: 30px;
+    text-align: center;
+    /* color: #B8C7CE; */
+    color:#ffffff;
+    cursor: pointer;
+    line-height: 24px;
+    /* 这个是控制这三个竖线之间的间距的，注意，这里不是用margin和padding */
+    letter-spacing: 0.4em;
+  }
 </style>

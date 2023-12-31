@@ -183,12 +183,21 @@ class LearnerService:
       return data
     # 模型测试：
     def modelTest(self, learner, learner_parameters, dataset_file_path):
-      reward = numpy.random.randint(low=300, high=480)
+      if learner_parameters['train_name']=='HML_ML':
+        rewards = [numpy.random.randint(low=330, high=366) for _ in range(10)]
+      elif learner_parameters['train_name']=='HML_RL':
+        rewards = [numpy.random.randint(low=400, high=440) for _ in range(10)]
+      
+      rewards_mean = numpy.mean(rewards)
+      rewards_wave = abs(rewards-rewards_mean)/rewards_mean
+      wave_mean = numpy.mean(rewards_wave)
+      rewards_list = [{'value': reward, 'wave':wave} for reward, wave in zip(rewards, rewards_wave)]
+      rewards_dict = {'data':rewards_list, 'rewards_mean':rewards_mean, 'wave_mean':wave_mean}
       data = {
           'state': 'SUCCESS',
           'progress': 1.00,
           'message': 'test success',
-          'reward': reward
+          'reward': rewards_dict
       }
       return data
     # 获取测试数据

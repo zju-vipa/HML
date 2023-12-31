@@ -100,15 +100,24 @@ export default {
   /* color: #B8C7CE; */
   color:#ffffff;
   cursor: pointer;
-  line-height: 24px;
-  letter-spacing: 0.2em;
+  line-height: 34px;
+  letter-spacing: 0.4em;
   /* border-bottom: 1px solid #ffffff; */
 }
-.el-menu{
+/* .el-menu{
   border-right: none;
+  font-size: 30px;
+} */
+.el-menu{
+  border-width: 0px;
 }
-.el-menu-item i{
-  margin-right: 26px;
+.el-menu-item i {
+  margin-right: 46px;
+  font-size: 25px;
+  /* border-style:none; */
+}
+.el-menu-item span{
+  font-size: 20px;
 }
 /* .el-menu-item .el-tooltip i{
   margin-right: 20px;
