@@ -97,8 +97,8 @@ export default {
     return {
       crossSectionTrainingSetFolder: '',
       crossSectionTestSetFolder: '',
-      crossSectionTrainingSetUploadURL: 'http://192.168.160.192:8021/api/private/v1/dataset/uploadCrossSectionTrainingSet',
-      crossSectionTestSetUploadURL: 'http://192.168.160.192:8021/api/private/v1/dataset/uploadCrossSectionTestSet',
+      crossSectionTrainingSetUploadURL: 'http://192.168.160.192:8051/api/private/v1/dataset/uploadCrossSectionTrainingSet',
+      crossSectionTestSetUploadURL: 'http://192.168.160.192:8051/api/private/v1/dataset/uploadCrossSectionTestSet',
       publicOption,
       // Tab标签激活的名字
       activeName: 'upload',
@@ -112,9 +112,9 @@ export default {
         if_profile: false
       },
       // 上传文件地址
-      // uploadURL: 'http://192.168.137.8:8021/api/private/v1/dataset/upload',
-      // uploadURL: 'http://192.168.160.192:8021/api/private/v1/dataset/upload',
-      uploadURL: 'http://10.214.211.137:8021/api/private/v1/dataset/upload',
+      // uploadURL: 'http://10.214.211.137:8051/api/private/v1/dataset/upload',
+      // uploadURL: 'http://192.168.160.192:8051/api/private/v1/dataset/upload',
+      uploadURL: 'http://10.214.211.137:8051/api/private/v1/dataset/upload',
       uploadFormRules: {
         dataset_name: [
           { required: true, message: '请输入数据名称', trigger: 'blur' }

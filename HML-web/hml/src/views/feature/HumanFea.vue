@@ -675,7 +675,7 @@ export default {
       percentageListen: null,
       disableSettings: false,
       uploadURL: ''
-      // uploadURL: 'http://10.214.211.137:8021/api/private/v1/featureEng/upload'
+      // uploadURL: 'http://10.214.211.137:8051/api/private/v1/featureEng/upload'
     }
   },
   mounted () {

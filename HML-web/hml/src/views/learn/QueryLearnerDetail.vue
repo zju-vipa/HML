@@ -50,7 +50,7 @@
       </el-card>
       <el-card>
         <!-- 任务信息 -->
-        <el-row style="font-size: 28px; margin-bottom: 30px">
+        <el-row style="font-size: 28px; margin-bottom: 15px">
           <el-col :span="3" align="right">
             <h4 class="currerntTask"> 当前任务： </h4>
           </el-col>
@@ -473,8 +473,9 @@ export default {
   }
   .Power{
     border-radius:4px;
-    margin: 0 20px 0 20px;
+    margin: 15px 20px 0 20px;
     height: 160px;
+    min-width: 420px;
     border: 2px solid #ebeef5;
   }
   .sectionPower{
@@ -491,13 +492,13 @@ export default {
   .el-form-item{
     margin-bottom: 30px;
   }
-.dealBtn{
-  float: left;
-  /* margin-top: 10px; */
-  margin-bottom: 10px;
-  margin-left: 10px;
-  margin-right: 10px;
-}
+  .dealBtn{
+    float: left;
+    /* margin-top: 10px; */
+    margin-bottom: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+  }
   .box{
     height:60px;
     border-right: 1px solid #ebeef5;
