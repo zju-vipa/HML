@@ -109,122 +109,115 @@ def main():
     # 1023:渲染决策树，绘制决策树的图形表示
     plt.figure(figsize=(20, 10))
     plot_tree(dt_model, filled=True)
-    plt.savefig('/root/HML/Decision/GCN_xgboost_1226/result_pic_docker/decision_tree.png', format='png', dpi=1000)  # 保存为高清图片
-
-    # dec_tree.py的末尾
-    marker_file_path = "/root/HML/Decision/GCN_xgboost_1226/script_complete2.txt"
-    with open(marker_file_path, "w") as marker_file:
-        marker_file.write("Script execution completed successfully.")
-
-
+    plt.savefig('result_pic/decision_tree.png', format='png', dpi=1000)  # 保存为高清图片
     # plt.show()
-    #
-    # # 1023:渲染决策树，转化json
-    # tree_json = tree_to_json(dt_model)
-    # # 保存到文件
-    # with open("result_pic/decision_tree.json", "w") as f:
-    #     json.dump(tree_json, f, indent=4)
-    # # 转换为扁平化的 JSON 格式
-    # flat_tree_json = flatten_tree(dt_model)
-    # # 保存到文件
-    # with open("result_pic/flat_decision_tree.json", "w") as f:
-    #     json.dump(flat_tree_json, f, indent=4)
-    # # 1023渲染决策树，添加判断注释（不太对）
-    # # 自动生成决策树图
-    # feature_count = x_np.shape[1]
-    # generate_tree_with_labels(dt_model, feature_count)
-    # # print(x_np[0])
-    #
-    #
-    # # 1030 决策树标号
-    # # 生成有标号的 JSON
-    # tree_json_with_id = tree_to_json_with_id(dt_model)
-    # with open("result_pic/decision_tree_with_id.json", "w") as f:
-    #     json.dump(tree_json_with_id, f, indent=4)
-    # # 生成有标号的决策树图片
-    # plt.figure(figsize=(20, 10))
-    # plot_tree(dt_model, filled=True, node_ids=True)  # 注意这里添加了 node_ids=True
-    # plt.savefig('result_pic/decision_tree_with_id.png', format='png', dpi=1000)
-    #
-    #
-    # # 1031：决策路径
+
+    # 1023:渲染决策树，转化json
+    tree_json = tree_to_json(dt_model)
+    # 保存到文件
+    with open("result_pic/decision_tree.json", "w") as f:
+        json.dump(tree_json, f, indent=4)
+    # 转换为扁平化的 JSON 格式
+    flat_tree_json = flatten_tree(dt_model)
+    # 保存到文件
+    with open("result_pic/flat_decision_tree.json", "w") as f:
+        json.dump(flat_tree_json, f, indent=4)
+    # 1023渲染决策树，添加判断注释（不太对）
+    # 自动生成决策树图
+    feature_count = x_np.shape[1]
+    generate_tree_with_labels(dt_model, feature_count)
+    # print(x_np[0])
+
+
+    # 1030 决策树标号
+    # 生成有标号的 JSON
+    tree_json_with_id = tree_to_json_with_id(dt_model)
+    with open("result_pic/decision_tree_with_id.json", "w") as f:
+        json.dump(tree_json_with_id, f, indent=4)
+    # 生成有标号的决策树图片
+    plt.figure(figsize=(20, 10))
+    plot_tree(dt_model, filled=True, node_ids=True)  # 注意这里添加了 node_ids=True
+    plt.savefig('result_pic/decision_tree_with_id.png', format='png', dpi=1000)
+
+
+    # 1031：决策路径
+    # 获取决策路径
+    # decision_path = get_decision_path(dt_model, x_np[0])
+    decision_path = get_decision_path(dt_model, x_np[1].reshape(1, -1))  #1104新代码修改
+    # print(decision_path)
+
+    # 1031：决策路径json
+    # 在 JSON 中标注决策路径
+    tree_json_with_id = tree_to_json_with_id(dt_model)
+    annotate_decision_path_in_json(tree_json_with_id, decision_path)
+    with open("result_pic/decision_tree_with_path.json", "w") as f:
+        json.dump(tree_json_with_id, f, indent=4)
+
+    # 1031：决策路径png
+    # 获取决策路径
+    # decision_path = get_decision_path(dt_model, x_np[0].reshape(1, -1))  #1104新代码修改
+    # 生成带有决策路径的 dot 文件
+    dot_data = export_graphviz_with_path(dt_model, decision_path, feature_names=[f'feature_{i}' for i in range(x_np.shape[1])])
+    # 生成带有决策路径的 PNG 图像
+    graph = graphviz.Source(dot_data)
+    graph.render('result_pic/decision_tree_with_path', format='png')
+
+
+    # 1032：决策路径png 带有标号
+    # 获取决策路径
+    # decision_path = get_decision_path(dt_model, x_np[0].reshape(1, -1))  #1104新代码修改
+    # 生成带有决策路径和节点标号的 dot 文件
+    dot_data = export_graphviz_with_path_and_ids(dt_model, decision_path, feature_names=[f'feature_{i}' for i in range(x_np.shape[1])])
+    # 生成带有决策路径和节点标号的 PNG 图像
+    graph = graphviz.Source(dot_data)
+    graph.render('result_pic/decision_tree_with_path_and_ids', format='png')
+
+
+    # 1032：决策路径json 带有标号
+    # 获取决策路径
+    # decision_path = get_decision_path(dt_model, x_np[0].reshape(1, -1))  #1104新代码修改
+    # 生成带有决策路径和节点 ID 的 JSON 对象
+    tree_json_with_path_and_id = tree_to_json_with_path_and_id(dt_model, decision_path)
+    # 保存到文件
+    with open("result_pic/decision_tree_with_path_and_ids.json", "w") as f:
+        json.dump(tree_json_with_path_and_id, f, indent=4)
+
+
+
+    # 1035：逐步生成并保存决策路径图像
+    # 获取决策路径
+    # decision_path = get_decision_path(dt_model, x_np[0].reshape(1, -1))  #1104新代码修改
+    # 逐步生成并保存决策路径图像
+    feature_names = [f'feature_{i}' for i in range(x_np.shape[1])]
+    generate_path_images(dt_model, decision_path, feature_names)
+
+
+
+    # 1103:删除不方便解释的内容，方便展示
     # # 获取决策路径
-    # # decision_path = get_decision_path(dt_model, x_np[0])
-    # decision_path = get_decision_path(dt_model, x_np[1].reshape(1, -1))  #1104新代码修改
-    # # print(decision_path)
-    #
-    # # 1031：决策路径json
-    # # 在 JSON 中标注决策路径
-    # tree_json_with_id = tree_to_json_with_id(dt_model)
-    # annotate_decision_path_in_json(tree_json_with_id, decision_path)
-    # with open("result_pic/decision_tree_with_path.json", "w") as f:
-    #     json.dump(tree_json_with_id, f, indent=4)
-    #
-    # # 1031：决策路径png
-    # # 获取决策路径
-    # # decision_path = get_decision_path(dt_model, x_np[0].reshape(1, -1))  #1104新代码修改
+    # decision_path = get_decision_path(dt_model, x_np[0])
     # # 生成带有决策路径的 dot 文件
-    # dot_data = export_graphviz_with_path(dt_model, decision_path, feature_names=[f'feature_{i}' for i in range(x_np.shape[1])])
+    # dot_data = plot_simplified_tree(dt_model, decision_path, feature_names=[f'feature_{i}' for i in range(x_np.shape[1])])
     # # 生成带有决策路径的 PNG 图像
     # graph = graphviz.Source(dot_data)
-    # graph.render('result_pic/decision_tree_with_path', format='png')
+    # graph.render('decision_tree_simplified', format='png')
+    feature_names = [f'feature_{i}' for i in range(x_np.shape[1])]
+    # plot_simplified_tree(dt_model, 'result_pic/decision_tree_simplified', feature_names=feature_names)
+    plot_simplified_tree(dt_model, 'decision_tree/decision_tree_simplified', feature_names=feature_names)
+
+
+
     #
-    #
-    # # 1032：决策路径png 带有标号
-    # # 获取决策路径
-    # # decision_path = get_decision_path(dt_model, x_np[0].reshape(1, -1))  #1104新代码修改
-    # # 生成带有决策路径和节点标号的 dot 文件
-    # dot_data = export_graphviz_with_path_and_ids(dt_model, decision_path, feature_names=[f'feature_{i}' for i in range(x_np.shape[1])])
-    # # 生成带有决策路径和节点标号的 PNG 图像
-    # graph = graphviz.Source(dot_data)
-    # graph.render('result_pic/decision_tree_with_path_and_ids', format='png')
-    #
-    #
-    # # 1032：决策路径json 带有标号
-    # # 获取决策路径
-    # # decision_path = get_decision_path(dt_model, x_np[0].reshape(1, -1))  #1104新代码修改
-    # # 生成带有决策路径和节点 ID 的 JSON 对象
-    # tree_json_with_path_and_id = tree_to_json_with_path_and_id(dt_model, decision_path)
-    # # 保存到文件
-    # with open("result_pic/decision_tree_with_path_and_ids.json", "w") as f:
-    #     json.dump(tree_json_with_path_and_id, f, indent=4)
-    #
-    #
-    #
-    # # 1035：逐步生成并保存决策路径图像
-    # # 获取决策路径
-    # # decision_path = get_decision_path(dt_model, x_np[0].reshape(1, -1))  #1104新代码修改
-    # # 逐步生成并保存决策路径图像
-    # feature_names = [f'feature_{i}' for i in range(x_np.shape[1])]
-    # generate_path_images(dt_model, decision_path, feature_names)
-    #
-    #
-    #
-    # # 1103:删除不方便解释的内容，方便展示
-    # # # 获取决策路径
-    # # decision_path = get_decision_path(dt_model, x_np[0])
-    # # # 生成带有决策路径的 dot 文件
-    # # dot_data = plot_simplified_tree(dt_model, decision_path, feature_names=[f'feature_{i}' for i in range(x_np.shape[1])])
-    # # # 生成带有决策路径的 PNG 图像
-    # # graph = graphviz.Source(dot_data)
-    # # graph.render('decision_tree_simplified', format='png')
+    # # 1211 新的蒸馏器方法迁移
     # feature_names = [f'feature_{i}' for i in range(x_np.shape[1])]
     # # plot_simplified_tree(dt_model, 'result_pic/decision_tree_simplified', feature_names=feature_names)
-    # plot_simplified_tree(dt_model, 'decision_tree/decision_tree_simplified', feature_names=feature_names)
-    #
-    #
-    #
-    # #
-    # # # 1211 新的蒸馏器方法迁移
-    # # feature_names = [f'feature_{i}' for i in range(x_np.shape[1])]
-    # # # plot_simplified_tree(dt_model, 'result_pic/decision_tree_simplified', feature_names=feature_names)
-    # # plot_simplified_tree1(dt_model, 'decision_tree1/decision_tree_simplified', feature_names=feature_names)
-    #
-    # # 生成带有决策路径和节点标号的 dot 文件
-    # dot_data = export_graphviz_with_path_and_ids1(dt_model, decision_path, feature_names=[f'feature_{i}' for i in range(x_np.shape[1])])
-    # # 生成带有决策路径和节点标号的 PNG 图像
-    # graph = graphviz.Source(dot_data)
-    # graph.render('decision_tree1/decision_tree_with_path_and_ids1', format='png')
+    # plot_simplified_tree1(dt_model, 'decision_tree1/decision_tree_simplified', feature_names=feature_names)
+
+    # 生成带有决策路径和节点标号的 dot 文件
+    dot_data = export_graphviz_with_path_and_ids1(dt_model, decision_path, feature_names=[f'feature_{i}' for i in range(x_np.shape[1])])
+    # 生成带有决策路径和节点标号的 PNG 图像
+    graph = graphviz.Source(dot_data)
+    graph.render('decision_tree1/decision_tree_with_path_and_ids1', format='png')
 
 
 # 1023:渲染决策树，转化json

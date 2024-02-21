@@ -47,7 +47,7 @@ def pass_data_iteratively(model, graphs, minibatch_size = 64):
 
 def main():
     # path = "/disk1/zyh/decision_tree/state/CASE300_0_32_32_0.001_.pth"
-    path = "/disk1/zyh/decision_tree/state/CASE300_0_32_32_0.001x_.pth"
+    path = "/disk1/zyh/decision_tree/state/CASE300_0_32_32_0.001x2_.pth"
     '''
     print("开始导入图网络深度模型...")
     GCN_model = torch.load(path)
@@ -594,7 +594,7 @@ def tree_to_json_with_path_and_id(decision_tree, path, feature_names=None):
 # decision_path_steps
 # 1035：逐步生成并保存决策路径图像
 # def generate_path_images(decision_tree, path, feature_names=None, folder_name='result_pic/decision_path_steps'):
-def generate_path_images(decision_tree, path, feature_names=None, folder_name='result_pic/decision_path_steps'):
+def generate_path_images(decision_tree, path, feature_names=None, folder_name='case2/decision_path_steps'):
     # 创建保存图像的文件夹
     if not os.path.exists(folder_name):
         os.makedirs(folder_name)

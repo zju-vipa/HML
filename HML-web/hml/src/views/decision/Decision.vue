@@ -110,7 +110,11 @@
                       <div style="margin-bottom: 10px;">
                           <label>数据集：</label>
                           <el-select v-model="selectedDataset" placeholder="选择数据集" style="width: 300px;">
-                            <el-option label="China-300" value="China-300" ></el-option>
+                            <el-option label="China300-1000" value="China300-1000"></el-option>
+                            <el-option label="China300-2000" value="China300-2000"></el-option>
+                            <el-option label="China300-3000" value="China300-3000"></el-option>
+                            <el-option label="China300-4000" value="China300-4000"></el-option>
+                            <el-option label="China300-5000" value="China300-5000"></el-option>
 <!--                            <el-option label="case39" value="case39"></el-option>-->
 <!--                              <el-option v-for="dataset in datasets" :key="dataset.value" :label="dataset.label" :value="dataset.value"></el-option>-->
                           </el-select>
@@ -174,7 +178,11 @@
                       <div style="margin-bottom: 10px;">
                           <label>数据集：</label>
                           <el-select v-model="selectedDataset1" placeholder="选择数据集" style="width: 300px;">
-                            <el-option label="China-300" value="China-300"></el-option>
+                            <el-option label="China300-1000" value="China300-1000"></el-option>
+                            <el-option label="China300-2000" value="China300-2000"></el-option>
+                            <el-option label="China300-3000" value="China300-3000"></el-option>
+                            <el-option label="China300-4000" value="China300-4000"></el-option>
+                            <el-option label="China300-5000" value="China300-5000"></el-option>
 <!--                            <el-option label="case39" value="case39"></el-option>-->
 <!--                              <el-option v-for="dataset in datasets" :key="dataset.value" :label="dataset.label" :value="dataset.value"></el-option>-->
                           </el-select>
@@ -226,7 +234,7 @@
                 </el-card>
                 </el-col>
               </el-row>
-              <!-- <el-row> -->
+              <el-row>
               <el-row>
                 <el-card class="box-card" shadow="always" :body-style="{ padding: '0px' }" style="height: 340px">
                   <div slot="header" class="header">
@@ -1119,7 +1127,7 @@ export default {
     startProgress () {
       this.timer = setInterval(() => {
         if (this.progress < 100) {
-          this.progress += 0.5 // 或者根据实际情况调整增量
+          this.progress += 0.1 // 或者根据实际情况调整增量
         } else {
           clearInterval(this.timer) // 到达 100% 后停止计时
         }

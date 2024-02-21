@@ -599,6 +599,7 @@ def apply_mam():
 
         print(f"Task: {task}, Case: {case1}")
         ret = os.system(f"python3 {script_path} --case {case1} --task {task}")
+        #  python .\dec_tree.py
         if ret != 0:
             msg = '没有正确返回值'
 
@@ -697,7 +698,7 @@ def add_decision_maker():
 
     def save_to_file(dataset, decision_maker_name, decision_maker_type):
 
-        file_path = "/root/HML/Decision/GCN_xgboost_1226/decision_maker_data.txt"
+        file_path = "/root/HML/Decision/GCN_xgboost_1226/decision_maker_data.txt"# 创建决策器
         # 要保存的数据
         data_to_save = f"Dataset: {dataset}, Decision Maker: {decision_maker_name}, Type: {decision_maker_type}\n"
         # 检查文件夹是否存在，如果不存在则创建
@@ -708,7 +709,75 @@ def add_decision_maker():
 
     # 保存到文件
     try:
+
+
+        # 保存交互信息
         save_to_file(selectedDataset, selectedDecisionMakerName, selectedDecisionMakerType)
+
+
+
+        # 0221
+        # 人机自主决策或机器决策
+        def update_line_comment(file_path, line_number, should_comment):
+            with open(file_path, 'r', encoding='utf-8') as file:
+                lines = file.readlines()
+            # 检查是否需要更新这一行
+            if should_comment and not lines[line_number - 1].strip().startswith('#'):
+                # 添加注释
+                lines[line_number - 1] = '# ' + lines[line_number - 1]
+            elif not should_comment and lines[line_number - 1].strip().startswith('#'):
+                # 移除注释
+                lines[line_number - 1] = lines[line_number - 1].lstrip('# ')
+                lines[line_number - 1] = lines[line_number - 1].lstrip()  # 移除左边额外的空格
+            # 重新写入文件
+            with open(file_path, 'w', encoding='utf-8') as file:
+                file.writelines(lines)
+        # 指定的文件路径和行号
+        file_path3 = "/root/HML/Decision/GCN_xgboost_1226/graphcnn.py"
+        line_number = 222
+        # if selectedDecisionMakerType == "machine":
+        #     # 如果是机器决策，添加注释
+        #     update_line_comment(file_path3, line_number, True)
+        # else:
+        #     # 如果是人机智能决策，取消注释
+        #     update_line_comment(file_path3, line_number, False)
+
+
+
+
+
+        # 0212
+        # 运行python .\main_case300.py（python .\dec_tree.py）
+        # script_path = "/root/HML/Decision/GCN_xgboost_1226/dec_tree.py"
+        if selectedDataset == "China300-1000":
+            script_path2 = "/root/HML/Decision/GCN_xgboost_1226/test.py"
+            script_path = "/root/HML/Decision/GCN_xgboost_1226/main_case3001.py"
+            # ret = os.system(f"python3 {script_path}")
+        elif selectedDataset == "China300-2000":
+            script_path2 = "/root/HML/Decision/GCN_xgboost_1226/test1.py"
+            script_path = "/root/HML/Decision/GCN_xgboost_1226/main_case3002.py"
+            # ret = os.system(f"python3 {script_path}")
+        elif selectedDataset == "China300-3000":
+            script_path2 = "/root/HML/Decision/GCN_xgboost_1226/test1.py"
+            script_path = "/root/HML/Decision/GCN_xgboost_1226/main_case3003.py"
+            # ret = os.system(f"python3 {script_path}")
+        elif selectedDataset == "China300-4000":
+            script_path2 = "/root/HML/Decision/GCN_xgboost_1226/test1.py"
+            script_path = "/root/HML/Decision/GCN_xgboost_1226/main_case3004.py"
+            # ret = os.system(f"python3 {script_path}")
+        elif selectedDataset == "China300-5000":
+            script_path2 = "/root/HML/Decision/GCN_xgboost_1226/test1.py"
+            script_path = "/root/HML/Decision/GCN_xgboost_1226/main_case3005.py"
+            # ret = os.system(f"python3 {script_path}")
+
+
+        # print(f"Task: {task}, Case: {case1}")
+        # ret = os.system(f"python3 {script_path} --case {case1} --task {task}")
+        ret = os.system(f"python3 {script_path2} --selectedDataset {selectedDataset} --selectedDecisionMakerName {selectedDecisionMakerName} --selectedDecisionMakerType {selectedDecisionMakerType}")
+        # ret = os.system(f"python3 {script_path}")
+        if ret != 0:
+            msg = '没有正确返回值'
+
         return jsonify({'meta': {'msg': '添加成功', 'code': 200}})
     except Exception as e:
         return jsonify({'meta': {'msg': 'Error: ' + str(e), 'code': 500}}), 500
@@ -727,7 +796,7 @@ def add_decision_maker1():
 
     def save_to_file(dataset, decision_maker_name, decision_maker_type):
 
-        file_path = "/root/HML/Decision/GCN_xgboost_1226/decision_maker_data1.txt"
+        file_path = "/root/HML/Decision/GCN_xgboost_1226/decision_maker_data1.txt"# 创建蒸馏器
         # 要保存的数据
         data_to_save = f"Dataset: {dataset}, Decision Maker: {decision_maker_name}, Distiller: {decision_maker_type}\n"
         # 检查文件夹是否存在，如果不存在则创建
@@ -738,7 +807,31 @@ def add_decision_maker1():
 
     # 保存到文件
     try:
+
+
+        # 保存交互信息
         save_to_file(selectedDataset, selectedDecisionMakerName, selectedDecisionMakerType)
+        # 0205
+        # 运行python .\dec_tree.py（python .\main_case300.py）
+        script_path = "/root/HML/Decision/GCN_xgboost_1226/test.py"
+        if selectedDataset == "China300-1000":
+            script_path = "/root/HML/Decision/GCN_xgboost_1226/dec_tree1.py"
+            # ret = os.system(f"python3 {script_path}")
+        elif selectedDataset == "China300-2000":
+            script_path = "/root/HML/Decision/GCN_xgboost_1226/dec_tree2.py"
+            # ret = os.system(f"python3 {script_path}")
+        elif selectedDataset == "China300-3000":
+            script_path = "/root/HML/Decision/GCN_xgboost_1226/dec_tree3.py"
+            # ret = os.system(f"python3 {script_path}")
+        elif selectedDataset == "China300-4000":
+            script_path = "/root/HML/Decision/GCN_xgboost_1226/dec_tree4.py"
+            # ret = os.system(f"python3 {script_path}")
+        elif selectedDataset == "China300-5000":
+            script_path = "/root/HML/Decision/GCN_xgboost_1226/dec_tree5.py"
+            # ret = os.system(f"python3 {script_path}")
+        # ret = os.system(f"python3 {script_path} --selectedDataset {selectedDataset} --selectedDecisionMakerName {selectedDecisionMakerName} --selectedDecisionMakerType {selectedDecisionMakerType}")
+        # if ret != 0:
+        #     msg = '没有正确返回值'
         return jsonify({'meta': {'msg': '添加成功', 'code': 200}})
     except Exception as e:
         return jsonify({'meta': {'msg': 'Error: ' + str(e), 'code': 500}}), 500
@@ -758,7 +851,7 @@ def add_decision_maker2():
 
     def save_to_file(dataset, decision_maker_name):
 
-        file_path = "/root/HML/Decision/GCN_xgboost_1226/decision_maker_data2.txt"
+        file_path = "/root/HML/Decision/GCN_xgboost_1226/decision_maker_data2.txt"# 创建可视化图像
         # 要保存的数据
         data_to_save = f"Dataset: {dataset}, Decision Maker: {decision_maker_name}\n"
         # 检查文件夹是否存在，如果不存在则创建
